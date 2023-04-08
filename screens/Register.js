@@ -18,7 +18,7 @@ import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { createUser } from "../store/databases";
 import * as SplashScreen from "expo-splash-screen";
 
-function Register({ navigation }) {
+function Register() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const [fonts] = useFonts({

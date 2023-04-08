@@ -1,6 +1,9 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import { Text, SafeAreaView } from "react-native";
+
+import { StatusBar } from "expo-status-bar";
+// import { StyleSheet, Text, View } from "react-native";
+// import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useState, useContext, useEffect, useCallback } from "react";
@@ -205,14 +208,13 @@ function AuthenticatedDrawerUser() {
 
 function NavigationOption() {
   const authCtx = useContext(AuthContext);
-  console.log(authCtx.doctor);
   return (
     <NavigationContainer>
       {!authCtx.isAuthenticated && <AuthenticationStack />}
-      {authCtx.isAuthenticated && !authCtx.doctor && (
+      {authCtx.isAuthenticated && !authCtx.isDoctor && (
         <AuthenticatedDrawerUser />
       )}
-      {authCtx.isAuthenticated && authCtx.doctor && (
+      {authCtx.isAuthenticated && authCtx.isDoctor && (
         <AuthenticatedDrawerDoctor />
       )}
     </NavigationContainer>
@@ -251,11 +253,11 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: "#fff",
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+// });

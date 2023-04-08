@@ -20,6 +20,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import uuid from "react-native-uuid";
+import { getFormattedDate } from "../util/date";
 
 const BACKEND_URL =
   "https://petapp-1a4cd-default-rtdb.europe-west1.firebasedatabase.app";
@@ -92,27 +93,56 @@ export async function addAnimal(name, breed, date, owner, color, gender, uid) {
   return { response: response, aid: aid };
 }
 
-export async function addAppointment(did, uid, aid, date, slot) {
+export async function addAppointment(
+  did,
+  uid,
+  aid,
+  date,
+  slot,
+  appointmentReason,
+  ownerName
+) {
   const response = await axios.post(BACKEND_URL + `/appointments.json`, {
     aid: aid,
     uid: uid,
     did: did,
     date: date,
     slot: slot,
+    reason: appointmentReason,
+    ownername: ownerName,
+    canceled: 0,
   });
   return response;
 }
-export async function getAppointments(did, date) {
-  //   console.log(BACKEND_URL + `/appointments.json?did="${did}"&date="${date}"`);
-  const appointmentsDetails = [];
-  const response = await axios.get(
-    BACKEND_URL + `/appointments.json?did="${did}"&date="${date}"`
-  );
+export async function getDoctorSlotsAppointments(did, date) {
+  const slots = [];
+  const response = await axios.get(BACKEND_URL + `/appointments.json`);
+  if (response.data) {
+    const appointments = Object.values(response.data);
 
+    const filtered = appointments.filter(function (appointment) {
+      return appointment.did === did && appointment.date === date;
+    });
+    console.log(filtered);
+    for (const key in filtered) {
+      const slot = filtered[key].slot;
+
+      slots.push(slot);
+    }
+    console.log(slots);
+  }
+  return slots;
+}
+
+export async function getAppointments(did, date) {
+  const appointmentsDetails = [];
+  const response = await axios.get(BACKEND_URL + `/appointments.json`);
   const appointments = Object.values(response.data);
+  //console.log(appointments);
   const filtered = appointments.filter(function (appointment) {
     return appointment.did === did && appointment.date === date;
   });
+  //console.log(filtered);
   for (const key in filtered) {
     const appointmentDetail = {
       did: filtered[key].did,
@@ -120,6 +150,8 @@ export async function getAppointments(did, date) {
       uid: filtered[key].uid,
       slot: filtered[key].slot,
       animal: await getAnimalDetails(filtered[key].aid),
+      reason: filtered[key].reason,
+      ownername: filtered[key].ownername,
       photoUrl: await getImageUrl(
         `${filtered[key].uid}/${filtered[key].aid}.jpeg`
       ),
@@ -127,6 +159,62 @@ export async function getAppointments(did, date) {
     };
     appointmentsDetails.push(appointmentDetail);
   }
+  // console.log(appointmentsDetails);
+  return appointmentsDetails;
+}
+
+export async function getUserStatusAppointments(uid, status) {
+  const appointmentsDetails = [];
+  const response = await axios.get(BACKEND_URL + `/appointments.json`);
+  if (response.data) {
+    const appointments = Object.values(response.data);
+    // console.log(appointments);
+    let filtered;
+    if (status === 0) {
+      filtered = appointments.filter(function (appointment) {
+        return (
+          (appointment.uid === uid &&
+            appointment.date > getFormattedDate(new Date())) ||
+          (appointment.date === getFormattedDate(new Date()) &&
+            appointment.slot.slice(6, 11) >=
+              `${new Date().getHours()}:${new Date().getMinutes()}`)
+        );
+      });
+    } else if (status === 1) {
+      filtered = appointments.filter(function (appointment) {
+        return (
+          (appointment.uid === uid &&
+            appointment.date < getFormattedDate(new Date())) ||
+          (appointment.date === getFormattedDate(new Date()) &&
+            appointment.slot.slice(6, 11) <
+              `${new Date().getHours()}:${new Date().getMinutes()}`)
+        );
+      });
+    } else {
+      filtered = appointments.filter(function (appointment) {
+        return appointment.uid === uid && appointment.canceled === 1;
+      });
+    }
+
+    for (const key in filtered) {
+      const appointmentDetail = {
+        did: filtered[key].did,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        slot: filtered[key].slot,
+        animal: await getAnimalDetails(filtered[key].aid),
+        reason: filtered[key].reason,
+        canceled: filtered[key].canceled,
+        ownername: filtered[key].ownername,
+        photoUrl: await getImageUrl(
+          `${filtered[key].uid}/${filtered[key].aid}.jpeg`
+        ),
+        generatedId: key,
+      };
+      appointmentsDetails.push(appointmentDetail);
+    }
+  }
+
   return appointmentsDetails;
 }
 
@@ -152,7 +240,6 @@ export async function getUsersAnimals(uid) {
 
   const response = await axios.get(BACKEND_URL + `/animals.json`);
   for (const key in response.data) {
-    console.log("da");
     if (response.data[key].uid === uid) {
       const animalObj = {
         aid: response.data[key].aid,

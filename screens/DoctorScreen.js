@@ -1,21 +1,17 @@
+import { useLayoutEffect, useEffect, useState, useRef } from "react";
 import {
-  useLayoutEffect,
-  useEffect,
-  useState,
-  useRef,
-  setTimeout,
-} from "react";
-import { View, Text, StyleSheet, ScrollView, FlatList } from "react-native";
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  SafeAreaView,
+  Platform,
+} from "react-native";
 import { AuthContext } from "../context/auth";
 import { useContext, useCallback } from "react";
 import { GlobalColors } from "../constants/colors";
-import {
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
-import { JumpingTransition } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from "react-native-swiper";
 import moment from "moment";
 import AppointmentCard from "../components/Appointments/AppointmentCard";
@@ -24,9 +20,42 @@ import { useFonts } from "expo-font";
 import { getAppointments } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { getFormattedDate } from "../util/date";
-SplashScreen.preventAutoHideAsync();
+import * as Notifications from "expo-notifications";
+import * as Permissions from "expo-permissions";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowAlert: true,
+  }),
+});
 function DoctorScreen({ navigation }) {
+  const getPermissions = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+
+    if (status !== "granted") {
+      // permisiunea nu a fost acordată, deci notificările nu vor funcționa
+      return;
+    }
+  };
+
+  function scheduleNotificationHandler(doctorId, slot, date) {
+    console.log("am fost");
+    getPermissions();
+    Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Upload consultation result!",
+        body: "Alooo",
+        data: {
+          doctorId: doctorId,
+        },
+      },
+      trigger: {
+        seconds: 5,
+      },
+    });
+  }
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -42,6 +71,10 @@ function DoctorScreen({ navigation }) {
 
   const authCtx = useContext(AuthContext);
   const currentDate = new Date();
+  const utcOffset = -currentDate.getTimezoneOffset() / 60;
+  const localHours = currentDate.getHours();
+  const romaniaHours = localHours + utcOffset;
+  currentDate.setHours(romaniaHours);
   const [date, setDate] = useState(currentDate);
   const [selectedDate, setSelectedDate] = useState(date);
   const [appointments, setAppointments] = useState([]);
@@ -86,20 +119,38 @@ function DoctorScreen({ navigation }) {
     async function getDoctorsAppointments() {
       try {
         setFetching(true);
-        console.log(getFormattedDate(selectedDate));
         const resp = await getAppointments(
           authCtx.uid,
           getFormattedDate(selectedDate)
         );
         setAppointments(resp);
         console.log(appointments);
-        setFetching(false);
+
+        const tomorrow = new Date(currentDate);
+
+        const tomorrowFormatted = `${tomorrow.getFullYear()}-${String(
+          tomorrow.getMonth() + 1
+        ).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
+        if (
+          getFormattedDate(selectedDate) === tomorrowFormatted &&
+          appointments.length > 0
+        ) {
+          console.log("daaa");
+          for (const key in appointments) {
+            scheduleNotificationHandler(
+              appointments[key].did,
+              appointments[key].slot,
+              appointments[key].date
+            );
+          }
+        }
       } catch (error) {
         console.log(error);
       }
+      setFetching(false);
     }
     getDoctorsAppointments();
-  }, [selectedDate]);
+  }, [date]);
   const onLayoutRootView = useCallback(async () => {
     if (fonts) {
       await SplashScreen.hideAsync();
@@ -109,6 +160,8 @@ function DoctorScreen({ navigation }) {
   if (!fonts) {
     return null;
   }
+  if (fetching) return;
+  <LoadingOverlay message={"Loading..."} />;
 
   const renderDate = (date, index) => {
     return (
@@ -140,6 +193,7 @@ function DoctorScreen({ navigation }) {
       </TouchableOpacity>
     );
   };
+
   if (fetching) return <LoadingOverlay message="Loading..." />;
   return (
     <View style={styles.container}>
@@ -197,7 +251,7 @@ function DoctorScreen({ navigation }) {
           <Text
             style={[
               styles.welcomeMessage,
-              { marginTop: 18, fontSize: 19 },
+              { top: -9, fontSize: 19 },
               appointments.length === 0 && { marginTop: 50 },
             ]}
           >
@@ -252,13 +306,13 @@ const styles = StyleSheet.create({
     color: GlobalColors.colors.pink500,
     fontFamily: "Garet-Book",
     marginLeft: 40,
-    top: -30,
+    top: 30,
     fontSize: 28,
   },
   appointments: {
     color: GlobalColors.colors.mint1,
     marginLeft: 40,
-    top: -20,
+    top: 30,
     fontSize: 15,
     fontFamily: "Garet-Book",
   },
@@ -268,6 +322,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
+    top: 40,
   },
   daterow: {
     flexDirection: "row",

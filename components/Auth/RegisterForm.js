@@ -1,4 +1,10 @@
-import { View, StyleSheet, Alert, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  Text,
+  KeyboardAvoidingView,
+} from "react-native";
 import Input from "./Input";
 import { useRef, useEffect, useState } from "react";
 import ButtonCustom from "../UI/ButtonCustom";
@@ -86,7 +92,7 @@ function RegisterForm({ onAuthenticate }) {
     }
   }
   return (
-    <View style={styles.form}>
+    <KeyboardAvoidingView style={styles.form} behavior="=" padding>
       <Input
         isInvalid={nameInvalid}
         value={userName}
@@ -127,7 +133,7 @@ function RegisterForm({ onAuthenticate }) {
           Register in
         </ButtonCustom>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 export default RegisterForm;

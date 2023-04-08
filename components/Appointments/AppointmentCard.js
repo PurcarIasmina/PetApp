@@ -1,6 +1,7 @@
 import { View, Image, StyleSheet, Text } from "react-native";
 import { GlobalColors } from "../../constants/colors";
 import { getAge } from "../../util/date";
+
 function AppointmentCard({ appointment }) {
   return (
     <View>
@@ -17,6 +18,9 @@ function AppointmentCard({ appointment }) {
         </View>
         <View style={styles.detailsContainer}>
           <Text style={styles.name}>{appointment.animal.nameA}</Text>
+          <Text style={[styles.name, { fontSize: 13 }]}>
+            Owner: {appointment.ownername}
+          </Text>
           <Text style={styles.date}>{`${
             getAge(appointment.animal.date).years
           }y ${getAge(appointment.animal.date).months}m ${
@@ -25,7 +29,15 @@ function AppointmentCard({ appointment }) {
           <Text
             style={[
               styles.date,
-              { color: GlobalColors.colors.mint1, marginTop: 30 },
+              { color: GlobalColors.colors.mint1, marginTop: 3 },
+            ]}
+          >
+            Reason: {appointment.reason}
+          </Text>
+          <Text
+            style={[
+              styles.date,
+              { color: GlobalColors.colors.mint1, marginTop: 2 },
             ]}
           >
             {appointment.date} {appointment.slot}
@@ -42,7 +54,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginVertical: 10,
     borderRadius: 30,
-    height: 120,
+    height: 140,
     width: 350,
     flexDirection: "row",
   },

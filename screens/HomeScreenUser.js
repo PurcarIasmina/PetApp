@@ -13,7 +13,7 @@ import {
 import DoctorCard from "../components/Appointments/DoctorCard";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { getDoctorsList } from "../store/databases";
+import { getDoctorsList, getAppointments } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { GestureHandlerScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -45,7 +45,7 @@ function HomeScreenUser({ navigation }) {
         setFetching(true);
         doctorsAux = await getDoctorsList();
         setDoctors(doctorsAux);
-        console.log(doctors);
+        // console.log(doctors);
         setFetching(false);
       } catch (error) {
         console.log(error);

@@ -12,18 +12,26 @@ import {
 import { useRoute } from "@react-navigation/native";
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { GlobalColors } from "../constants/colors";
-import { FontAwesome } from "@expo/vector-icons";
-import { getAgeYear } from "../util/date";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { getAgeYear, getFormattedDate, getAge } from "../util/date";
 import { useFonts } from "expo-font";
 import moment from "moment";
 import Swiper from "react-native-swiper";
 import * as SplashScreen from "expo-splash-screen";
 import { Ionicons } from "@expo/vector-icons";
 import { Button, Modal } from "react-native-paper";
-import { addAppointment, getUsersAnimals } from "../store/databases";
+import {
+  addAppointment,
+  getAnimalDetails,
+  getDoctorSlotsAppointments,
+  getImageUrl,
+  getUsersAnimals,
+} from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { AuthContext } from "../context/auth";
 import AnimalCard from "../components/Appointments/CardAnimal";
+import { TextInput } from "react-native-gesture-handler";
+import { FontAwesome } from "@expo/vector-icons";
 function DoctorBookAppointment({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -43,7 +51,10 @@ function DoctorBookAppointment({ navigation }) {
   const authCtx = useContext(AuthContext);
   const [id, setId] = useState();
   const [fetching, setFetching] = useState(false);
-
+  const [navailableSlots, setNAvailableSlots] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [selectedAnimal, setSelectedAnimal] = useState({});
   const [fonts] = useFonts({
     Lora: require("../constants/fonts/Lora-VariableFont_wght.ttf"),
     "Garet-Book": require("../constants/fonts/Garet-Book.ttf"),
@@ -69,10 +80,12 @@ function DoctorBookAppointment({ navigation }) {
   const [selectedDate, setSelectedDate] = useState(date);
   const swiper = useRef();
   const formattedMonth = monthNames[date.getMonth()];
-  const [selectedSlot, setSelectedSlot] = useState(-1);
+  const [selectedSlot, setSelectedSlot] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [animals, setUserAnimals] = useState([]);
   const [animalsFetching, setAnimalsFetching] = useState(false);
+  const [appointmentReason, setAppointmentReason] = useState("");
+  const [ownerName, setOwnerName] = useState("");
   const [count, setCount] = useState(0);
   let animalss = [];
 
@@ -80,15 +93,29 @@ function DoctorBookAppointment({ navigation }) {
     async function getAnimals() {
       try {
         setAnimalsFetching(true);
-        console.log(authCtx.uid);
         animalss = await getUsersAnimals(authCtx.uid);
-        console.log(animalss);
         setUserAnimals(animalss);
       } catch (error) {
         console.log(error);
       }
       setAnimalsFetching(false);
     }
+
+    async function getDoctorAvailableslots() {
+      try {
+        const slots = await getDoctorSlotsAppointments(
+          docDetails.did,
+          selectedDate
+        );
+        setNAvailableSlots(slots);
+        const availableSlots = calculateAvailableSlots(slots);
+        setAvailableSlots(availableSlots);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    getDoctorAvailableslots();
     getAnimals();
   }, []);
 
@@ -149,13 +176,52 @@ function DoctorBookAppointment({ navigation }) {
       </TouchableOpacity>
     );
   };
-  function handleSlotPressed(index) {
-    if (index !== selectedSlot) {
+  function handleSlotPressed(item) {
+    if (item !== selectedSlot) {
       setModalVisible(true);
-      setSelectedSlot(index);
-    } else setSelectedSlot(-1);
+      setSelectedSlot(item);
+    } else setSelectedSlot("");
   }
   async function onPressButton() {
+    try {
+      console.log(ownerName);
+      await addAppointment(
+        docDetails.did,
+        authCtx.uid,
+        id,
+        getFormattedDate(selectedDate),
+        selectedSlot,
+        appointmentReason,
+        ownerName
+      );
+      navigation.navigate("UserAppointments");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function calculateAvailableSlots(navailableSlots) {
+    const availableSlots = [];
+    for (let i = 10; i <= 16; i++) {
+      for (let j = 0; j < 2; j++) {
+        const slotStartTime = `${i}:${j === 0 ? "00" : "30"}`;
+        const slotEndTime = `${j === 0 ? i : i + 1}:${j === 0 ? "30" : "00"}`;
+
+        const isSlotOccupied =
+          navailableSlots.length > 0
+            ? navailableSlots.some((slot) => {
+                return `${slot}` === `${slotStartTime}-${slotEndTime}`;
+              })
+            : false;
+
+        if (!isSlotOccupied) {
+          availableSlots.push(`${slotStartTime}-${slotEndTime}`);
+        }
+      }
+    }
+    return availableSlots;
+  }
+  async function onNextPressButton() {
     if (count > 1) {
       Alert.alert("", "You can select just one animal for this slot!", [{}], {
         messageStyle: {
@@ -169,20 +235,21 @@ function DoctorBookAppointment({ navigation }) {
         },
       });
     } else {
+      setConfirmModal(true);
       try {
-        const resp = await addAppointment(
-          docDetails.did,
-          authCtx.uid,
-          id,
-          selectedDate,
-          selectedSlot
+        const animalDetails = await getAnimalDetails(id);
+        const animalPhoto = await getImageUrl(
+          `${animalDetails.uid}/${animalDetails.aid}.jpeg`
         );
-        navigation.navigate("UserAppointments");
+        console.log(animalPhoto);
+        setSelectedAnimal({ ...animalDetails, photoUrl: animalPhoto });
+        console.log(selectedAnimal);
       } catch (error) {
         console.log(error);
       }
     }
   }
+
   return (
     <View style={styles.container}>
       <View style={styles.docContainer}>
@@ -192,6 +259,7 @@ function DoctorBookAppointment({ navigation }) {
             source={{ uri: docDetails.photo }}
           ></Image>
           <View>
+            <Text></Text>
             <Text style={styles.name}>Dr.{docDetails.name}</Text>
             <View style={{ flexDirection: "row" }}>
               <FontAwesome
@@ -262,14 +330,14 @@ function DoctorBookAppointment({ navigation }) {
         <View style={styles.slots}>
           <Text style={styles.slotTitle}>Available slots</Text>
           <FlatList
-            data={["10:00-10:30PM", "10:30-11:00PM", "11:00-11:30PM"]}
+            data={availableSlots}
             renderItem={({ item, index }) => (
               <TouchableOpacity
                 style={[
                   styles.timeSlot,
-                  selectedSlot === index && styles.selected,
+                  selectedSlot === item && styles.selected,
                 ]}
-                onPress={handleSlotPressed.bind(this, index)}
+                onPress={handleSlotPressed.bind(this, item)}
               >
                 <Text
                   style={[
@@ -284,7 +352,7 @@ function DoctorBookAppointment({ navigation }) {
               </TouchableOpacity>
             )}
             numColumns={2}
-            keyExtractor={(item) => item.did}
+            keyExtractor={(item) => item}
             contentContainerStyle={styles.list}
           ></FlatList>
         </View>
@@ -293,29 +361,149 @@ function DoctorBookAppointment({ navigation }) {
         visible={modalVisible}
         transparent={true}
         style={styles.modal}
-        onDismiss={() => setModalVisible(false)}
+        onDismiss={() => {
+          setModalVisible(false), setConfirmModal(false), setCount(0);
+        }}
         animationType="slide"
       >
-        <View style={styles.animalsContainer}>
-          <Text style={styles.petChooseText}>Choose your pet</Text>
-          <FlatList
-            data={animals}
-            renderItem={({ item, index }) =>
-              animalsFetching ? (
-                <LoadingOverlay message="Fetching"></LoadingOverlay>
-              ) : (
-                <AnimalCard animal={item} setCount={setCount} setId={setId} />
-              )
-            }
-          ></FlatList>
-          <Button
-            textColor={GlobalColors.colors.pink500}
-            style={styles.confirmButton}
-            onPress={onPressButton}
-          >
-            Confirm
-          </Button>
-        </View>
+        {!confirmModal && (
+          <View style={styles.animalsContainer}>
+            <Text style={styles.petChooseText}>Choose your pet</Text>
+            <FlatList
+              data={animals}
+              renderItem={({ item, index }) =>
+                animalsFetching ? (
+                  <LoadingOverlay message="Fetching"></LoadingOverlay>
+                ) : (
+                  <AnimalCard animal={item} setCount={setCount} setId={setId} />
+                )
+              }
+            ></FlatList>
+
+            <Button
+              textColor={GlobalColors.colors.pink500}
+              style={styles.confirmButton}
+              onPress={onNextPressButton}
+            >
+              Next
+            </Button>
+          </View>
+        )}
+        {confirmModal && (
+          <View>
+            <Text style={[styles.petChooseText, { top: -30, fontSize: 16 }]}>
+              Appointment details
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                marginLeft: 32,
+              }}
+            >
+              <Icon
+                name="user-md"
+                size={19}
+                color={GlobalColors.colors.pink500}
+                style={{ marginTop: 2 }}
+              />
+              <View
+                style={{
+                  marginLeft: 5,
+                }}
+              >
+                <Text style={styles.infoAppointment}>
+                  Dr. {docDetails.name}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={{ flexDirection: "row", marginTop: 10, marginLeft: 32 }}
+            >
+              <Icon
+                name="calendar-o"
+                size={16}
+                color={GlobalColors.colors.pink500}
+                style={{ marginTop: 2 }}
+              />
+
+              <View
+                style={{
+                  marginLeft: 5,
+                }}
+              >
+                <Text style={styles.infoAppointment}>
+                  {selectedDate.toDateString()}
+                </Text>
+              </View>
+            </View>
+            <View
+              style={{ flexDirection: "row", marginTop: 10, marginLeft: 32 }}
+            >
+              <Icon
+                name="clock-o"
+                size={21}
+                color={GlobalColors.colors.pink500}
+              />
+
+              <View
+                style={{
+                  marginLeft: 5,
+                }}
+              >
+                <Text style={styles.infoAppointment}>{selectedSlot}</Text>
+              </View>
+            </View>
+
+            <View>
+              <View style={styles.cardContainer}>
+                <View style={styles.itemsContainer}>
+                  <Image
+                    style={styles.image}
+                    source={{ uri: selectedAnimal.photoUrl }}
+                  ></Image>
+                  <View style={{ flexDirection: "column" }}>
+                    <Text style={styles.name}>{selectedAnimal.nameA}</Text>
+                    <Text style={styles.date}>
+                      {selectedAnimal.breed},{" "}
+                      {getAge(selectedAnimal.date).years}y{" "}
+                      {getAge(selectedAnimal.date).months}m{" "}
+                      {getAge(selectedAnimal.date).days}d
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Enter appointment reason"
+                placeholderTextColor={GlobalColors.colors.pink500}
+                style={styles.input}
+                defaultValue={appointmentReason}
+                onChangeText={(value) => {
+                  setAppointmentReason(value);
+                }}
+              ></TextInput>
+            </View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                placeholder="Enter your full name"
+                placeholderTextColor={GlobalColors.colors.pink500}
+                style={styles.input}
+                defaultValue={ownerName}
+                onChangeText={(value) => {
+                  setOwnerName(value);
+                }}
+              ></TextInput>
+            </View>
+            <Button
+              textColor={GlobalColors.colors.pink500}
+              style={styles.confirmButton}
+              onPress={onPressButton}
+            >
+              Confirm
+            </Button>
+          </View>
+        )}
       </Modal>
     </View>
   );
@@ -500,5 +688,66 @@ const styles = StyleSheet.create({
     color: GlobalColors.colors.pink500,
     marginHorizontal: 70,
     marginTop: 10,
+  },
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    padding: 10,
+    marginHorizontal: 10,
+    marginVertical: 5,
+  },
+  itemsContainer: {
+    backgroundColor: "white",
+    flexDirection: "row",
+    width: "80%",
+    marginHorizontal: 25,
+    marginVertical: 10,
+    borderRadius: 20,
+  },
+  cardContainer: {
+    height: 100,
+    marginHorizontal: 30,
+    backgroundColor: GlobalColors.colors.white1,
+    marginVertical: 10,
+    borderRadius: 20,
+    flexDirection: "row",
+  },
+  name: {
+    fontFamily: "Garet-Book",
+    fontSize: 20,
+    color: GlobalColors.colors.pink500,
+    marginTop: 20,
+    marginHorizontal: 20,
+  },
+  date: {
+    fontFamily: "Garet-Book",
+    fontSize: 10,
+    color: GlobalColors.colors.darkGrey,
+
+    marginHorizontal: 20,
+  },
+  infoAppointment: {
+    color: GlobalColors.colors.pink500,
+    paddingLeft: 5,
+    fontFamily: "Garet-Book",
+    fontSize: 15,
+  },
+  inputContainer: {
+    borderRadius: 10,
+    backgroundColor: GlobalColors.colors.white1,
+    height: 28,
+    borderWidth: 0.2,
+    marginLeft: 30,
+    marginRight: 30,
+    borderColor: GlobalColors.colors.pink500,
+    marginVertical: 10,
+  },
+  input: {
+    flex: 1,
+    paddingLeft: 5,
+    paddingVertical: 0,
+    color: GlobalColors.colors.pink500,
+    fontFamily: "Garet-Book",
   },
 });
