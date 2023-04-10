@@ -7,6 +7,7 @@ export const GlobalColors = {
     mint1: "#99c1de",
     purple10: "#CDDAFD",
     blue500: "#76b5c5",
+    blue10: "#A7C7E7",
     gray1: "#d3d3d3",
     gray10: "#c5c3c6",
     purple500: "#301934",
@@ -15,5 +16,9 @@ export const GlobalColors = {
     darkGrey: "#928490",
     darkPurple: "#433E49",
     purple300: "#6867AC",
+    green1: "#C1E1C1",
+    green10: "#6B9362",
+    red1: "#ff817b",
+    red10: "#ff2015",
   },
 };

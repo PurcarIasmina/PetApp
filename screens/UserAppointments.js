@@ -1,29 +1,22 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableHighlight,
-} from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import HeaderButtonAppointment from "../components/UI/HeaderButtonAppointment";
 import { useState, useEffect, useContext, useLayoutEffect } from "react";
 import { TouchableRipple } from "react-native-paper";
 import { getUserStatusAppointments } from "../store/databases";
 
 import { AuthContext } from "../context/auth";
+import AppointmentStatus from "../components/Appointments/AppointmentStatus";
 function UserAppointments() {
   const [status, setStatus] = useState(0);
   const [activeAppointments, setActiveAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
   const [canceledAppointments, setCanceledAppointments] = useState([]);
 
-  console.log(status);
   const authCtx = useContext(AuthContext);
 
   useLayoutEffect(() => {
     async function getActiveAppointments() {
       try {
-        setFet;
         const active = await getUserStatusAppointments(authCtx.uid, 0);
         setActiveAppointments(active);
       } catch (error) {
@@ -40,7 +33,7 @@ function UserAppointments() {
     }
     async function getCanceledAppointments() {
       try {
-        const canceled = await getUserStatusAppointments(authCtx.uid, 3);
+        const canceled = await getUserStatusAppointments(authCtx.uid, 2);
         setCanceledAppointments(canceled);
       } catch (error) {
         console.log(error);
@@ -50,6 +43,9 @@ function UserAppointments() {
     getPastAppointments();
     getCanceledAppointments();
   }, [status]);
+  function handlerOnPress() {
+    setStatus(2);
+  }
   return (
     <View>
       <View style={styles.headerButtons}>
@@ -83,6 +79,23 @@ function UserAppointments() {
           />
         </TouchableRipple>
       </View>
+      <FlatList
+        data={
+          status === 0
+            ? activeAppointments
+            : status === 1
+            ? pastAppointments
+            : canceledAppointments
+        }
+        renderItem={({ item, index }) => (
+          <AppointmentStatus
+            status={status}
+            appointment={item}
+            onPress={handlerOnPress}
+          />
+        )}
+        keyExtractor={(item) => item.generatedId}
+      ></FlatList>
     </View>
   );
 }

@@ -10,7 +10,14 @@ import {
   Alert,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { useState, useEffect, useRef, useCallback, useContext } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+} from "react";
 import { GlobalColors } from "../constants/colors";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { getAgeYear, getFormattedDate, getAge } from "../util/date";
@@ -101,14 +108,20 @@ function DoctorBookAppointment({ navigation }) {
       setAnimalsFetching(false);
     }
 
+    getAnimals();
+  }, []);
+  useLayoutEffect(() => {
     async function getDoctorAvailableslots() {
       try {
         const slots = await getDoctorSlotsAppointments(
           docDetails.did,
-          selectedDate
+          getFormattedDate(selectedDate)
         );
+
         setNAvailableSlots(slots);
+
         const availableSlots = calculateAvailableSlots(slots);
+        console.log(availableSlots);
         setAvailableSlots(availableSlots);
       } catch (error) {
         console.log(error);
@@ -116,8 +129,7 @@ function DoctorBookAppointment({ navigation }) {
     }
 
     getDoctorAvailableslots();
-    getAnimals();
-  }, []);
+  }, [selectedDate]);
 
   const handleNextDay = () => {
     const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);

@@ -33,3 +33,10 @@ export function getAgeYear(birthday) {
   }
   return age;
 }
+export function getRomanianTime() {
+  const currentDate = new Date();
+  const timezoneOffset = 180;
+  const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+  const romaniaDateTime = new Date(romanianTime);
+  return romaniaDateTime;
+}

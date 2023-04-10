@@ -114,14 +114,26 @@ export async function addAppointment(
   });
   return response;
 }
+export async function cancelAppointment(appointmentId, data) {
+  const response = await axios.put(
+    BACKEND_URL + `/appointments/${appointmentId}.json`,
+    data
+  );
+  console.log(appointmentId);
+  return response;
+}
 export async function getDoctorSlotsAppointments(did, date) {
   const slots = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);
   if (response.data) {
     const appointments = Object.values(response.data);
-
+    console.log(appointments);
     const filtered = appointments.filter(function (appointment) {
-      return appointment.did === did && appointment.date === date;
+      return (
+        appointment.did === did &&
+        appointment.date === date &&
+        appointment.canceled === 0
+      );
     });
     console.log(filtered);
     for (const key in filtered) {
@@ -140,7 +152,11 @@ export async function getAppointments(did, date) {
   const appointments = Object.values(response.data);
   //console.log(appointments);
   const filtered = appointments.filter(function (appointment) {
-    return appointment.did === did && appointment.date === date;
+    return (
+      appointment.did === did &&
+      appointment.date === date &&
+      appointment.canceled === 0
+    );
   });
   //console.log(filtered);
   for (const key in filtered) {
@@ -160,34 +176,53 @@ export async function getAppointments(did, date) {
     appointmentsDetails.push(appointmentDetail);
   }
   // console.log(appointmentsDetails);
+  appointmentsDetails.sort((ap1, ap2) => ap1.slot.localeCompare(ap2.slot));
   return appointmentsDetails;
 }
 
 export async function getUserStatusAppointments(uid, status) {
   const appointmentsDetails = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);
+
   if (response.data) {
+    const appointmentKeys = Object.keys(response.data);
     const appointments = Object.values(response.data);
-    // console.log(appointments);
+    appointments.map((appointment, index) => {
+      appointment.key = appointmentKeys[index];
+    });
+
     let filtered;
+    console.log(status + "status");
+    const currentDate = new Date();
+    const timezoneOffset = 180;
+    const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+    const romaniaDateTime = new Date(romanianTime);
     if (status === 0) {
       filtered = appointments.filter(function (appointment) {
         return (
-          (appointment.uid === uid &&
-            appointment.date > getFormattedDate(new Date())) ||
-          (appointment.date === getFormattedDate(new Date()) &&
-            appointment.slot.slice(6, 11) >=
-              `${new Date().getHours()}:${new Date().getMinutes()}`)
+          appointment.uid === uid &&
+          appointment.canceled === 0 &&
+          (appointment.date > getFormattedDate(romaniaDateTime) ||
+            (appointment.date === getFormattedDate(romaniaDateTime) &&
+              appointment.slot.slice(6, 11) >=
+                romaniaDateTime.toISOString().slice(12, 19)))
         );
       });
+      console.log(romaniaDateTime.toISOString().slice(11, 16));
+
+      console.log(romaniaDateTime);
     } else if (status === 1) {
       filtered = appointments.filter(function (appointment) {
         return (
-          (appointment.uid === uid &&
-            appointment.date < getFormattedDate(new Date())) ||
-          (appointment.date === getFormattedDate(new Date()) &&
-            appointment.slot.slice(6, 11) <
-              `${new Date().getHours()}:${new Date().getMinutes()}`)
+          appointment.uid === uid &&
+          appointment.canceled === 0 &&
+          appointment.date <
+            getFormattedDate(
+              new Date() ||
+                (appointment.date === getFormattedDate(new Date()) &&
+                  appointment.slot.slice(6, 11) <
+                    romaniaDateTime.toISOString().slice(12, 19))
+            )
         );
       });
     } else {
@@ -209,8 +244,9 @@ export async function getUserStatusAppointments(uid, status) {
         photoUrl: await getImageUrl(
           `${filtered[key].uid}/${filtered[key].aid}.jpeg`
         ),
-        generatedId: key,
+        generatedId: filtered[key].key,
       };
+
       appointmentsDetails.push(appointmentDetail);
     }
   }

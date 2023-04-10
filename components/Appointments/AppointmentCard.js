@@ -1,8 +1,16 @@
 import { View, Image, StyleSheet, Text } from "react-native";
 import { GlobalColors } from "../../constants/colors";
-import { getAge } from "../../util/date";
+import { getAge, getRomanianTime } from "../../util/date";
+import { useEffect } from "react";
+import { FontAwesome } from "@expo/vector-icons";
+import { TouchableRipple } from "react-native-paper";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 function AppointmentCard({ appointment }) {
+  const actualTime = getRomanianTime().toISOString().slice(11, 16);
+  const actualDate = getRomanianTime().toISOString().slice(0, 10);
+
+  useEffect(() => {}, []);
   return (
     <View>
       <View style={styles.elementContainer}>
@@ -42,6 +50,19 @@ function AppointmentCard({ appointment }) {
           >
             {appointment.date} {appointment.slot}
           </Text>
+          {(actualDate > appointment.date ||
+            (actualDate === appointment.date &&
+              actualTime > appointment.slot)) && (
+            <View style={styles.uploadContainer}>
+              <TouchableOpacity>
+                <FontAwesome
+                  color={GlobalColors.colors.pink500}
+                  name={"upload"}
+                  size={20}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </View>
@@ -84,7 +105,12 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 16,
     color: GlobalColors.colors.gray10,
-    paddingHorizontal: 10,
     fontFamily: "Garet-Book",
+  },
+  uploadContainer: {
+    position: "absolute",
+    top: -2,
+    alignSelf: "flex-end",
+    right: -2,
   },
 });
