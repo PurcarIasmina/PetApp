@@ -22,7 +22,7 @@ import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { getFormattedDate } from "../util/date";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
-
+import AppointmentResult from "./AppointmentResult";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: false,
@@ -70,31 +70,36 @@ function DoctorScreen({ navigation }) {
   });
 
   const authCtx = useContext(AuthContext);
-  const currentDate = new Date();
-  const utcOffset = -currentDate.getTimezoneOffset() / 60;
-  const localHours = currentDate.getHours();
-  const romaniaHours = localHours + utcOffset;
-  currentDate.setHours(romaniaHours);
-  const [date, setDate] = useState(currentDate);
-  const [selectedDate, setSelectedDate] = useState(date);
+  let currentDate = new Date();
+  const timezoneOffset = 180;
+  const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+  currentDate = new Date(romanianTime);
+  const [date, setDate] = useState(new Date(currentDate));
+  const [selectedDate, setSelectedDate] = useState(new Date(date));
+  // console.log(date);
   const [appointments, setAppointments] = useState([]);
   const [fetching, setFetching] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  // console.log(currentDate);
+  // console.log(currentDate.getUTCDate());
   const monthNames = [
-    "Ian.",
+    "Jan.",
     "Feb.",
     "Mar.",
     "Apr.",
-    "Mai",
-    "Iun.",
-    "Iul.",
+    "May",
+    "Jun.",
+    "Jul.",
     "Aug.",
     "Sep.",
     "Oct.",
     "Nov.",
     "Dec.",
   ];
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   const swiper = useRef();
-  const formattedMonth = monthNames[date.getMonth()];
+  const formattedMonth = monthNames[date.getUTCMonth()];
 
   const handlePrevDay = () => {
     const prevDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
@@ -128,9 +133,9 @@ function DoctorScreen({ navigation }) {
 
         const tomorrow = new Date(currentDate);
 
-        const tomorrowFormatted = `${tomorrow.getFullYear()}-${String(
-          tomorrow.getMonth() + 1
-        ).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
+        const tomorrowFormatted = `${tomorrow.getUTCFullYear()}-${String(
+          tomorrow.getUTCMonth() + 1
+        ).padStart(2, "0")}-${String(tomorrow.getUTCDate()).padStart(2, "0")}`;
         if (
           getFormattedDate(selectedDate) === tomorrowFormatted &&
           appointments.length > 0
@@ -150,7 +155,7 @@ function DoctorScreen({ navigation }) {
       setFetching(false);
     }
     getDoctorsAppointments();
-  }, [date]);
+  }, [selectedDate]);
   const onLayoutRootView = useCallback(async () => {
     if (fonts) {
       await SplashScreen.hideAsync();
@@ -162,8 +167,9 @@ function DoctorScreen({ navigation }) {
   }
   if (fetching) return;
   <LoadingOverlay message={"Loading..."} />;
-
   const renderDate = (date, index) => {
+    console.log(date.getUTCDate());
+    console.log(selectedDate.getUTCDate());
     return (
       <TouchableOpacity
         onPress={() => onDateSelect(date)}
@@ -171,7 +177,7 @@ function DoctorScreen({ navigation }) {
       >
         <View
           style={
-            date.toDateString() === selectedDate.toDateString()
+            date.toLocaleDateString() === selectedDate.toLocaleDateString()
               ? [styles.containerdate, styles.selectedDate]
               : styles.containerdate
           }
@@ -179,15 +185,9 @@ function DoctorScreen({ navigation }) {
         >
           <>
             <Text style={styles.itemWeekday}>
-              {date.toLocaleDateString("en-US", {
-                weekday: "short",
-              })}
+              {daysOfWeek[date.getUTCDay()]}
             </Text>
-            <Text style={styles.itemDate}>
-              {date.toLocaleDateString("en-US", {
-                day: "numeric",
-              })}
-            </Text>
+            <Text style={styles.itemDate}>{date.getUTCDate()}</Text>
           </>
         </View>
       </TouchableOpacity>
@@ -212,7 +212,7 @@ function DoctorScreen({ navigation }) {
           ></Ionicons>
         </TouchableOpacity>
         <Text style={styles.day}>
-          {date.getDate()} {formattedMonth} {date.getFullYear()}
+          {date.getUTCDate()} {formattedMonth} {date.getUTCFullYear()}
         </Text>
         <TouchableOpacity onPress={handleNextDay}>
           <Ionicons
@@ -242,6 +242,7 @@ function DoctorScreen({ navigation }) {
             <View style={styles.daterow}>
               {[...Array(daysToShow)].map((_, index) => {
                 const date = moment(prevDate).add(index, "days");
+
                 return renderDate(date.toDate(), index);
               })}
             </View>
@@ -360,5 +361,16 @@ const styles = StyleSheet.create({
   appointmentsContainer: {
     flex: 1,
     top: -200,
+  },
+  modal: {
+    backgroundColor: "white",
+    alignSelf: "center",
+    height: 500,
+    marginHorizontal: 30,
+
+    flex: 1,
+    marginTop: 200,
+    // position: "relative",
+    borderRadius: 20,
   },
 });

@@ -181,7 +181,7 @@ export async function getAppointments(did, date) {
 }
 
 export async function getUserStatusAppointments(uid, status) {
-  const appointmentsDetails = [];
+  let appointmentsDetails = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);
 
   if (response.data) {
@@ -250,6 +250,14 @@ export async function getUserStatusAppointments(uid, status) {
       appointmentsDetails.push(appointmentDetail);
     }
   }
+
+  appointmentsDetails = appointmentsDetails.sort((ap1, ap2) => {
+    if (ap1.date < ap2.date) return -1;
+    if (ap1.date > ap2.date) return 1;
+    if (ap1.slot < ap2.slot) return -1;
+    if (ap1.slot > ap2.slot) return 1;
+    return 0;
+  });
 
   return appointmentsDetails;
 }

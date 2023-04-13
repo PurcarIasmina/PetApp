@@ -20,5 +20,6 @@ export const GlobalColors = {
     green10: "#6B9362",
     red1: "#ff817b",
     red10: "#ff2015",
+    gray0: "#F8F8F6",
   },
 };

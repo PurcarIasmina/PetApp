@@ -6,6 +6,8 @@ import { getUserStatusAppointments } from "../store/databases";
 
 import { AuthContext } from "../context/auth";
 import AppointmentStatus from "../components/Appointments/AppointmentStatus";
+import { Ionicons } from "@expo/vector-icons";
+import { GlobalColors } from "../constants/colors";
 function UserAppointments() {
   const [status, setStatus] = useState(0);
   const [activeAppointments, setActiveAppointments] = useState([]);
@@ -79,6 +81,33 @@ function UserAppointments() {
           />
         </TouchableRipple>
       </View>
+      {((status === 0 && activeAppointments.length === 0) ||
+        (status === 1 && pastAppointments.length === 0) ||
+        (canceledAppointments.length === 0 && status === 2)) && (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 280,
+          }}
+        >
+          <Ionicons
+            name={"calendar-outline"}
+            color={GlobalColors.colors.gray10}
+            size={40}
+          />
+          <Text
+            style={{
+              fontWeight: "600",
+              fontSize: 20,
+              color: GlobalColors.colors.gray10,
+              marginRight: 3,
+            }}
+          >
+            No Appointments
+          </Text>
+        </View>
+      )}
       <FlatList
         data={
           status === 0

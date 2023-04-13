@@ -25,6 +25,8 @@ import UserAppointments from "./screens/UserAppointments";
 import DoctorProfile from "./screens/DoctorProfile";
 import DoctorEditCard from "./components/Appointments/DoctorEditCard";
 import DoctorBookAppointment from "./screens/DoctorBookAppointment";
+import AppointmentResult from "./screens/AppointmentResult";
+import AnimalPlan from "./screens/AnimalPlan";
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 function AuthenticationStack() {
@@ -99,6 +101,24 @@ function AuthenticatedDrawerDoctor() {
       <Drawer.Screen
         name="DoctorEditProfile"
         component={DoctorEditCard}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="AppointmentResult"
+        component={AppointmentResult}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="AnimalPlan"
+        component={AnimalPlan}
         options={{
           drawerItemStyle: { display: "none" },
           headerTitle: "",

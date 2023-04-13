@@ -16,7 +16,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { getDoctorsList, getAppointments } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { GestureHandlerScrollView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 function HomeScreenUser({ navigation }) {
   const authCtx = useContext(AuthContext);

@@ -5,11 +5,11 @@ import { useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { TouchableRipple } from "react-native-paper";
 import { TouchableOpacity } from "react-native-gesture-handler";
-
+import { useNavigation } from "@react-navigation/native";
 function AppointmentCard({ appointment }) {
   const actualTime = getRomanianTime().toISOString().slice(11, 16);
   const actualDate = getRomanianTime().toISOString().slice(0, 10);
-
+  const navigation = useNavigation();
   useEffect(() => {}, []);
   return (
     <View>
@@ -54,7 +54,11 @@ function AppointmentCard({ appointment }) {
             (actualDate === appointment.date &&
               actualTime > appointment.slot)) && (
             <View style={styles.uploadContainer}>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("AppointmentResult", appointment)
+                }
+              >
                 <FontAwesome
                   color={GlobalColors.colors.pink500}
                   name={"upload"}
@@ -101,6 +105,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontFamily: "Roboto-Regular",
     marginBottom: 5,
+    left: -10,
   },
   date: {
     fontSize: 16,

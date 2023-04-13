@@ -69,22 +69,29 @@ function DoctorBookAppointment({ navigation }) {
   });
 
   const monthNames = [
-    "Ian.",
+    "Jan.",
     "Feb.",
     "Mar.",
     "Apr.",
-    "Mai",
-    "Iun.",
-    "Iul.",
+    "May",
+    "Jun.",
+    "Jul.",
     "Aug.",
     "Sep.",
     "Oct.",
     "Nov.",
     "Dec.",
   ];
-  const currentDate = new Date();
-  const [date, setDate] = useState(currentDate);
-  const [selectedDate, setSelectedDate] = useState(date);
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  let currentDate = new Date();
+  const timezoneOffset = 180;
+  const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+  currentDate = new Date(romanianTime);
+
+  const [date, setDate] = useState(new Date(currentDate));
+  const [selectedDate, setSelectedDate] = useState(new Date(date));
+  console.log(selectedDate);
   const swiper = useRef();
   const formattedMonth = monthNames[date.getMonth()];
   const [selectedSlot, setSelectedSlot] = useState("");
@@ -166,7 +173,7 @@ function DoctorBookAppointment({ navigation }) {
       >
         <View
           style={
-            date.toDateString() === selectedDate.toDateString()
+            date.toLocaleDateString() === selectedDate.toLocaleDateString()
               ? [styles.containerdate, styles.selectedDate]
               : styles.containerdate
           }
@@ -174,15 +181,9 @@ function DoctorBookAppointment({ navigation }) {
         >
           <>
             <Text style={styles.itemWeekday}>
-              {date.toLocaleDateString("en-US", {
-                weekday: "short",
-              })}
+              {daysOfWeek[date.getUTCDay()]}
             </Text>
-            <Text style={styles.itemDate}>
-              {date.toLocaleDateString("en-US", {
-                day: "numeric",
-              })}
-            </Text>
+            <Text style={styles.itemDate}>{date.getUTCDate()}</Text>
           </>
         </View>
       </TouchableOpacity>
@@ -311,7 +312,7 @@ function DoctorBookAppointment({ navigation }) {
           </TouchableOpacity>
         )}
         <Text style={styles.day}>
-          {date.getDate()} {formattedMonth} {date.getFullYear()}
+          {date.getUTCDate()} {formattedMonth} {date.getUTCFullYear()}
         </Text>
         <TouchableOpacity onPress={handleNextDay}>
           <Ionicons
