@@ -6,10 +6,12 @@ import { FontAwesome } from "@expo/vector-icons";
 import { TouchableRipple } from "react-native-paper";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 function AppointmentCard({ appointment }) {
   const actualTime = getRomanianTime().toISOString().slice(11, 16);
   const actualDate = getRomanianTime().toISOString().slice(0, 10);
   const navigation = useNavigation();
+  console.log(appointment);
   useEffect(() => {}, []);
   return (
     <View>
@@ -54,17 +56,28 @@ function AppointmentCard({ appointment }) {
             (actualDate === appointment.date &&
               actualTime > appointment.slot)) && (
             <View style={styles.uploadContainer}>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("AppointmentResult", appointment)
-                }
-              >
-                <FontAwesome
+              {!appointment.hasOwnProperty("done") && (
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("AppointmentResult", {
+                      appointment: appointment,
+                    })
+                  }
+                >
+                  <FontAwesome
+                    color={GlobalColors.colors.pink500}
+                    name={"upload"}
+                    size={20}
+                  />
+                </TouchableOpacity>
+              )}
+              {appointment.hasOwnProperty("done") && (
+                <MaterialCommunityIcon
                   color={GlobalColors.colors.pink500}
-                  name={"upload"}
+                  name={"archive-check-outline"}
                   size={20}
                 />
-              </TouchableOpacity>
+              )}
             </View>
           )}
         </View>

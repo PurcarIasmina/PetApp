@@ -15,7 +15,7 @@ import { useFonts } from "expo-font";
 import LoginForm from "../components/Auth/LoginForm";
 import { getUserName, login } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-import { useState, useContext, useCallback } from "react";
+import { useState, useContext, useCallback, useRef, useEffect } from "react";
 import { AuthContext } from "../context/auth";
 import HomeScreenUser from "./HomeScreenUser";
 import * as SplashScreen from "expo-splash-screen";
@@ -31,6 +31,7 @@ function Login({ navigation }) {
   });
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const authCtx = useContext(AuthContext);
+
   async function loginHandler({ email, password }) {
     setIsAuthenticating(true);
     try {

@@ -12,47 +12,40 @@ import { useState } from "react";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Button } from "react-native-paper";
 import { useRoute } from "@react-navigation/native";
-function AnimalPlan({ navigation }) {
+import Checkbox from "expo-checkbox";
+function DoseCardPlan({ navigation }) {
   const route = useRoute();
   navigation.setOptions({
     headerStyle: {
       backgroundColor: "#fff",
     },
   });
-  const [pillName, setPillName] = useState("");
-  const [pillCount, setPillCount] = useState(0);
-  const [pillTimes, setPillTimes] = useState(0);
-  const [pressed, setPressed] = useState({
-    Morning: false,
-    Lunch: false,
-    Evening: false,
-  });
+  const [doseName, setDoseName] = useState("");
+  const [doseQuantity, setDoseQuantity] = useState(0);
+  const [checkedItems, setCheckedItems] = useState("");
+  const [doseNumber, setDoseNumber] = useState("");
+
+  const handleCheck = (text) => {
+    setCheckedItems(text);
+  };
+
   const [additionalInfo, setAdditionalInfo] = useState("");
   const handleIncrement = () => {
-    setPillCount(pillCount + 1);
+    setDoseQuantity(doseQuantity + 1);
   };
 
   const handleDecrement = () => {
-    if (pillCount > 0) {
-      setPillCount(pillCount - 1);
-    }
-  };
-  const handleDaysIncrement = () => {
-    setPillTimes(pillTimes + 1);
-  };
-
-  const handleDaysDecrement = () => {
-    if (pillTimes > 0) {
-      setPillTimes(pillTimes - 1);
+    if (doseQuantity > 0) {
+      setDoseQuantity(doseQuantity - 1);
     }
   };
 
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>
       <View style={styles.container}>
-        <Text style={styles.title}>Animal Plan</Text>
+        <Text style={styles.title}>Dose Plan</Text>
         <View style={{ marginTop: 20 }}>
-          <Text style={styles.subtitle}>Pill name</Text>
+          <Text style={styles.subtitle}>Dose name</Text>
           <View style={styles.pillInputContainer}>
             <Icon
               style={[styles.icon, { marginLeft: 5, top: 5 }]}
@@ -61,10 +54,10 @@ function AnimalPlan({ navigation }) {
               color={GlobalColors.colors.pink500}
             />
             <TextInput
-              placeholder="Enter pill name..."
+              placeholder="Enter dose name..."
               style={styles.textInput}
-              value={pillName}
-              onChangeText={(text) => setPillName(text)}
+              value={doseName}
+              onChangeText={(text) => setDoseName(text)}
             ></TextInput>
           </View>
           <View style={styles.prescriptionContainer}>
@@ -79,9 +72,15 @@ function AnimalPlan({ navigation }) {
                 },
               ]}
             >
-              How many
+              Dose quantity
             </Text>
-            <View style={[styles.pillInputContainer, { width: "40%" }]}>
+
+            <View
+              style={[
+                styles.pillInputContainer,
+                { marginLeft: -155, width: "43%" },
+              ]}
+            >
               <TouchableOpacity onPress={handleIncrement}>
                 <Icon
                   name="angle-up"
@@ -96,59 +95,13 @@ function AnimalPlan({ navigation }) {
                   name="pills"
                   size={14}
                   color={GlobalColors.colors.pink500}
-                  style={[styles.icon, { marginHorizontal: 1 }]}
-                />
-                <Text style={[styles.textInput]}>{pillCount} tablets</Text>
-              </View>
-              <TouchableOpacity onPress={handleDecrement}>
-                <Icon
-                  name="angle-down"
-                  style={[styles.icon, { marginHorizontal: -10 }]}
-                  color={GlobalColors.colors.darkGrey}
-                  size={15}
-                />
-              </TouchableOpacity>
-            </View>
-            <Text
-              style={[
-                styles.subtitle,
-                {
-                  fontSize: 15,
-                  position: "absolute",
-                  left: 195,
-                  top: -20,
-                },
-              ]}
-            >
-              How long
-            </Text>
-            <View
-              style={[
-                styles.pillInputContainer,
-                { marginLeft: -10, width: "40%" },
-              ]}
-            >
-              <TouchableOpacity onPress={handleDaysIncrement}>
-                <Icon
-                  name="angle-up"
-                  style={[styles.icon, { marginHorizontal: -10 }]}
-                  size={15}
-                  color={GlobalColors.colors.darkGrey}
-                />
-              </TouchableOpacity>
-
-              <View style={{ marginHorizontal: 10, flexDirection: "row" }}>
-                <Icon
-                  name="calendar"
-                  size={14}
-                  color={GlobalColors.colors.pink500}
                   style={[styles.icon, { marginHorizontal: 2, top: 5 }]}
                 />
                 <Text style={[styles.textInput, { alignSelf: "center" }]}>
-                  {pillTimes} days
+                  {doseQuantity} doses
                 </Text>
               </View>
-              <TouchableOpacity onPress={handleDaysDecrement}>
+              <TouchableOpacity onPress={handleDecrement}>
                 <Icon
                   name="angle-down"
                   style={[styles.icon, { marginHorizontal: 10 }]}
@@ -158,79 +111,54 @@ function AnimalPlan({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.timePrescriptionContainer}>
-            <Text style={[styles.subtitle, { fontSize: 16 }]}>
+          <View style={{ marginTop: 55, flexDirection: "column" }}>
+            <Text style={[styles.subtitle, { fontSize: 15 }]}>
               {" "}
-              When to take
+              Way of admnistration
             </Text>
-            <View style={styles.timeContainer}>
-              <Pressable
-                onPress={() => {
-                  setPressed({
-                    Morning: !pressed.Morning,
-                    Lunch: pressed.Lunch,
-                    Evening: pressed.Evening,
-                  });
-                }}
-              >
-                <View
-                  style={[styles.mealTime, pressed.Morning && styles.pressed]}
-                >
-                  <MaterialCommunityIcon
-                    name="coffee"
-                    color={GlobalColors.colors.pink500}
-                    size={40}
-                  />
-                  <Text style={styles.mealTimeText}>Morning</Text>
-                </View>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  setPressed({
-                    Morning: pressed.Morning,
-                    Lunch: !pressed.Lunch,
-                    Evening: pressed.Evening,
-                  });
-                }}
-              >
-                <View
-                  style={[styles.mealTime, pressed.Lunch && styles.pressed]}
-                >
-                  <MaterialCommunityIcon
-                    name="food-variant"
-                    color={GlobalColors.colors.pink500}
-                    size={40}
-                  />
-                  <Text style={styles.mealTimeText}>Lunch</Text>
-                </View>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  setPressed({
-                    Morning: pressed.Morning,
-                    Lunch: pressed.Lunch,
-                    Evening: !pressed.Evening,
-                  });
-                }}
-              >
-                <View
-                  style={[styles.mealTime, pressed.Evening && styles.pressed]}
-                >
-                  <MaterialCommunityIcon
-                    name="bed-empty"
-                    color={GlobalColors.colors.pink500}
-                    size={40}
-                  />
-                  <Text style={styles.mealTimeText}>Evening</Text>
-                </View>
-              </Pressable>
+            <View View style={{ marginTop: 5, left: 5, flexDirection: "row" }}>
+              <Text style={[styles.subtitle, { fontSize: 15 }]}>Oral</Text>
+              <Checkbox
+                style={styles.checkBox}
+                value={checkedItems === "Oral"}
+                onValueChange={() => handleCheck("Oral")}
+                color={GlobalColors.colors.pink500}
+              />
+              <Text style={[styles.subtitle, { fontSize: 15 }]}>
+                Injectable
+              </Text>
+              <Checkbox
+                style={styles.checkBox}
+                value={checkedItems === "Injectable"}
+                onValueChange={() => handleCheck("Injectable")}
+                color={GlobalColors.colors.pink500}
+              />
             </View>
+          </View>
+          <View style={{ marginTop: 20 }}>
+            <Text style={[styles.subtitle, { fontSize: 15 }]}>Lot number</Text>
+            <View style={styles.pillInputContainer}>
+              <Icon
+                style={[styles.icon, { marginLeft: 5, top: 5 }]}
+                name={"receipt"}
+                size={15}
+                color={GlobalColors.colors.pink500}
+              />
+              <TextInput
+                placeholder="Enter doses lot number..."
+                style={styles.textInput}
+                value={doseNumber}
+                onChangeText={(text) => setDoseNumber(text)}
+              ></TextInput>
+            </View>
+          </View>
+          <View>
             <Text style={[styles.subtitle, { top: 30, left: 5, fontSize: 16 }]}>
               Additional notes
             </Text>
             <View style={styles.additionalNotesContainer}>
               <TextInput
-                placeholder="e.g. Take one tablet 3 times a day"
+                placeholder="e.g. What to do next..."
                 style={styles.textInput}
                 value={additionalInfo}
                 onChangeText={(text) => setAdditionalInfo(text)}
@@ -239,31 +167,29 @@ function AnimalPlan({ navigation }) {
           </View>
         </View>
       </View>
+
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("AppointmentResult", {
-              pillDetails: {
-                pillName: pillName,
-                pillCount: pillCount,
-                pillTimes: pillTimes,
+              doseDetails: {
+                doseName: doseName,
+                doseQuantity: doseQuantity,
+                doseNumber: doseNumber,
                 additionalInfo: additionalInfo,
-                pillMomentDay: pressed,
               },
-              pills: [
-                ...route.params.pills,
+              doses: [
+                ...route.params.doses,
                 {
-                  pillName: pillName,
-                  pillCount: pillCount,
-                  pillTimes: pillTimes,
+                  doseName: doseName,
+                  doseQuantity: doseQuantity,
+                  doseNumber: doseNumber,
                   additionalInfo: additionalInfo,
-                  pillMomentDay: pressed,
                 },
               ],
               appointment: route.params.appointment,
               selectedOption: route.params.selectedOption,
               date: route.params.date,
-              diagnostic: route.params.diagnostic,
             })
           }
         >
@@ -275,14 +201,14 @@ function AnimalPlan({ navigation }) {
               width: 200,
             }}
           >
-            Add pill
+            Add dose
           </Button>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-export default AnimalPlan;
+export default DoseCardPlan;
 const styles = StyleSheet.create({
   container: { flex: 1, top: 10, backgroundColor: "white" },
   title: {
@@ -369,5 +295,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     top: -100,
+  },
+  checkBox: {
+    textColor: GlobalColors.colors.gray1,
+    width: 12,
+    height: 12,
+    marginHorizontal: 10,
+    top: 5,
   },
 });

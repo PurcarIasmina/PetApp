@@ -2,7 +2,7 @@ import axios from "axios";
 import { setStatusBarBackgroundColor } from "expo-status-bar";
 import { useRoute } from "@react-navigation/native";
 
-import { initializeApp } from "firebase/app";
+import { initializeApp, firebase } from "firebase/app";
 import {
   doc,
   setDoc,
@@ -149,8 +149,12 @@ export async function getDoctorSlotsAppointments(did, date) {
 export async function getAppointments(did, date) {
   const appointmentsDetails = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);
+  const appointmentKeys = Object.keys(response.data);
   const appointments = Object.values(response.data);
-  //console.log(appointments);
+  appointments.map((appointment, index) => {
+    appointment.key = appointmentKeys[index];
+  });
+  // console.log(appointments);
   const filtered = appointments.filter(function (appointment) {
     return (
       appointment.did === did &&
@@ -158,7 +162,10 @@ export async function getAppointments(did, date) {
       appointment.canceled === 0
     );
   });
-  //console.log(filtered);
+  console.log(did, date);
+  console.log(filtered);
+
+  // console.log(filtered);
   for (const key in filtered) {
     const appointmentDetail = {
       did: filtered[key].did,
@@ -171,8 +178,14 @@ export async function getAppointments(did, date) {
       photoUrl: await getImageUrl(
         `${filtered[key].uid}/${filtered[key].aid}.jpeg`
       ),
-      generatedId: key,
+      generatedId: filtered[key].key,
     };
+    {
+      filtered[key].hasOwnProperty("done")
+        ? (appointmentDetail["done"] = 1)
+        : null;
+    }
+    console.log(appointmentDetail);
     appointmentsDetails.push(appointmentDetail);
   }
   // console.log(appointmentsDetails);
@@ -262,12 +275,74 @@ export async function getUserStatusAppointments(uid, status) {
   return appointmentsDetails;
 }
 
+export async function getAnimalDoneAppointments(uid, aid) {
+  let appointmentsDetails = [];
+  const response = await axios.get(BACKEND_URL + `/appointments.json`);
+
+  if (response.data) {
+    const appointmentKeys = Object.keys(response.data);
+    const appointments = Object.values(response.data);
+    appointments.map((appointment, index) => {
+      appointment.key = appointmentKeys[index];
+    });
+
+    let filtered;
+
+    filtered = appointments.filter(function (appointment) {
+      return (
+        appointment.uid === uid &&
+        appointment.hasOwnProperty("done") &&
+        appointment.aid === aid
+      );
+    });
+
+    for (const key in filtered) {
+      const appointmentDetail = {
+        did: filtered[key].did,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        slot: filtered[key].slot,
+        animal: await getAnimalDetails(filtered[key].aid),
+        reason: filtered[key].reason,
+        canceled: filtered[key].canceled,
+        ownername: filtered[key].ownername,
+        photoUrl: await getImageUrl(
+          `${filtered[key].uid}/${filtered[key].aid}.jpeg`
+        ),
+        generatedId: filtered[key].key,
+        done: filtered[key].done,
+        result: filtered[key].result,
+      };
+
+      appointmentsDetails.push(appointmentDetail);
+    }
+  }
+
+  appointmentsDetails = appointmentsDetails.sort((ap1, ap2) => {
+    if (ap1.date < ap2.date) return -1;
+    if (ap1.date > ap2.date) return 1;
+    if (ap1.slot < ap2.slot) return -1;
+    if (ap1.slot > ap2.slot) return 1;
+    return 0;
+  });
+
+  return appointmentsDetails;
+}
+
 export async function editAnimal(generatedId, data) {
   const response = await axios.put(
     BACKEND_URL + `/animals/${generatedId}.json`,
     data
   );
   console.log(response);
+  return response;
+}
+export async function editAppointment(appointmentId, data) {
+  const response = await axios.put(
+    BACKEND_URL + `/appointments/${appointmentId}.json`,
+    data
+  );
+  console.log(appointmentId);
   return response;
 }
 export async function getAnimalDetails(aid) {

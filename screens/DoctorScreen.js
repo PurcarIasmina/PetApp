@@ -128,6 +128,7 @@ function DoctorScreen({ navigation }) {
           authCtx.uid,
           getFormattedDate(selectedDate)
         );
+        console.log(resp);
         setAppointments(resp);
         console.log(appointments);
 

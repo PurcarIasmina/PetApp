@@ -7,6 +7,7 @@ import {
   Pressable,
   TextInput,
   ScrollView,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { GlobalColors } from "../../constants/colors";
 import IconButton from "../UI/IconButton";
@@ -27,6 +28,10 @@ import { getFormattedDate } from "../../util/date";
 import { getAge } from "../../util/date";
 import { editAnimal, editImage, storeImage } from "../../store/databases";
 import LoadingOverlay from "../UI/LoadingOverlay";
+import { Tooltip } from "react-native-paper";
+import { Provider as PaperProvider } from "react-native-paper";
+
+import { useNavigation } from "@react-navigation/native";
 function PetCard({
   name,
   breed,
@@ -38,7 +43,7 @@ function PetCard({
   aid,
   generatedId,
 }) {
-  console.log(photo);
+  const navigation = useNavigation();
   const [editing, setEditing] = useState(false);
   const [pushing, setPushing] = useState(false);
   const [namee, setName] = useState(name);
@@ -46,6 +51,7 @@ function PetCard({
     getFormattedDate(new Date(datebirth))
   );
   const [breedd, setBreed] = useState(breed);
+  const [aidd, setAid] = useState(aid);
   const [ownerr, setOwner] = useState(owner);
   const [colorr, setColor] = useState(color);
   const [photoo, setPhoto] = useState(photo);
@@ -64,6 +70,8 @@ function PetCard({
   const bs = createRef();
   const fall = new Animated.Value(1);
   const [open, setOpen] = useState(false);
+  const [openTip, setOpenTip] = useState(false);
+
   const authCtx = useContext(AuthContext);
   const [pickedImagePath, setPickedImagePath] = useState("");
   const [imagePicked, setImagePicked] = useState(false);
@@ -452,14 +460,23 @@ function PetCard({
         {mode}
         <View style={styles.buttonsContainer}>
           <IconButton
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate("AnimalRecords", {
+                aid: aidd,
+                generatedId: generatedId,
+                photoUrl: photo,
+              });
+            }}
             top={18}
             // text={20}
             // label={x}
             icon="clipboard"
             color={GlobalColors.colors.white1}
             size={28}
+            tip
+            tipText={"Medical Records"}
           />
+
           <IconButton
             onPress={() => {}}
             // label="Reminders"
@@ -467,6 +484,8 @@ function PetCard({
             icon="notifications"
             color={GlobalColors.colors.white1}
             size={29}
+            tip
+            tipText={"Notifications"}
           />
           <IconButton
             onPress={() => {}}
@@ -475,6 +494,8 @@ function PetCard({
             icon="download"
             color={GlobalColors.colors.white1}
             size={30}
+            tip
+            tipText={"Download files"}
           />
           <IconButton
             onPress={() => {}}
@@ -484,6 +505,8 @@ function PetCard({
             color={GlobalColors.colors.white1}
             // style={styles.exitButton}
             size={30}
+            tip
+            tipText={"Attach files"}
           />
         </View>
       </View>
