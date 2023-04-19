@@ -13,14 +13,20 @@ import {
 import DoctorCard from "../components/Appointments/DoctorCard";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { getDoctorsList, getAppointments } from "../store/databases";
+import {
+  getDoctorsList,
+  getAppointments,
+  getUserStatusAppointments,
+} from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { GestureHandlerScrollView } from "react-native-gesture-handler";
+import { scheduleNotificationHandler } from "../notifications/notifications";
 
 function HomeScreenUser({ navigation }) {
   const authCtx = useContext(AuthContext);
   const [doctors, setDoctors] = useState([]);
   const [fetching, setFetching] = useState(false);
+  const [nextApp, setNextApp] = useState();
   let doctorsAux;
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -50,8 +56,25 @@ function HomeScreenUser({ navigation }) {
         console.log(error);
       }
     }
+    // async function getNextAppointment() {
+    //   try {
+    //     const resp = await getUserStatusAppointments(authCtx.uid, 0);
+    //     if (resp) {
+    //       console.log(resp[0]);
+    //       setNextApp(resp[0]);
+    //       console.log(nextApp);
+    //       scheduleNotificationHandler(
+    //         "Don't forget you have an appointment!",
+    //         `Data: ${nextApp.date}, Hour: ${nextApp.slot}`
+    //       );
+    //     }
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // }
 
     getDoctors();
+    // getNextAppointment();
   }, []);
 
   if (!fonts) {

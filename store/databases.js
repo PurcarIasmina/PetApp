@@ -1,7 +1,7 @@
 import axios from "axios";
 import { setStatusBarBackgroundColor } from "expo-status-bar";
 import { useRoute } from "@react-navigation/native";
-
+import { registerForPushNotificationsAsync } from "../notifications/notifications";
 import { initializeApp, firebase } from "firebase/app";
 import {
   doc,
@@ -92,6 +92,27 @@ export async function addAnimal(name, breed, date, owner, color, gender, uid) {
   });
   return { response: response, aid: aid };
 }
+
+// export async function addToken(uid) {
+//   const expoToken = await registerForPushNotificationsAsync();
+//   const resp = await axios.put(BACKEND_URL + `/tokens/${uid}.json`, {
+//     uid: uid,
+//     tokenExpo: expoToken,
+//   });
+// }
+
+// export async function getTokens() {
+//   const tokens = [];
+//   const response = await axios.get(BACKEND_URL + `/tokens.json`);
+//   for (const key in response.data) {
+//     const TokenObj = {
+//       uid: response.data[key].uid,
+//       token: response.data[key].tokenExpo,
+//     };
+//     tokens.push(TokenObj);
+//   }
+//   return tokens;
+// }
 
 export async function addAppointment(
   did,

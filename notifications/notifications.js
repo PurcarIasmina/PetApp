@@ -1,30 +1,73 @@
 import * as Notifications from "expo-notifications";
-import { parseISO, getTime } from "date-fns";
+import * as Permissions from "expo-permissions";
+import * as Device from "expo-device";
+
 Notifications.setNotificationHandler({
-  handleNotification: async () => {
-    return {
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-      shouldShowAlert: true,
-    };
-  },
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowAlert: true,
+  }),
 });
-export function scheduleNotificationHandler(doctorId, slot, date) {
+
+export const getPermissions = async () => {
+  const { status } = await Notifications.requestPermissionsAsync();
+  if (status !== "granted") {
+    return;
+  }
+};
+export function scheduleNotificationHandler(title, body, name) {
+  getPermissions();
   Notifications.scheduleNotificationAsync({
     content: {
-      title: "Upload consultation result!",
-      body: "",
-      data: {
-        doctorId: doctorId,
-        slot: slot,
-        date: date,
-      },
+      title: title,
+      body: body,
+      data: {},
     },
     trigger: {
-      seconds: 5,
+      seconds: 20,
     },
   });
-  //   {
-  //     console.log(getTime(parseISO(slot)));
-  //   }
+}
+
+export async function registerForPushNotificationsAsync() {
+  let token;
+
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+  if (existingStatus !== "granted") {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+  if (finalStatus !== "granted") {
+    alert("Failed to get push token for push notification!");
+    return;
+  }
+  token = (await Notifications.getExpoPushTokenAsync()).data;
+  console.log(token);
+
+  if (Platform.OS === "android") {
+    Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+    });
+  }
+
+  return token;
+}
+
+export function sendPushNotificationHandler(token, title, body) {
+  fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      to: token,
+      title: title,
+      body: body,
+    }),
+  });
 }

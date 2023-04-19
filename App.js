@@ -29,6 +29,13 @@ import AppointmentResult from "./screens/AppointmentResult";
 import AnimalPlan from "./screens/AnimalPlan";
 import DoseCardPlan from "./screens/DoseCardPlan";
 import AnimalRecords from "./screens/AnimalRecords";
+import * as Notifications from "expo-notifications";
+import {
+  registerForPushNotificationsAsync,
+  scheduleNotificationHandler,
+  sendPushNotificationHandler,
+} from "./notifications/notifications";
+import { getDoctorsList, getTokens } from "./store/databases";
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 function AuthenticationStack() {
@@ -263,6 +270,7 @@ function NavigationOption() {
 
 function Base() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
+  const [token, setToken] = useState("");
   const authCtx = useContext(AuthContext);
   useEffect(() => {
     async function fetchToken() {
@@ -273,6 +281,24 @@ function Base() {
       setIsTryingLogin(false);
     }
   }, []);
+  useEffect(() => {
+    async function getToken() {
+      const tokenn = await registerForPushNotificationsAsync();
+      setToken(tokenn);
+    }
+    sendPushNotificationHandler(token, "Alo", "tesNotit");
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received");
+        console.log(notification);
+      }
+    );
+
+    getToken();
+    return () => {
+      subscription.remove();
+    };
+  }, []);
   const onLayoutRootView = useCallback(async () => {
     if (isTryingLogin) {
       await SplashScreen.hideAsync();
@@ -281,6 +307,7 @@ function Base() {
 
   return <NavigationOption />;
 }
+
 export default function App() {
   return (
     <>

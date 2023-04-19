@@ -13,12 +13,13 @@ import ButtonCustom from "../components/UI/ButtonCustom";
 import { GlobalColors } from "../constants/colors";
 import { useFonts } from "expo-font";
 import LoginForm from "../components/Auth/LoginForm";
-import { getUserName, login } from "../store/databases";
+import { addToken, getUserName, login } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { useState, useContext, useCallback, useRef, useEffect } from "react";
 import { AuthContext } from "../context/auth";
 import HomeScreenUser from "./HomeScreenUser";
 import * as SplashScreen from "expo-splash-screen";
+import { registerForPushNotificationsAsync } from "../notifications/notifications";
 
 function doctorValidation(value) {
   const reg = /@doctor\.petapp\.ro/;
@@ -38,6 +39,7 @@ function Login({ navigation }) {
       const { token, id, name } = await login(email, password);
       authCtx.authenticate(token);
 
+      // const addTk = await addToken(id);
       authCtx.userDetails(name, id);
       if (doctorValidation(email)) authCtx.checkIsDoctor("doctor");
       if (!authCtx.doctor) navigation.replace("HomeScreenUser");

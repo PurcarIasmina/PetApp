@@ -167,7 +167,7 @@ export default AppointmentStatus;
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    height: 120,
+    height: 250,
     borderBottomWidth: 0.9,
     borderBottomColor: GlobalColors.colors.gray1,
   },

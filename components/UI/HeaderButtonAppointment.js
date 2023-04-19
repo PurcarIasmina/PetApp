@@ -2,7 +2,7 @@ import { View, StyleSheet, TouchableWithoutFeedback, Text } from "react-native";
 import { GlobalColors } from "../../constants/colors";
 import { useState } from "react";
 import { Dimensions } from "react-native";
-function HeaderButtonAppointment({ status, count, pressed }) {
+function HeaderButtonAppointment({ status, count, pressed, textSize }) {
   return (
     <View
       style={[
@@ -13,9 +13,18 @@ function HeaderButtonAppointment({ status, count, pressed }) {
         },
       ]}
     >
-      <Text style={styles.status}>{status}</Text>
-      <View style={styles.count}>
-        <Text style={styles.countText}>{count}</Text>
+      <Text style={[styles.status, textSize ? { fontSize: textSize } : 17]}>
+        {status}
+      </Text>
+      <View
+        style={[
+          styles.count,
+          textSize && { height: 20, width: 20, borderRadius: 10 },
+        ]}
+      >
+        <Text style={[styles.countText, textSize && { fontSize: 10 }]}>
+          {count}
+        </Text>
       </View>
     </View>
   );

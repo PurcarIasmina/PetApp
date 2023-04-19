@@ -20,7 +20,7 @@ function PillCardPlan({ pillName, pillTimes, handlerDelete, index, moment }) {
             justifyContent: "center",
             alignItems: "center",
             marginTop: -25,
-            marginHorizontal: 30,
+            marginLeft: 30,
           }}
         >
           <Text style={styles.pillName}>{pillName}</Text>
@@ -28,7 +28,7 @@ function PillCardPlan({ pillName, pillTimes, handlerDelete, index, moment }) {
             {moment ? `${pillTimes} days` : pillTimes}
           </Text>
         </View>
-        <View style={{ position: "absolute", marginLeft: 335, top: -5 }}>
+        <View style={{ position: "absolute", left: 335, top: -5 }}>
           <TouchableOpacity
             onPress={() => {
               handlerDelete(index, moment);
@@ -78,5 +78,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 55,
     left: 2,
+    right: -100,
   },
 });
