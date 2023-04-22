@@ -36,6 +36,7 @@ import {
   sendPushNotificationHandler,
 } from "./notifications/notifications";
 import { getDoctorsList, getTokens } from "./store/databases";
+import NotificationsAnimalPage from "./screens/NotificationsAnimalPage";
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 function AuthenticationStack() {
@@ -249,6 +250,15 @@ function AuthenticatedDrawerUser() {
           unmountOnBlur: true,
         }}
       />
+      <Drawer.Screen
+        name="AnimalNotifications"
+        component={NotificationsAnimalPage}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
     </Drawer.Navigator>
   );
 }
@@ -270,7 +280,6 @@ function NavigationOption() {
 
 function Base() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
-  const [token, setToken] = useState("");
   const authCtx = useContext(AuthContext);
   useEffect(() => {
     async function fetchToken() {
@@ -282,11 +291,6 @@ function Base() {
     }
   }, []);
   useEffect(() => {
-    async function getToken() {
-      const tokenn = await registerForPushNotificationsAsync();
-      setToken(tokenn);
-    }
-    sendPushNotificationHandler(token, "Alo", "tesNotit");
     const subscription = Notifications.addNotificationReceivedListener(
       (notification) => {
         console.log("Notification received");
@@ -294,7 +298,6 @@ function Base() {
       }
     );
 
-    getToken();
     return () => {
       subscription.remove();
     };

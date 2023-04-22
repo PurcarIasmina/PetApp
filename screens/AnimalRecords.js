@@ -93,9 +93,8 @@ function AnimalRecords({ navigation }) {
       try {
         setFetching(true);
         let resp = [];
-
         resp = await getAnimalDoneAppointments(authCtx.uid, aid);
-
+        console.log(resp);
         if (resp) {
           setVaccines(
             resp.filter(

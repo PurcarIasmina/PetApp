@@ -37,9 +37,9 @@ function Login({ navigation }) {
     setIsAuthenticating(true);
     try {
       const { token, id, name } = await login(email, password);
-      authCtx.authenticate(token);
-
-      // const addTk = await addToken(id);
+      const tokenn = await registerForPushNotificationsAsync();
+      console.log(tokenn);
+      authCtx.authenticate(token, tokenn);
       authCtx.userDetails(name, id);
       if (doctorValidation(email)) authCtx.checkIsDoctor("doctor");
       if (!authCtx.doctor) navigation.replace("HomeScreenUser");

@@ -135,6 +135,51 @@ export async function addAppointment(
   });
   return response;
 }
+
+export async function addNotification(uid, aid, momentTime, pill, date) {
+  const response = await axios.post(BACKEND_URL + `/notifications.json`, {
+    aid: aid,
+    uid: uid,
+    momentTime: momentTime,
+    date: date,
+    pill: pill,
+  });
+  return response;
+}
+
+export async function deleteNotification(generatedId) {
+  const response = await axios.delete(
+    BACKEND_URL + `/notifications/${generatedId}.json`
+  );
+  return response;
+}
+export async function getNotifications(uid, aid) {
+  const response = await axios.get(BACKEND_URL + `/notifications.json`);
+  let notificationsDetails = [];
+  if (response.data) {
+    const notificationsKeys = Object.keys(response.data);
+    const notifications = Object.values(response.data);
+    notifications.map((notification, index) => {
+      notification.key = notificationsKeys[index];
+    });
+    const filtered = notifications.filter(function (notification) {
+      return notification.aid === aid && notification.uid === uid;
+    });
+    for (const key in filtered) {
+      const notificationDetail = {
+        aid: filtered[key].aid,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        pill: filtered[key].pill,
+        momentTime: filtered[key].momentTime,
+        generatedId: filtered[key].key,
+      };
+      notificationsDetails.push(notificationDetail);
+    }
+  }
+  return notificationsDetails;
+}
+
 export async function cancelAppointment(appointmentId, data) {
   const response = await axios.put(
     BACKEND_URL + `/appointments/${appointmentId}.json`,
@@ -307,7 +352,7 @@ export async function getAnimalDoneAppointments(uid, aid) {
       appointment.key = appointmentKeys[index];
     });
 
-    let filtered;
+    let filtered = [];
 
     filtered = appointments.filter(function (appointment) {
       return (
@@ -323,13 +368,10 @@ export async function getAnimalDoneAppointments(uid, aid) {
         date: filtered[key].date,
         uid: filtered[key].uid,
         slot: filtered[key].slot,
-        animal: await getAnimalDetails(filtered[key].aid),
+        aid: filtered[key].aid,
         reason: filtered[key].reason,
         canceled: filtered[key].canceled,
         ownername: filtered[key].ownername,
-        photoUrl: await getImageUrl(
-          `${filtered[key].uid}/${filtered[key].aid}.jpeg`
-        ),
         generatedId: filtered[key].key,
         done: filtered[key].done,
         result: filtered[key].result,
@@ -349,7 +391,46 @@ export async function getAnimalDoneAppointments(uid, aid) {
 
   return appointmentsDetails;
 }
-
+export function calculateAnimalPillDays(doneAppointments) {
+  let resp = [];
+  resp = doneAppointments;
+  const pillDays = [];
+  if (resp) {
+    let consultations = [];
+    consultations = resp.filter(
+      (item) => item.result.doctorReason.localeCompare("Consultation") === 0
+    );
+    const currentDate = new Date();
+    const timezoneOffset = 180;
+    const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+    const romaniaDateTime = new Date(romanianTime);
+    for (const key in consultations) {
+      const appointmentDate = new Date(consultations[key].date);
+      const diffInTime = romaniaDateTime.getTime() - appointmentDate.getTime();
+      const daysSinceAppointment = Math.floor(
+        diffInTime / (1000 * 60 * 60 * 24)
+      );
+      for (const keyn in consultations[key].result.pillsPlan) {
+        const pill = consultations[key].result.pillsPlan[keyn];
+        if (pill.pillTimes >= daysSinceAppointment) {
+          let myDate = new Date(consultations[key].date);
+          myDate.setDate(myDate.getUTCDate() + pill.pillTimes - 1);
+          myDate = getFormattedDate(myDate);
+          pillDays.push({
+            pillName: pill.pillName,
+            pillCount: pill.pillCount,
+            pillMomentDay: pill.pillMomentDay,
+            pillTimes: pill.pillTimes,
+            additionalInfo: pill.additionalInfo,
+            pillFirstDay: consultations[key].date,
+            pillLastDay: myDate,
+          });
+        }
+      }
+    }
+  }
+  return pillDays;
+}
 export async function editAnimal(generatedId, data) {
   const response = await axios.put(
     BACKEND_URL + `/animals/${generatedId}.json`,

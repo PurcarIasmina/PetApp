@@ -478,7 +478,13 @@ function PetCard({
           />
 
           <IconButton
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate("AnimalNotifications", {
+                aid: aidd,
+                generatedId: generatedId,
+                photoUrl: photo,
+              });
+            }}
             // label="Reminders"
             top={19}
             icon="notifications"

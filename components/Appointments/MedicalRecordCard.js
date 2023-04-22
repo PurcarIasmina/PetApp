@@ -126,58 +126,63 @@ function MedicalRecordCard({ appointment, status }) {
                     style={{ paddingHorizontal: 5, top: 1 }}
                   />
                 </View>
-                {appointment.result.pillsPlan.map((pill, index) => (
-                  <View key={index} style={styles.pillContainer}>
-                    <Text style={styles.medicineText}>
-                      {pill.pillCount} x {pill.pillName}
-                    </Text>
-                    <View style={{ flexDirection: "row" }}>
-                      <Text style={styles.diagnostic}>When:</Text>
-                      {pill.pillMomentDay.Morning && (
-                        <MaterialCommunityIcon
-                          name="coffee"
-                          style={styles.iconMoment}
-                          color={GlobalColors.colors.pink500}
-                          size={18}
-                        />
-                      )}
-                      {pill.pillMomentDay.Lunch && (
-                        <MaterialCommunityIcon
-                          name="food-variant"
-                          style={styles.iconMoment}
-                          color={GlobalColors.colors.pink500}
-                          size={18}
-                        />
-                      )}
-                      {pill.pillMomentDay.Evening && (
-                        <MaterialCommunityIcon
-                          name="bed-empty"
-                          style={styles.iconMoment}
-                          color={GlobalColors.colors.pink500}
-                          size={18}
-                        />
-                      )}
+                {appointment.result.doctorReason.localeCompare(
+                  "Consultation"
+                ) === 0 &&
+                  appointment.result.pillsPlan.map((pill, index) => (
+                    <View key={index} style={styles.pillContainer}>
+                      <Text style={styles.medicineText}>
+                        {pill.pillCount} x {pill.pillName}
+                      </Text>
+                      <View style={{ flexDirection: "row" }}>
+                        <Text style={styles.diagnostic}>When:</Text>
+                        {pill.pillMomentDay.Morning && (
+                          <MaterialCommunityIcon
+                            name="coffee"
+                            style={styles.iconMoment}
+                            color={GlobalColors.colors.pink500}
+                            size={18}
+                          />
+                        )}
+                        {pill.pillMomentDay.Lunch && (
+                          <MaterialCommunityIcon
+                            name="food-variant"
+                            style={styles.iconMoment}
+                            color={GlobalColors.colors.pink500}
+                            size={18}
+                          />
+                        )}
+                        {pill.pillMomentDay.Evening && (
+                          <MaterialCommunityIcon
+                            name="bed-empty"
+                            style={styles.iconMoment}
+                            color={GlobalColors.colors.pink500}
+                            size={18}
+                          />
+                        )}
+                      </View>
+                      <Text style={styles.diagnostic}>
+                        How long : {pill.pillTimes} days
+                      </Text>
                     </View>
-                    <Text style={styles.diagnostic}>
-                      How long : {pill.pillTimes} days
-                    </Text>
-                  </View>
-                ))}
+                  ))}
               </View>
             )}
-            {appointment.result.appointmentDoses.map((dose, index) => (
-              <View key={index} style={styles.pillContainer}>
-                <Text style={styles.medicineText}>
-                  {dose.doseName} x {dose.doseQuantity} dose
-                </Text>
-                <Text style={styles.diagnostic}>Lot: {dose.doseNumber}</Text>
-                {dose.additionalInfo.length > 0 && (
-                  <Text style={styles.diagnostic}>
-                    Additional Info: {dose.additionalInfo}
+            {appointment.result.doctorReason.localeCompare("Consultation") !=
+              0 &&
+              appointment.result.appointmentDoses.map((dose, index) => (
+                <View key={index} style={styles.pillContainer}>
+                  <Text style={styles.medicineText}>
+                    {dose.doseName} x {dose.doseQuantity} dose
                   </Text>
-                )}
-              </View>
-            ))}
+                  <Text style={styles.diagnostic}>Lot: {dose.doseNumber}</Text>
+                  {dose.additionalInfo.length > 0 && (
+                    <Text style={styles.diagnostic}>
+                      Additional Info: {dose.additionalInfo}
+                    </Text>
+                  )}
+                </View>
+              ))}
           </ScrollView>
         </View>
       </View>
@@ -221,7 +226,7 @@ const styles = StyleSheet.create({
   textDate: {
     fontFamily: "Garet-Book",
     color: GlobalColors.colors.gray0,
-    fontSize: 18,
+    fontSize: 16,
     textAlign: "center",
   },
   medicineText: {

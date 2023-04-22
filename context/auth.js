@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { doc } from "firebase/firestore";
 export const AuthContext = createContext({
   token: "",
+  tokenNotify: "",
   name: "",
   uid: "",
   doctor: "",
@@ -17,6 +18,7 @@ export const AuthContext = createContext({
 
 function AuthContextProvider({ children }) {
   const [authToken, setAuthToken] = useState();
+  const [notifyToken, setNotifyToken] = useState();
   const [authName, setAuthName] = useState();
   const [authUid, setAuthUid] = useState();
   const [authDoctor, setAuthDoctor] = useState();
@@ -28,6 +30,15 @@ function AuthContextProvider({ children }) {
       }
     }
     fetchToken();
+  }, []);
+  useEffect(() => {
+    async function fetchNotifyToken() {
+      const storedToken = await AsyncStorage.getItem("tokenNotify");
+      if (storedToken) {
+        setNotifyToken(storedToken);
+      }
+    }
+    fetchNotifyToken();
   }, []);
   useEffect(() => {
     async function fetchName() {
@@ -56,9 +67,11 @@ function AuthContextProvider({ children }) {
     }
     fetchIsDoctor();
   }, []);
-  function authenticate(token) {
+  function authenticate(token, tokenNotify) {
     setAuthToken(token);
+    setNotifyToken(tokenNotify);
     AsyncStorage.setItem("token", token);
+    AsyncStorage.setItem("tokenNotify", tokenNotify);
   }
   function userDetails(name, id) {
     setAuthName(name);
@@ -72,16 +85,19 @@ function AuthContextProvider({ children }) {
   }
   function logout() {
     setAuthToken(null);
+    setNotifyToken(null);
     setAuthName(null);
     setAuthUid(null);
     setAuthDoctor(null);
     AsyncStorage.removeItem("token");
+    AsyncStorage.removeItem("tokenNotify");
     AsyncStorage.removeItem("name");
     AsyncStorage.removeItem("uid");
     AsyncStorage.removeItem("doctor");
   }
   const value = {
     token: authToken,
+    tokenNotify: notifyToken,
     name: authName,
     uid: authUid,
     doctor: authDoctor,
