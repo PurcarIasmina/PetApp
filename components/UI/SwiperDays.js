@@ -8,13 +8,13 @@ import {
 } from "react-native";
 import { GlobalColors } from "../../constants/colors";
 import { getFormattedDate } from "../../util/date";
-function SwiperDays({ pills, handlerGetPills, notifications }) {
+function SwiperDays({ pills, handlerGetPills, notifications, date }) {
   const [days, setDays] = useState([]);
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const currentDate = new Date();
   const timezoneOffset = 180;
   const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
-  const [selectedDate, setSelectedDate] = useState(new Date(romanianTime));
+  const [selectedDate, setSelectedDate] = useState(new Date(date));
   const [earliestPillFirstDay, setEarliestPillFirstDay] = useState(
     pills.reduce(
       (earliest, pill) =>

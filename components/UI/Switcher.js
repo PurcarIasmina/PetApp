@@ -14,6 +14,7 @@ function Switcher({
   notificationChanged,
   notificationValue,
   generatedId,
+  setSelctedDateReceived,
 }) {
   const [isSwitchOn, setIsSwitchOn] = useState(status);
   const authCtx = useContext(AuthContext);
@@ -44,6 +45,7 @@ function Switcher({
         console.log(error);
       }
     }
+    setSelctedDateReceived(date);
   };
 
   return (

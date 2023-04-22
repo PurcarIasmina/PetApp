@@ -131,6 +131,7 @@ function NotificationsAnimalPage({ navigation }) {
   useEffect(() => {
     async function getNotificationss() {
       try {
+        setFetching(true);
         let auxvect = [];
         auxvect = await getNotifications(authCtx.uid, aid);
         setNotificationsForSelectedDay(
@@ -139,7 +140,9 @@ function NotificationsAnimalPage({ navigation }) {
               notification.date.localeCompare(selectedDaterecieved) === 0
           )
         );
+
         setNotifications(auxvect);
+        setFetching(false);
         console.log(notificationsForSelectedDay, "aloooo");
       } catch (error) {
         console.log(error);
@@ -241,6 +244,7 @@ function NotificationsAnimalPage({ navigation }) {
                   ).generatedId
                 : null
             }
+            setSelctedDateReceived={setSelctedDateReceived}
           />
         </View>
       </View>
@@ -261,6 +265,7 @@ function NotificationsAnimalPage({ navigation }) {
               pills={pills}
               handlerGetPills={getPills}
               notifications={notifications}
+              date={selectedDaterecieved}
             />
 
             <View style={styles.listContainer}>
