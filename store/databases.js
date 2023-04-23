@@ -136,13 +136,14 @@ export async function addAppointment(
   return response;
 }
 
-export async function addNotification(uid, aid, momentTime, pill, date) {
+export async function addNotification(uid, aid, momentTime, pill, date, name) {
   const response = await axios.post(BACKEND_URL + `/notifications.json`, {
     aid: aid,
     uid: uid,
     momentTime: momentTime,
     date: date,
     pill: pill,
+    name: name,
   });
   return response;
 }
@@ -173,6 +174,34 @@ export async function getNotifications(uid, aid) {
         pill: filtered[key].pill,
         momentTime: filtered[key].momentTime,
         generatedId: filtered[key].key,
+        name: filtered[key].name,
+      };
+      notificationsDetails.push(notificationDetail);
+    }
+  }
+  return notificationsDetails;
+}
+export async function getUserNotifications(uid) {
+  const response = await axios.get(BACKEND_URL + `/notifications.json`);
+  let notificationsDetails = [];
+  if (response.data) {
+    const notificationsKeys = Object.keys(response.data);
+    const notifications = Object.values(response.data);
+    notifications.map((notification, index) => {
+      notification.key = notificationsKeys[index];
+    });
+    const filtered = notifications.filter(function (notification) {
+      return notification.uid === uid;
+    });
+    for (const key in filtered) {
+      const notificationDetail = {
+        aid: filtered[key].aid,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        pill: filtered[key].pill,
+        momentTime: filtered[key].momentTime,
+        generatedId: filtered[key].key,
+        name: filtered[key].name,
       };
       notificationsDetails.push(notificationDetail);
     }

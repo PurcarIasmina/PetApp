@@ -7,6 +7,8 @@ Notifications.setNotificationHandler({
     shouldPlaySound: false,
     shouldSetBadge: false,
     shouldShowAlert: true,
+    attachments: [{ url: "https://example.com/image.png" }],
+    badgeIconType: "alert",
   }),
 });
 
@@ -68,6 +70,18 @@ export function sendPushNotificationHandler(token, title, body) {
       to: token,
       title: title,
       body: body,
+      data: {
+        "content-available": 1,
+      },
     }),
+    content: {
+      shouldShowAlert: true,
+      attachments: [
+        {
+          url: "https://example.co.https://www.google.https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pexels.com%2Fsearch%2Fflowers%2F&psig=AOvVaw101J5qfniVDI2ako3bUe9x&ust=1682288172248000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCLiZ5vnBvv4CFQAAAAAdAAAAABAJcom/url?sa=i&url=https%3A%2F%2Fwww.dreamstime.com%2Fphotos-images%2Fflowers.html&psig=AOvVaw101J5qfniVDI2ako3bUe9x&ust=1682288172248000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCLiZ5vnBvv4CFQAAAAAdAAAAABAEpng",
+        },
+      ],
+      badgeIconType: "alert",
+    },
   });
 }

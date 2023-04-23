@@ -7,6 +7,7 @@ import { getTime } from "date-fns";
 import { addNotification, deleteNotification } from "../../store/databases";
 function Switcher({
   aid,
+  name,
   momentTime,
   pill,
   date,
@@ -16,6 +17,7 @@ function Switcher({
   generatedId,
   setSelctedDateReceived,
 }) {
+  console.log(name);
   const [isSwitchOn, setIsSwitchOn] = useState(status);
   const authCtx = useContext(AuthContext);
   console.log(generatedId);
@@ -28,7 +30,8 @@ function Switcher({
           aid,
           momentTime,
           pill,
-          date
+          date,
+          name
         );
 
         notificationChanged(!notificationValue);

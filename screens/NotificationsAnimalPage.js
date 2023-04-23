@@ -30,6 +30,7 @@ function NotificationsAnimalPage({ navigation }) {
   const route = useRoute();
   const authCtx = useContext(AuthContext);
   const [aid, setAid] = [route.params ? route.params.aid : null];
+  const [name, setName] = [route.params ? route.params.animalName : null];
   const [pills, setPills] = useState([]);
   const [pillsFoSelected, setPillsForSelected] = useState([]);
   const [notificationsForSelectedDay, setNotificationsForSelectedDay] =
@@ -221,6 +222,7 @@ function NotificationsAnimalPage({ navigation }) {
         <View style={{ position: "absolute", top: -2, left: 140 }}>
           <Switcher
             aid={aid}
+            name={name}
             momentTime={momenTime}
             pill={item.pillName}
             date={selectedDaterecieved}

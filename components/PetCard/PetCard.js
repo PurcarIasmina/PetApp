@@ -482,6 +482,7 @@ function PetCard({
               navigation.navigate("AnimalNotifications", {
                 aid: aidd,
                 generatedId: generatedId,
+                animalName: namee,
                 photoUrl: photo,
               });
             }}
