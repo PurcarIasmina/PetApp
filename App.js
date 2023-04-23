@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 // import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { useState, useContext, useEffect, useCallback } from "react";
+import { useState, useContext, useEffect, useCallback, useRef } from "react";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { GlobalColors } from "./constants/colors";
 import Register from "./screens/Register";
@@ -35,8 +35,31 @@ import {
   scheduleNotificationHandler,
   sendPushNotificationHandler,
 } from "./notifications/notifications";
-import { getDoctorsList, getTokens } from "./store/databases";
+import {
+  getDoctorsList,
+  getNotifications,
+  getTokens,
+  getUserNotifications,
+} from "./store/databases";
 import NotificationsAnimalPage from "./screens/NotificationsAnimalPage";
+import { getFormattedDate } from "./util/date";
+import * as TaskManager from "expo-task-manager";
+// const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+
+// TaskManager.defineTask(
+//   BACKGROUND_NOTIFICATION_TASK,
+//   ({ data, error, executionInfo }) => {
+//     if (error) {
+//       console.log("error occurred");
+//     }
+//     if (data) {
+//       console.log("data-----", data);
+//     }
+//   }
+// );
+
+// Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 function AuthenticationStack() {
@@ -281,6 +304,14 @@ function NavigationOption() {
 function Base() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
   const authCtx = useContext(AuthContext);
+  const [notifications, setNotifications] = useState([]);
+  const currentDate = new Date();
+  const timezoneOffset = 180;
+  const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+  const [actualDate, setActualDate] = useState(new Date(romanianTime));
+  const [minutes, setMinutes] = useState(actualDate.getUTCMinutes());
+  const notificationListener = useRef();
+  const responseListener = useRef();
   useEffect(() => {
     async function fetchToken() {
       const storedToken = await AsyncStorage.getItem("token");
@@ -291,17 +322,79 @@ function Base() {
     }
   }, []);
   useEffect(() => {
-    const subscription = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        console.log("Notification received");
-        console.log(notification);
+    async function haveNotifications() {
+      try {
+        let resp = [];
+        resp = await getUserNotifications(authCtx.uid);
+        setNotifications(resp);
+        return resp;
+      } catch (error) {
+        console.log(error);
       }
-    );
+    }
+    function updateDate() {
+      setActualDate(new Date(romanianTime));
+    }
 
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+    const interval = setInterval(() => {
+      updateDate();
+    }, 60000);
+    haveNotifications().then((resp) => {
+      for (const key in resp) {
+        if (resp[key].date.localeCompare(getFormattedDate(actualDate)) === 0) {
+          console.log(actualDate.getUTCHours());
+          if (
+            resp[key].momentTime.localeCompare("Morning") === 0 &&
+            actualDate.getUTCHours() === 2 &&
+            actualDate.getUTCMinutes() === 48
+          ) {
+            console.log("da");
+            sendPushNotificationHandler(
+              authCtx.tokenNotify,
+              "Reminder! ☕️",
+              `Administrate to ${resp[key].name} morning medication`
+            );
+          }
+
+          if (
+            resp[key].momentTime.localeCompare("Lunch") &&
+            actualDate.getUTCHours() === 12 &&
+            actualDate.getUTCMinutes() === 59
+          ) {
+            sendPushNotificationHandler(
+              authCtx.tokenNotify,
+              "Reminder!🍴",
+              `Administrate to ${resp[key].name} lunch medication`
+            );
+          }
+          if (
+            resp[key].momentTime.localeCompare("Evening") &&
+            actualDate.getUTCHours() === 19 &&
+            actualDate.getUTCMinutes() === 59
+          ) {
+            sendPushNotificationHandler(
+              authCtx.tokenNotify,
+              "Reminder!🌛",
+              `Administrate to ${resp[key].name} evening medication`
+            );
+          }
+        }
+      }
+
+      responseListener.current =
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          console.log(response);
+        });
+      return () => {
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
+        Notifications.removeNotificationSubscription(responseListener.current);
+      };
+    });
+
+    return () => clearInterval(interval);
+  }, [actualDate]);
   const onLayoutRootView = useCallback(async () => {
     if (isTryingLogin) {
       await SplashScreen.hideAsync();
