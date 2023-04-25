@@ -1,10 +1,15 @@
 import { Switch } from "react-native-paper";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect, useLayoutEffect } from "react";
 import { GlobalColors } from "../../constants/colors";
 import { sendPushNotificationHandler } from "../../notifications/notifications";
 import { AuthContext } from "../../context/auth";
 import { getTime } from "date-fns";
-import { addNotification, deleteNotification } from "../../store/databases";
+import {
+  addNotification,
+  deleteNotification,
+  addNotificationAppointment,
+  deleteNotificationAppointment,
+} from "../../store/databases";
 function Switcher({
   aid,
   name,
@@ -16,39 +21,72 @@ function Switcher({
   notificationValue,
   generatedId,
   setSelctedDateReceived,
+  appointmentReminder,
+  slot,
+  active,
 }) {
-  console.log(name);
-  const [isSwitchOn, setIsSwitchOn] = useState(status);
+  console.log(status, "STATUS");
+  const [isSwitchOn, setIsSwitchOn] = useState(false);
+  console.log(isSwitchOn);
   const authCtx = useContext(AuthContext);
   console.log(generatedId);
+  useLayoutEffect(() => {
+    setIsSwitchOn(status);
+  });
   const onToggleSwitch = async () => {
     setIsSwitchOn(!isSwitchOn);
-    if (!isSwitchOn) {
-      try {
-        const resp = await addNotification(
-          authCtx.uid,
-          aid,
-          momentTime,
-          pill,
-          date,
-          name
-        );
+    if (appointmentReminder === null) {
+      if (!isSwitchOn) {
+        try {
+          const resp = await addNotification(
+            authCtx.uid,
+            aid,
+            momentTime,
+            pill,
+            date,
+            name
+          );
 
-        notificationChanged(!notificationValue);
-      } catch (error) {
-        console.log(error);
-      }
-    } else {
-      try {
-        if (generatedId) {
-          const resp = await deleteNotification(generatedId);
           notificationChanged(!notificationValue);
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
+      } else {
+        try {
+          if (generatedId) {
+            const resp = await deleteNotification(generatedId);
+            notificationChanged(!notificationValue);
+          }
+        } catch (error) {
+          console.log(error);
+        }
       }
+      setSelctedDateReceived(date);
+    } else {
+      if (!isSwitchOn) {
+        try {
+          const resp = await addNotificationAppointment(
+            authCtx.uid,
+            aid,
+            date,
+            name,
+            active ? true : false,
+            active ? slot : undefined
+          );
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        try {
+          if (generatedId) {
+            const resp = await deleteNotificationAppointment(generatedId);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      setSelctedDateReceived(date);
     }
-    setSelctedDateReceived(date);
   };
 
   return (

@@ -1,4 +1,10 @@
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useContext, useEffect, useState, useLayoutEffect } from "react";
 import { AuthContext } from "../context/auth";
@@ -13,7 +19,9 @@ import { GlobalColors } from "../constants/colors";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Switcher from "../components/UI/Switcher";
 import { getFormattedDate } from "../util/date";
-
+import NotificationsNextAppointemnt from "./NotificationsNextAppointment";
+import { getUserStatusAppointments } from "../store/databases";
+import { calendarFormat } from "moment";
 function NotificationsAnimalPage({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -49,13 +57,13 @@ function NotificationsAnimalPage({ navigation }) {
   const [selectedDaterecieved, setSelctedDateReceived] = useState(
     getFormattedDate(new Date(romanianTime))
   );
+  const [calendar, showCalendar] = useState(false);
   useEffect(() => {
     async function getPillPlan() {
       try {
         setFetching(true);
         aux = await getAnimalDoneAppointments(authCtx.uid, aid);
         resp = calculateAnimalPillDays(aux);
-        console.log(resp);
         setPills(resp);
         setFetching(false);
         return resp;
@@ -69,9 +77,7 @@ function NotificationsAnimalPage({ navigation }) {
         resp.filter((pill) => {
           const firstDay = getFormattedDate(new Date(pill.pillFirstDay));
           const lastDay = getFormattedDate(new Date(pill.pillLastDay));
-          console.log(
-            getFormattedDate(new Date(romanianTime)).localeCompare(lastDay) <= 0
-          );
+
           return (
             getFormattedDate(new Date(romanianTime)).localeCompare(firstDay) >=
               0 &&
@@ -80,7 +86,7 @@ function NotificationsAnimalPage({ navigation }) {
         })
       );
 
-      console.log(pillsFoSelected);
+      //   console.log(pillsFoSelected);
       setMorning(
         resp
           .filter((pill) => {
@@ -156,6 +162,36 @@ function NotificationsAnimalPage({ navigation }) {
     setLunch(pillsFoSelected.some((pill) => pill.pillMomentDay.Lunch));
     setEvening(pillsFoSelected.some((pill) => pill.pillMomentDay.Evening));
   }, [selectedDaterecieved]);
+
+  navigation.setOptions({
+    headerRight: () =>
+      pills.length > 0 && (
+        <TouchableOpacity
+          style={{ marginRight: 20, flexDirection: "row" }}
+          onPress={() => {
+            showCalendar(!calendar);
+          }}
+        >
+          {calendar && (
+            <MaterialCommunityIcon
+              name={"arrow-right"}
+              size={18}
+              color={GlobalColors.colors.pink500}
+              style={{ top: 4, right: 4 }}
+            />
+          )}
+          <MaterialCommunityIcon
+            name={!calendar ? "calendar-arrow-right" : "pill"}
+            size={20}
+            color={GlobalColors.colors.pink500}
+            style={{ top: 4, right: 4 }}
+          />
+          {/* <Text style={[styles.momentDayText, { fontSize: 14 }]}>
+            Appointments
+          </Text> */}
+        </TouchableOpacity>
+      ),
+  });
   //   useEffect(() => {
   //     async function getNotificationss() {
   //       try {
@@ -178,6 +214,22 @@ function NotificationsAnimalPage({ navigation }) {
   //     }
   //     getNotificationss();
   //   }, [notificationChanged]);
+  //   useEffect(() => {
+  //     async function getNextPlannedApp() {
+  //       try {
+  //         setFetching(true);
+  //         let active = [];
+  //         active = await getUserStatusAppointments(authCtx.uid, 0);
+  //         console.log(active);
+  //         setNextActiveAppointments(active);
+  //         console.log(nextActiveAppointments, "active");
+  //         setFetching(false);
+  //       } catch (error) {
+  //         console.log(error);
+  //       }
+  //     }
+  //     getNextPlannedApp();
+  //   }, []);
 
   function getPills(selectedDate) {
     setFetching(true);
@@ -192,7 +244,7 @@ function NotificationsAnimalPage({ navigation }) {
         );
       })
     );
-    console.log(pillsFoSelected);
+    // console.log(pillsFoSelected);
     setSelctedDateReceived(selectedDate);
     setNotificationsForSelectedDay(
       notifications.filter(
@@ -231,6 +283,7 @@ function NotificationsAnimalPage({ navigation }) {
                 notification.pill.localeCompare(item.pillName) === 0 &&
                 notification.momentTime.localeCompare(momenTime) === 0
             )}
+            appointmentReminder={null}
             notificationChanged={setNotificationChanged}
             notificationValue={notificationChanged}
             generatedId={
@@ -261,7 +314,7 @@ function NotificationsAnimalPage({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.swiperContainer}>
-        {pills.length > 0 && (
+        {pills.length > 0 && !calendar && (
           <View>
             <SwiperDays
               pills={pills}
@@ -371,6 +424,13 @@ function NotificationsAnimalPage({ navigation }) {
           </View>
         )}
       </View>
+
+      {(pills.length === 0 && (
+        <NotificationsNextAppointemnt aid={aid} animalName={name} />
+      )) ||
+        (pills.length > 0 && calendar && (
+          <NotificationsNextAppointemnt aid={aid} animalName={name} />
+        ))}
     </View>
   );
 }

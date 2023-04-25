@@ -21,6 +21,7 @@ function UserAppointments() {
       try {
         const active = await getUserStatusAppointments(authCtx.uid, 0);
         setActiveAppointments(active);
+        console.log(active);
       } catch (error) {
         console.log(error);
       }

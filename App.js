@@ -326,6 +326,7 @@ function Base() {
       try {
         let resp = [];
         resp = await getUserNotifications(authCtx.uid);
+        // console.log(resp, "aloo");
         setNotifications(resp);
         return resp;
       } catch (error) {
@@ -345,8 +346,8 @@ function Base() {
           console.log(actualDate.getUTCHours());
           if (
             resp[key].momentTime.localeCompare("Morning") === 0 &&
-            actualDate.getUTCHours() === 2 &&
-            actualDate.getUTCMinutes() === 48
+            actualDate.getUTCHours() === 7 &&
+            actualDate.getUTCMinutes() === 59
           ) {
             console.log("da");
             sendPushNotificationHandler(
@@ -357,7 +358,7 @@ function Base() {
           }
 
           if (
-            resp[key].momentTime.localeCompare("Lunch") &&
+            resp[key].momentTime.localeCompare("Lunch") === 0 &&
             actualDate.getUTCHours() === 12 &&
             actualDate.getUTCMinutes() === 59
           ) {
@@ -367,11 +368,18 @@ function Base() {
               `Administrate to ${resp[key].name} lunch medication`
             );
           }
+
+          console.log(
+            actualDate.getUTCHours(),
+            actualDate.getUTCMinutes(),
+            resp[key].momentTime.localeCompare("Evening")
+          );
           if (
-            resp[key].momentTime.localeCompare("Evening") &&
+            resp[key].momentTime.localeCompare("Evening") === 0 &&
             actualDate.getUTCHours() === 19 &&
             actualDate.getUTCMinutes() === 59
           ) {
+            console.log("da");
             sendPushNotificationHandler(
               authCtx.tokenNotify,
               "Reminder!🌛",

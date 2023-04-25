@@ -215,20 +215,28 @@ function DoctorBookAppointment({ navigation }) {
 
   function calculateAvailableSlots(navailableSlots) {
     const availableSlots = [];
+    const currentHour = currentDate.getUTCHours();
+    const currentMinute = currentDate.getUTCMinutes();
     for (let i = 10; i <= 16; i++) {
       for (let j = 0; j < 2; j++) {
         const slotStartTime = `${i}:${j === 0 ? "00" : "30"}`;
         const slotEndTime = `${j === 0 ? i : i + 1}:${j === 0 ? "30" : "00"}`;
 
-        const isSlotOccupied =
-          navailableSlots.length > 0
-            ? navailableSlots.some((slot) => {
-                return `${slot}` === `${slotStartTime}-${slotEndTime}`;
-              })
-            : false;
+        if (
+          (selectedDate.getUTCDate() === currentDate.getUTCDate() &&
+            `${currentHour}:${currentMinute}` < `${slotStartTime}`) ||
+          selectedDate.getUTCDate() > currentDate.getUTCDate()
+        ) {
+          const isSlotOccupied =
+            navailableSlots.length > 0
+              ? navailableSlots.some((slot) => {
+                  return `${slot}` === `${slotStartTime}-${slotEndTime}`;
+                })
+              : false;
 
-        if (!isSlotOccupied) {
-          availableSlots.push(`${slotStartTime}-${slotEndTime}`);
+          if (!isSlotOccupied) {
+            availableSlots.push(`${slotStartTime}-${slotEndTime}`);
+          }
         }
       }
     }
@@ -456,11 +464,12 @@ function DoctorBookAppointment({ navigation }) {
                 name="clock-o"
                 size={21}
                 color={GlobalColors.colors.pink500}
+                style={{ left: -1 }}
               />
 
               <View
                 style={{
-                  marginLeft: 5,
+                  marginLeft: 3,
                 }}
               >
                 <Text style={styles.infoAppointment}>{selectedSlot}</Text>
@@ -714,7 +723,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     flexDirection: "row",
     width: "80%",
-    marginHorizontal: 25,
+    marginHorizontal: 30,
     marginVertical: 10,
     borderRadius: 20,
   },

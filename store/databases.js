@@ -147,6 +147,34 @@ export async function addNotification(uid, aid, momentTime, pill, date, name) {
   });
   return response;
 }
+export async function addNotificationAppointment(
+  uid,
+  aid,
+  date,
+  name,
+  active,
+  slot
+) {
+  const response = await axios.post(
+    BACKEND_URL + `/notificationsAppointment.json`,
+    {
+      aid: aid,
+      uid: uid,
+      date: date,
+      name: name,
+      active: active,
+      slot: slot,
+    }
+  );
+  return response;
+}
+
+export async function deleteNotificationAppointment(generatedId) {
+  const response = await axios.delete(
+    BACKEND_URL + `/notificationsAppointment/${generatedId}.json`
+  );
+  return response;
+}
 
 export async function deleteNotification(generatedId) {
   const response = await axios.delete(
@@ -163,6 +191,7 @@ export async function getNotifications(uid, aid) {
     notifications.map((notification, index) => {
       notification.key = notificationsKeys[index];
     });
+
     const filtered = notifications.filter(function (notification) {
       return notification.aid === aid && notification.uid === uid;
     });
@@ -173,6 +202,36 @@ export async function getNotifications(uid, aid) {
         uid: filtered[key].uid,
         pill: filtered[key].pill,
         momentTime: filtered[key].momentTime,
+        generatedId: filtered[key].key,
+        name: filtered[key].name,
+      };
+      notificationsDetails.push(notificationDetail);
+    }
+  }
+
+  return notificationsDetails;
+}
+export async function getNotificationsAppointment(uid, aid) {
+  const response = await axios.get(
+    BACKEND_URL + `/notificationsAppointment.json`
+  );
+  let notificationsDetails = [];
+  if (response.data) {
+    const notificationsKeys = Object.keys(response.data);
+    const notifications = Object.values(response.data);
+    notifications.map((notification, index) => {
+      notification.key = notificationsKeys[index];
+    });
+
+    const filtered = notifications.filter(function (notification) {
+      return notification.aid === aid && notification.uid === uid;
+    });
+    for (const key in filtered) {
+      const notificationDetail = {
+        aid: filtered[key].aid,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        active: filtered[key].active,
         generatedId: filtered[key].key,
         name: filtered[key].name,
       };
@@ -202,6 +261,35 @@ export async function getUserNotifications(uid) {
         momentTime: filtered[key].momentTime,
         generatedId: filtered[key].key,
         name: filtered[key].name,
+      };
+      notificationsDetails.push(notificationDetail);
+    }
+  }
+  return notificationsDetails;
+}
+
+export async function getUserAppointmentsNotifications(uid) {
+  const response = await axios.get(
+    BACKEND_URL + `/notificationsAppointments.json`
+  );
+  let notificationsDetails = [];
+  if (response.data) {
+    const notificationsKeys = Object.keys(response.data);
+    const notifications = Object.values(response.data);
+    notifications.map((notification, index) => {
+      notification.key = notificationsKeys[index];
+    });
+    const filtered = notifications.filter(function (notification) {
+      return notification.uid === uid;
+    });
+    for (const key in filtered) {
+      const notificationDetail = {
+        aid: filtered[key].aid,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        name: filtered[key].name,
+        generatedId: filtered[key].key,
+        active: filtered[key].active,
       };
       notificationsDetails.push(notificationDetail);
     }
@@ -313,7 +401,7 @@ export async function getUserStatusAppointments(uid, status) {
           (appointment.date > getFormattedDate(romaniaDateTime) ||
             (appointment.date === getFormattedDate(romaniaDateTime) &&
               appointment.slot.slice(6, 11) >=
-                romaniaDateTime.toISOString().slice(12, 19)))
+                romaniaDateTime.toISOString().slice(11, 16)))
         );
       });
       console.log(romaniaDateTime.toISOString().slice(11, 16));
@@ -322,15 +410,12 @@ export async function getUserStatusAppointments(uid, status) {
     } else if (status === 1) {
       filtered = appointments.filter(function (appointment) {
         return (
-          appointment.uid === uid &&
-          appointment.canceled === 0 &&
-          appointment.date <
-            getFormattedDate(
-              new Date() ||
-                (appointment.date === getFormattedDate(new Date()) &&
-                  appointment.slot.slice(6, 11) <
-                    romaniaDateTime.toISOString().slice(12, 19))
-            )
+          (appointment.uid === uid &&
+            appointment.canceled === 0 &&
+            appointment.date < getFormattedDate(new Date(romaniaDateTime))) ||
+          (appointment.date === getFormattedDate(new Date(romaniaDateTime)) &&
+            appointment.slot.slice(6, 11) <
+              romaniaDateTime.toISOString().slice(11, 16))
         );
       });
     } else {
@@ -439,9 +524,10 @@ export function calculateAnimalPillDays(doneAppointments) {
       const daysSinceAppointment = Math.floor(
         diffInTime / (1000 * 60 * 60 * 24)
       );
+      // console.log(daysSinceAppointment + "dif");
       for (const keyn in consultations[key].result.pillsPlan) {
         const pill = consultations[key].result.pillsPlan[keyn];
-        if (pill.pillTimes >= daysSinceAppointment) {
+        if (pill.pillTimes > daysSinceAppointment) {
           let myDate = new Date(consultations[key].date);
           myDate.setDate(myDate.getUTCDate() + pill.pillTimes - 1);
           myDate = getFormattedDate(myDate);
