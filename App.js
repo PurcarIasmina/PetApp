@@ -39,11 +39,13 @@ import {
   getDoctorsList,
   getNotifications,
   getTokens,
+  getUserAppointmentsNotifications,
   getUserNotifications,
 } from "./store/databases";
 import NotificationsAnimalPage from "./screens/NotificationsAnimalPage";
 import { getFormattedDate } from "./util/date";
 import * as TaskManager from "expo-task-manager";
+import moment from "moment";
 // const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 // TaskManager.defineTask(
@@ -305,6 +307,7 @@ function Base() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
   const authCtx = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
+  const [notificationsAppointment, setNotificationsAppointment] = useState([]);
   const currentDate = new Date();
   const timezoneOffset = 180;
   const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
@@ -328,6 +331,17 @@ function Base() {
         resp = await getUserNotifications(authCtx.uid);
         // console.log(resp, "aloo");
         setNotifications(resp);
+        return resp;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    async function haveNotificationsForAppointments() {
+      try {
+        let resp = [];
+        resp = await getUserAppointmentsNotifications(authCtx.uid);
+        console.log(resp, "ce am primit");
+        setNotificationsAppointment(resp);
         return resp;
       } catch (error) {
         console.log(error);
@@ -384,6 +398,60 @@ function Base() {
               authCtx.tokenNotify,
               "Reminder!🌛",
               `Administrate to ${resp[key].name} evening medication`
+            );
+          }
+        }
+      }
+
+      responseListener.current =
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          console.log(response);
+        });
+      return () => {
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
+        Notifications.removeNotificationSubscription(responseListener.current);
+      };
+    });
+    haveNotificationsForAppointments().then((resp) => {
+      console.log(resp, "resp");
+      for (const key in resp) {
+        const dateApp = moment(resp[key].date, "YYYY-MM-DD");
+        const actualDateMoment = moment(
+          getFormattedDate(actualDate),
+          "YYYY-MM-DD"
+        );
+        console.log(actualDateMoment, "date");
+        const diffInDays = dateApp.diff(actualDateMoment, "days");
+        console.log(diffInDays);
+        if (
+          diffInDays === 7 ||
+          (diffInDays === 1 && actualDate.getUTCHours() === 19)
+        ) {
+          if (resp[key].active === true) {
+            sendPushNotificationHandler(
+              authCtx.tokenNotify,
+              "Reminder! 🕒",
+              `You have an appointment for ${resp[key].name} on ${new Date(
+                resp[key].date
+              ).toLocaleDateString("en", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}`
+            );
+          } else {
+            sendPushNotificationHandler(
+              authCtx.tokenNotify,
+              "Reminder! 🕒",
+              `Your vet recommends an appointment for ${
+                resp[key].name
+              } on ${new Date(resp[key].date).toLocaleDateString("en", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}`
             );
           }
         }

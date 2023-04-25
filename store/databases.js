@@ -270,9 +270,10 @@ export async function getUserNotifications(uid) {
 
 export async function getUserAppointmentsNotifications(uid) {
   const response = await axios.get(
-    BACKEND_URL + `/notificationsAppointments.json`
+    BACKEND_URL + `/notificationsAppointment.json`
   );
   let notificationsDetails = [];
+  // console.log(response);
   if (response.data) {
     const notificationsKeys = Object.keys(response.data);
     const notifications = Object.values(response.data);
@@ -282,6 +283,7 @@ export async function getUserAppointmentsNotifications(uid) {
     const filtered = notifications.filter(function (notification) {
       return notification.uid === uid;
     });
+    console.log(filtered);
     for (const key in filtered) {
       const notificationDetail = {
         aid: filtered[key].aid,
