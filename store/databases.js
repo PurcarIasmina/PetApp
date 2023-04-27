@@ -6,10 +6,20 @@ import { initializeApp, firebase } from "firebase/app";
 import {
   doc,
   setDoc,
+  updateDoc,
   getFirestore,
+  initializeFirestore,
   getDocs,
   getDoc,
   collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  addDoc,
+  limit,
+  get,
 } from "firebase/firestore";
 import {
   getStorage,
@@ -35,7 +45,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+});
 const storage = getStorage(app);
 
 export async function createUser(name, email, password) {
@@ -50,6 +63,59 @@ export async function createUser(name, email, password) {
   addToFiresbase(name, email, response.data.localId);
   return token;
 }
+
+export async function addMessage(chatid, usermsg) {
+  const chatRef = doc(db, "Chats", chatid);
+  await setDoc(chatRef, {}, { merge: true });
+  const conversationRef = doc(collection(chatRef, "messages"));
+  await setDoc(conversationRef, {
+    ...usermsg,
+  });
+}
+export function getMessagesFunction(chatid) {
+  const msgRef = collection(db, "Chats", chatid, "messages");
+  const q = query(msgRef, orderBy("createdAt", "desc"));
+  let msg = [];
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        let msg = [];
+        querySnapshot.docs.map((docSanp) => {
+          msg.push({
+            ...docSanp.data(),
+            createdAt: docSanp.data().createdAt.toDate(),
+          });
+        });
+
+        resolve(msg);
+      },
+      (error) => {
+        console.error(error);
+        reject(error);
+      }
+    );
+  });
+}
+export async function getMessagesWithUsers(userId) {
+  console.log(userId, "user");
+  const chatsRef = collection(db, "Chats");
+  const querySnapshot = await getDocs(chatsRef);
+  const conversations = [];
+  querySnapshot.forEach((doc) => {
+    const chatId = doc.id;
+    console.log(doc, "doc");
+    if (chatId.includes(userId)) {
+      const otherUserId = chatId.replace(userId, "").replace("-", "");
+
+      conversations.push({ chatId, otherUserId });
+    }
+  });
+  console.log(conversations, "conv");
+
+  return conversations;
+}
+
 export async function editUser(
   telephone,
   description,
@@ -77,7 +143,72 @@ export async function addToFiresbase(name, email, uid) {
     uid: uid,
   });
 }
+export async function addToFiresbaseChatConversation(prop) {
+  console.log(prop);
+  const conversationRef = doc(collection(db, "chats"));
+  await setDoc(conversationRef, {
+    ...prop,
+  });
+}
+export async function getConversationsByDoctor(
+  setMessages,
+  senderId,
+  receiverId
+) {
+  const conversationsRef = collection(db, "chats");
+  const q = query(conversationsRef, orderBy("createdAt", "desc"), limit(50));
 
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    console.log(snapshot);
+    setMessages(
+      snapshot.docs
+        .filter((doc) => {
+          return (
+            (doc.data().senderId === senderId &&
+              doc.data().receiverId === receiverId) ||
+            (doc.data().senderId === receiverId &&
+              doc.data().receiverId === senderId)
+          );
+        })
+        .map((doc) => ({
+          key: doc.id,
+          _id: doc.id,
+          ...doc.data(),
+        }))
+    );
+  });
+  return () => unsubscribe();
+}
+
+export async function getUsersWithConversations(userId) {
+  const conversationsRef = collection(db, "chats");
+  const q = query(conversationsRef, orderBy("createdAt", "desc"), limit(50));
+
+  const snapshot = await getDocs(q);
+
+  const conversations = snapshot.docs
+    .filter((doc) => {
+      return doc.data().senderId === userId || doc.data().receiverId === userId;
+    })
+    .map((doc) => ({
+      id:
+        doc.data().senderId === userId
+          ? doc.data().receiverId
+          : doc.data().senderId,
+      _id: doc.id,
+      ...doc.data(),
+    }));
+  console.log(conversations, "conv");
+  const uniqueUsers = conversations.reduce((acc, conversation) => {
+    if (!acc.some((user) => user.id === conversation.id)) {
+      acc.push(conversation);
+    }
+    return acc;
+  }, []);
+  console.log(uniqueUsers, "unique");
+
+  return uniqueUsers;
+}
 export async function addAnimal(name, breed, date, owner, color, gender, uid) {
   const aid = uuid.v4();
   const response = await axios.post(BACKEND_URL + "/animals.json", {
@@ -616,6 +747,23 @@ export async function getUserName(id) {
     if (docRef) {
       const obj = userData.data();
       return obj.name;
+    } else {
+      console.log("Document does not exist");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+export async function getUserDetails(id) {
+  const docRef = doc(db, "users", id);
+  try {
+    const userData = await getDoc(docRef);
+    if (docRef) {
+      const obj = userData.data();
+      return {
+        name: obj.name,
+        email: obj.email,
+      };
     } else {
       console.log("Document does not exist");
     }

@@ -46,6 +46,8 @@ import NotificationsAnimalPage from "./screens/NotificationsAnimalPage";
 import { getFormattedDate } from "./util/date";
 import * as TaskManager from "expo-task-manager";
 import moment from "moment";
+import ChatScreenList from "./screens/ChatScreenList";
+import ChatListDoctor from "./screens/ChatListDoctor";
 // const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 // TaskManager.defineTask(
@@ -133,6 +135,28 @@ function AuthenticatedDrawerDoctor() {
           unmountOnBlur: true,
         }}
       />
+
+      <Drawer.Screen
+        name="ChatListDoctor"
+        component={ChatListDoctor}
+        options={{
+          title: "Live Chat",
+          headerTitle: "",
+          drawerIcon: ({ color }) => (
+            <Ionicons color={color} size={20} name="chatbubbles-outline" />
+          ),
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="ChatScreen"
+        component={ChatScreen}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
       <Drawer.Screen
         name="DoctorEditProfile"
         component={DoctorEditCard}
@@ -216,14 +240,24 @@ function AuthenticatedDrawerUser() {
         }}
       />
       <Drawer.Screen
-        name="ChatScreen"
-        component={ChatScreen}
+        name="ListDoctorsScreen"
+        component={ChatScreenList}
         options={{
           title: "Live Chat",
           headerTitle: "",
           drawerIcon: ({ color }) => (
             <Ionicons color={color} size={20} name="chatbubbles-outline" />
           ),
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="ChatScreen"
+        component={ChatScreen}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
           unmountOnBlur: true,
         }}
       />
@@ -415,16 +449,16 @@ function Base() {
       };
     });
     haveNotificationsForAppointments().then((resp) => {
-      console.log(resp, "resp");
+      // console.log(resp, "resp");
       for (const key in resp) {
         const dateApp = moment(resp[key].date, "YYYY-MM-DD");
         const actualDateMoment = moment(
           getFormattedDate(actualDate),
           "YYYY-MM-DD"
         );
-        console.log(actualDateMoment, "date");
+        // console.log(actualDateMoment, "date");
         const diffInDays = dateApp.diff(actualDateMoment, "days");
-        console.log(diffInDays);
+        // console.log(diffInDays);
         if (
           diffInDays === 7 ||
           (diffInDays === 1 && actualDate.getUTCHours() === 19)
