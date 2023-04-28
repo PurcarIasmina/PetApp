@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     borderColor: GlobalColors.colors.pink1,
     backgroundColor: GlobalColors.colors.pink10,
     marginTop: 30,
-    marginLeft: 102,
+    marginLeft: 118,
   },
   icon: {
     alignSelf: "center",

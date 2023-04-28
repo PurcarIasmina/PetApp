@@ -791,7 +791,7 @@ export async function getDoctorsList() {
             gender: data.gender,
             did: data.uid,
             description: data.description,
-            photo: await getImageUrl(`doctor/${data.uid}`),
+            photo: await getImageUrl(`doctor/${data.uid}.jpeg`),
           };
 
           doctors.push(doctor);
@@ -825,7 +825,7 @@ export async function getDoctorDetails(id) {
           description: obj.description,
           datebirth: obj.datebirth,
           did: obj.uid,
-          photo: await getImageUrl(`doctor/${id}`),
+          photo: await getImageUrl(`doctor/${id}.jpeg`),
         };
       }
     } else {
@@ -876,6 +876,18 @@ export async function editImage(path, newPath) {
   return snap;
 }
 
+export async function storeAndGetUrl(path, formattedPath) {
+  const imageRef = ref(storage, formattedPath);
+  const response = await fetch(path);
+  const blob = await response.blob();
+  const snap = await uploadBytes(imageRef, blob).then(async (resp) => {
+    const url = await getDownloadURL(imageRef).then((responseUrl) => {
+      return responseUrl;
+    });
+    return url; // returnati url-ul direct din promisiunea getDownloadURL
+  });
+  return snap;
+}
 export async function getImageUrl(path) {
   const imageRef = ref(storage, path);
   const url = await getDownloadURL(imageRef).then((responseUrl) => {

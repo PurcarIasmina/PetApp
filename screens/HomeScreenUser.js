@@ -50,7 +50,7 @@ function HomeScreenUser({ navigation }) {
         setFetching(true);
         doctorsAux = await getDoctorsList();
         setDoctors(doctorsAux);
-        // console.log(doctors);
+        console.log(doctors);
         setFetching(false);
       } catch (error) {
         console.log(error);

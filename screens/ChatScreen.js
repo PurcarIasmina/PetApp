@@ -1,5 +1,19 @@
-import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { GiftedChat, Bubble, Send, Avatar } from "react-native-gifted-chat";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+} from "react-native";
+import {
+  GiftedChat,
+  Bubble,
+  Send,
+  Avatar,
+  Composer,
+  Box,
+} from "react-native-gifted-chat";
 import {
   useState,
   useEffect,
@@ -19,14 +33,15 @@ import {
   getMessagesFunction,
   getUserName,
   setMessagesRead,
+  storeAndGetUrl,
   storeImage,
 } from "../store/databases";
 import { serverTimestamp } from "firebase/firestore";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
+import FeatherIcon from "react-native-vector-icons/Feather";
 import { Feather } from "@expo/vector-icons";
-
 function ChatScreen({ navigation }) {
   const route = useRoute();
 
@@ -36,6 +51,74 @@ function ChatScreen({ navigation }) {
   const authCtx = useContext(AuthContext);
   const [pickedImagePath, setPickedImagePath] = useState("");
   const [imagePicked, setImagePicked] = useState(false);
+  const [urlImage, setUrlImage] = useState("");
+  const [auxImage, setAuxImage] = useState("");
+  const chatid =
+    route.params.receiverId > authCtx.uid
+      ? authCtx.uid + "-" + route.params.receiverId
+      : route.params.receiverId + "-" + authCtx.uid;
+  navigation.setOptions({
+    headerShown: true,
+    headerStyle: {
+      backgroundColor: GlobalColors.colors.pink500,
+      borderBottomWidth: 0,
+      borderBottomColor: "white",
+      elevation: 0,
+      shadowOpacity: 0,
+      shadowColor: "transparent",
+    },
+    headerLeft: () => (
+      <View
+        style={{
+          flexDirection: "row",
+          backgroundColor: GlobalColors.colors.pink500,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate(
+              authCtx.doctor ? "ChatListDoctor" : "ListDoctorsScreen"
+            );
+          }}
+        >
+          <Feather
+            name="chevron-left"
+            size={20}
+            color={GlobalColors.colors.gray0}
+            style={{ top: 8 }}
+          />
+        </TouchableOpacity>
+        <View
+          style={[
+            styles.avatar,
+            {
+              backgroundColor: GlobalColors.colors.gray0,
+              left: 8,
+            },
+          ]}
+        >
+          <Text
+            style={[styles.initials, { color: GlobalColors.colors.pink500 }]}
+          >
+            {route.params.name[0].toUpperCase()}
+          </Text>
+        </View>
+        <Text
+          style={[
+            styles.initials,
+            {
+              color: GlobalColors.colors.gray0,
+              top: 8,
+              left: 18,
+              fontSize: 18,
+            },
+          ]}
+        >
+          {route.params.name}
+        </Text>
+      </View>
+    ),
+  });
   // useLayoutEffect(() => {
   //   function getMessages() {
   //     try {
@@ -70,15 +153,11 @@ function ChatScreen({ navigation }) {
   //   // }
   // }, []);
   function getAllMessages() {
-    const chatid =
-      route.params.receiverId > authCtx.uid
-        ? authCtx.uid + "-" + route.params.receiverId
-        : route.params.receiverId + "-" + authCtx.uid;
-
     getMessagesFunction(chatid)
       .then((msg) => {
         setMessages(msg);
         // console.log(msg);
+
         setIsLoading(false);
       })
       .catch((error) => {
@@ -93,70 +172,10 @@ function ChatScreen({ navigation }) {
   }, [messages]);
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: GlobalColors.colors.pink500,
-        borderBottomWidth: 0,
-        borderBottomColor: "white",
-        elevation: 0,
-        shadowOpacity: 0,
-        shadowColor: "transparent",
-      },
-      headerLeft: () => (
-        <View
-          style={{
-            flexDirection: "row",
-            backgroundColor: GlobalColors.colors.pink500,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate(
-                authCtx.doctor ? "ChatListDoctor" : "ListDoctorsScreen"
-              );
-            }}
-          >
-            <Feather
-              name="chevron-left"
-              size={20}
-              color={GlobalColors.colors.gray0}
-              style={{ top: 8 }}
-            />
-          </TouchableOpacity>
-          <View
-            style={[
-              styles.avatar,
-              {
-                backgroundColor: GlobalColors.colors.gray0,
-                left: 8,
-              },
-            ]}
-          >
-            <Text
-              style={[styles.initials, { color: GlobalColors.colors.pink500 }]}
-            >
-              {route.params.name[0].toUpperCase()}
-            </Text>
-          </View>
-          <Text
-            style={[
-              styles.initials,
-              {
-                color: GlobalColors.colors.gray0,
-                top: 8,
-                left: 18,
-                fontSize: 18,
-              },
-            ]}
-          >
-            {route.params.name}
-          </Text>
-        </View>
-      ),
-    });
+    setPickedImagePath("");
     getAllMessages();
   }, [messages]);
+
   const galleryPhotoHandler = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -173,6 +192,8 @@ function ChatScreen({ navigation }) {
     if (!result.cancelled) {
       setPickedImagePath(result.uri);
       setImagePicked(true);
+      setAuxImage(result.uri);
+      uploadImage(result.uri);
       console.log(result.uri);
     }
   };
@@ -191,36 +212,57 @@ function ChatScreen({ navigation }) {
 
     if (!result.cancelled) {
       setPickedImagePath(result.uri);
+      setAuxImage(result.uri);
       setImagePicked(true);
+      uploadImage(result.uri);
       console.log(result.uri);
     }
   };
 
-  const onSend = useCallback(async (msgArray = []) => {
+  const uploadImage = async (imgPath) => {
+    const url = `${chatid}/${Math.random()}.jpeg`;
+    const res = await storeAndGetUrl(imgPath, url);
+    setUrlImage(res);
+  };
+  const onSend = async (msgArray) => {
     const msg = msgArray[0];
 
-    const chatid =
-      route.params.receiverId > authCtx.uid
-        ? authCtx.uid + "-" + route.params.receiverId
-        : route.params.receiverId + "-" + authCtx.uid;
-    const url = pickedImagePath ? `${chatid}/${Math.random()}.jpeg` : "";
-    if (pickedImagePath) {
-      await storeImage(pickedImagePath, url);
-    }
+    // if (pickedImagePath !== "") {
+    //   await storeAndGetUrl(pickedImagePath, url).then((resp) => {
+    //     usermsg = {
+    //       ...msg,
+    //       sentBy: authCtx.uid,
+    //       sentTo: route.params.receiverId,
+    //       createdAt: new Date(),
+    //       read: false,
+    //       image: resp,
+    //     };
+    //   });
+    // } else {
+    //   usermsg = {
+    //     ...msg,
+    //     sentBy: authCtx.uid,
+    //     sentTo: route.params.receiverId,
+    //     createdAt: new Date(),
+    //     read: false,
+    //   };
+    // }
     const usermsg = {
       ...msg,
       sentBy: authCtx.uid,
       sentTo: route.params.receiverId,
       createdAt: new Date(),
       read: false,
-      image: await getImageUrl(url),
+      image: urlImage,
     };
+
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, usermsg)
     );
-
+    setAuxImage("");
+    setUrlImage("");
     await addMessage(chatid, usermsg);
-  }, []);
+  };
   const renderAvatar = (props) => {
     // if (authCtx.doctor) {
     //   return <Avatar {...props} />;
@@ -249,7 +291,30 @@ function ChatScreen({ navigation }) {
           name: route.params.name,
           avatar: "",
         }}
+        renderChat={() => (
+          <ImageBackground
+            source={require("../images/backgroundchat.jpg")}
+            style={{ flex: 1 }}
+          />
+        )}
+        keyboardShouldPersistTaps={"always"}
+        // keyboardVerticalOffset={80}
+
+        keyboardDismissMode="on-drag"
+        renderChatFooter={() => <View style={{ height: 45 }}></View>}
         renderAvatar={renderAvatar}
+        renderComposer={(props) => (
+          <Composer
+            {...props}
+            composerHeight={80}
+            placeholderTextColor={GlobalColors.colors.pink500}
+            placeholder=""
+            textInputStyle={{
+              // fontFamily: "Garet-Book",
+              color: GlobalColors.colors.pink500,
+            }}
+          />
+        )}
         renderBubble={(props) => {
           return (
             <View>
@@ -257,33 +322,50 @@ function ChatScreen({ navigation }) {
                 {...props}
                 wrapperStyle={{
                   right: { backgroundColor: GlobalColors.colors.pink500 },
-                  left: { backgroundColor: GlobalColors.colors.gray0 },
+                  left: {
+                    backgroundColor: GlobalColors.colors.gray0,
+                    color: GlobalColors.colors.pink500,
+                  },
+                }}
+                textStyle={{
+                  left: {
+                    color: GlobalColors.colors.pink500,
+                    // fontFamily: "Garet-Book",
+                  },
+                  right: {
+                    color: GlobalColors.colors.gray0,
+                    // fontFamily: "Garet-Book",
+                  },
+                }}
+                timeTextStyle={{
+                  left: { color: GlobalColors.colors.pink500 },
+                  right: { color: GlobalColors.colors.gray0 },
                 }}
               />
             </View>
           );
         }}
         // renderMessageImage={(props) => (
-        //   <Image
-        //     {...props}
-        //     source={{ uri: props.image }}
-        //     style={{ width: 200, height: 200 }}
-        //   />
+        //   <Image {...props} style={{ width: 200, height: 200 }} />
         // )}
-        alwaysShowSend
+        alwaysShowSend={true}
+        // renderMessageImage={(props) => {
+        //   <Image {...props} />;
+        // }}
         renderSend={(props) => {
           return (
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-
                 justifyContent: "center",
+                top: -50,
+                marginLeft: 50,
               }}
             >
-              {pickedImagePath !== "" && (
+              {auxImage !== "" && (
                 <Image
-                  source={{ uri: pickedImagePath }}
+                  source={{ uri: auxImage }}
                   style={{
                     width: 30,
                     height: 30,
@@ -314,8 +396,9 @@ function ChatScreen({ navigation }) {
                 {...props}
                 containerStyle={{ justifyContent: "center", marginRight: 17 }}
               >
-                <MaterialCommunityIcon
-                  size={22}
+                <FeatherIcon
+                  size={20}
+                  style={{ top: 1 }}
                   color={"#535D63"}
                   name="send"
                 />

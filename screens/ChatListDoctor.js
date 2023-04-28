@@ -118,6 +118,7 @@ function ChatListDoctor({ navigation }) {
                     fontSize: 18,
                     fontFamily: "Garet-Book",
                     marginBottom: 0,
+                    marginTop: 2,
                   },
                 ]}
               >
