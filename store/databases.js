@@ -115,7 +115,72 @@ export async function getMessagesWithUsers(userId) {
 
   return conversations;
 }
+export async function getUnreadMessagesCount(userId) {
+  const chatsRef = collection(db, "Chats");
+  const querySnapshot = await getDocs(chatsRef);
+  const unreadMessagesCounts = {};
 
+  querySnapshot.forEach(async (doc) => {
+    const chatId = doc.id;
+    if (chatId.includes(userId)) {
+      const otherUserId = chatId.replace(userId, "").replace("-", "");
+      const messagesRef = collection(doc.ref, "messages");
+      let unreadCount = 0; // Numărul total de mesaje necitite pentru conversația curentă
+
+      const messagesQuerySnapshotPromise = await getDocs(messagesRef);
+
+      // Așteaptă finalizarea promisiunii
+
+      // Numără mesajele necitite
+      messagesQuerySnapshotPromise.docs.forEach((doc) => {
+        if (!doc.data().read && doc.data().sentTo === userId) {
+          console.log("daa");
+          unreadCount++;
+        }
+      });
+      console.log(unreadCount);
+      // Adaugă numărul de mesaje necitite în obiectul de numărare a mesajelor necitite pentru utilizatorul corespunzător
+      if (unreadMessagesCounts[otherUserId]) {
+        unreadMessagesCounts[otherUserId] += unreadCount;
+      } else {
+        unreadMessagesCounts[otherUserId] = unreadCount;
+      }
+      console.log(unreadMessagesCounts);
+    }
+  });
+
+  // Așteaptă finalizarea tuturor promisiunilor și returnează obiectul de numărare a mesajelor necitite pentru fiecare utilizator
+
+  return unreadMessagesCounts;
+}
+
+export async function setMessagesRead(userId, otherId) {
+  const chatsRef = collection(db, "Chats");
+  const querySnapshot = await getDocs(chatsRef);
+
+  for (const doc of querySnapshot.docs) {
+    const chatId = doc.id;
+    if (chatId.includes(userId)) {
+      const otherUserId = chatId.replace(userId, "").replace("-", "");
+      const messagesRef = collection(doc.ref, "messages");
+
+      const messagesQuerySnapshot = await getDocs(messagesRef);
+
+      for (const messageDoc of messagesQuerySnapshot.docs) {
+        const messageData = messageDoc.data();
+        if (
+          !messageData.read &&
+          messageData.sentTo === userId &&
+          messageData.sentBy === otherId
+        ) {
+          console.log("daa");
+
+          await updateDoc(messageDoc.ref, { read: true });
+        }
+      }
+    }
+  }
+}
 export async function editUser(
   telephone,
   description,
@@ -143,72 +208,7 @@ export async function addToFiresbase(name, email, uid) {
     uid: uid,
   });
 }
-export async function addToFiresbaseChatConversation(prop) {
-  console.log(prop);
-  const conversationRef = doc(collection(db, "chats"));
-  await setDoc(conversationRef, {
-    ...prop,
-  });
-}
-export async function getConversationsByDoctor(
-  setMessages,
-  senderId,
-  receiverId
-) {
-  const conversationsRef = collection(db, "chats");
-  const q = query(conversationsRef, orderBy("createdAt", "desc"), limit(50));
 
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    console.log(snapshot);
-    setMessages(
-      snapshot.docs
-        .filter((doc) => {
-          return (
-            (doc.data().senderId === senderId &&
-              doc.data().receiverId === receiverId) ||
-            (doc.data().senderId === receiverId &&
-              doc.data().receiverId === senderId)
-          );
-        })
-        .map((doc) => ({
-          key: doc.id,
-          _id: doc.id,
-          ...doc.data(),
-        }))
-    );
-  });
-  return () => unsubscribe();
-}
-
-export async function getUsersWithConversations(userId) {
-  const conversationsRef = collection(db, "chats");
-  const q = query(conversationsRef, orderBy("createdAt", "desc"), limit(50));
-
-  const snapshot = await getDocs(q);
-
-  const conversations = snapshot.docs
-    .filter((doc) => {
-      return doc.data().senderId === userId || doc.data().receiverId === userId;
-    })
-    .map((doc) => ({
-      id:
-        doc.data().senderId === userId
-          ? doc.data().receiverId
-          : doc.data().senderId,
-      _id: doc.id,
-      ...doc.data(),
-    }));
-  console.log(conversations, "conv");
-  const uniqueUsers = conversations.reduce((acc, conversation) => {
-    if (!acc.some((user) => user.id === conversation.id)) {
-      acc.push(conversation);
-    }
-    return acc;
-  }, []);
-  console.log(uniqueUsers, "unique");
-
-  return uniqueUsers;
-}
 export async function addAnimal(name, breed, date, owner, color, gender, uid) {
   const aid = uuid.v4();
   const response = await axios.post(BACKEND_URL + "/animals.json", {

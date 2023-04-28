@@ -1,10 +1,12 @@
 import { View, StyleSheet, FlatList, Text, Image } from "react-native";
-import { useState, useEffect } from "react";
-import { getDoctorsList } from "../store/databases";
+import { useState, useEffect, useContext } from "react";
+import { getDoctorsList, getUnreadMessagesCount } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../constants/colors";
 import FeatherIcon from "react-native-vector-icons/Feather";
+import { useRoute } from "@react-navigation/native";
+import { AuthContext } from "../context/auth";
 function ChatScreenList({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -19,6 +21,7 @@ function ChatScreenList({ navigation }) {
   });
   const [doctors, setDoctors] = useState([]);
   const [fetching, setFetching] = useState(false);
+  const route = useRoute();
   useEffect(() => {
     async function getDoctors() {
       try {
@@ -33,6 +36,15 @@ function ChatScreenList({ navigation }) {
       }
     }
     getDoctors();
+  }, []);
+  const [uncount, setUncount] = useState({});
+  const authCtx = useContext(AuthContext);
+  useEffect(() => {
+    async function getUnread() {
+      const resp = await getUnreadMessagesCount(authCtx.uid);
+      setUncount(resp);
+    }
+    getUnread();
   }, []);
   if (fetching) return <LoadingOverlay message={"Loading..."} />;
   return (
@@ -62,7 +74,37 @@ function ChatScreenList({ navigation }) {
                 <Text style={styles.cardEmailText}>{item.email}</Text>
               </View>
             </View>
-
+            {uncount[item.did] > 0 && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  left: 48,
+                  top: 25,
+                  backgroundColor: GlobalColors.colors.mint1,
+                  borderRadius: 99999,
+                  height: 20,
+                  width: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={[
+                    styles.cardEmailText,
+                    {
+                      color: GlobalColors.colors.gray0,
+                      fontSize: 12,
+                      textAlign: "center",
+                      marginLeft: 0,
+                      marginBottom: 0,
+                      fontFamily: "Garet-Book",
+                    },
+                  ]}
+                >
+                  {uncount[item.did]}
+                </Text>
+              </View>
+            )}
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate("ChatScreen", {

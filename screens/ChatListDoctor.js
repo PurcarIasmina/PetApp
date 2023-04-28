@@ -4,15 +4,18 @@ import {
   getDoctorsList,
   getImageUrl,
   getMessagesWithUsers,
+  getUnreadMessagesCount,
   getUserDetails,
   getUsersWithConversations,
+  setMessagesRead,
 } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../constants/colors";
 import { AuthContext } from "../context/auth";
 import FeatherIcon from "react-native-vector-icons/Feather";
-
+import { useRoute } from "@react-navigation/native";
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 function ChatListDoctor({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -25,15 +28,27 @@ function ChatListDoctor({ navigation }) {
       shadowColor: "transparent",
     },
   });
+  const route = useRoute();
+  console.log(route.params);
   const [userConv, setUsersConc] = useState([]);
   const [fetching, setFetching] = useState(false);
   const [details, setDetails] = useState([]);
-  const [photo, setPhoto] = useState();
   const authCtx = useContext(AuthContext);
+  const [uncount, setUncount] = useState({});
   useLayoutEffect(() => {
+    async function getUnread() {
+      const resp = await getUnreadMessagesCount(authCtx.uid);
+      console.log(resp, "resp");
+      setUncount(resp);
+      console.log(uncount, "uncount");
+    }
+    getUnread();
+  }, [navigation]);
+  useEffect(() => {
     async function getUsersConc() {
       try {
         setFetching(true);
+
         let list = [];
         const detailsList = [];
         list = await getMessagesWithUsers(authCtx.uid);
@@ -44,29 +59,46 @@ function ChatListDoctor({ navigation }) {
         }
         setDetails(detailsList);
         setUsersConc(list);
+
         setFetching(false);
       } catch (error) {
         console.log(error);
       }
     }
     getUsersConc();
-  }, []);
-  useEffect(() => {
-    async function getUrl() {
-      try {
-        const url = await getImageUrl(`doctor/${authCtx.uid}`);
-        setPhoto(url);
-        console.log(photo);
-      } catch (error) {
-        console.log(error);
-      }
+  }, [uncount]);
+  async function onPressed(id, index) {
+    try {
+      await setMessagesRead(authCtx.uid, id);
+      navigation.navigate("ChatScreen", {
+        receiverId: id,
+        name: details[index].name,
+      });
+    } catch (error) {
+      console.log(error);
     }
-    getUrl();
-  }, []);
+  }
+
   if (fetching) return <LoadingOverlay message={"Loading..."} />;
   return (
     <View style={styles.docContainer}>
       <Text style={styles.title}>Inbox</Text>
+      {userConv.length === 0 && (
+        <View
+          style={{
+            flexDirection: "row",
+            top: 10,
+          }}
+        >
+          <Text style={styles.title}>No messages</Text>
+          <FeatherIcon
+            name="mail"
+            size={20}
+            color={GlobalColors.colors.pink500}
+            style={{ top: 12, left: 5 }}
+          />
+        </View>
+      )}
 
       <FlatList
         data={userConv}
@@ -96,6 +128,7 @@ function ChatListDoctor({ navigation }) {
             <View style={styles.cardBody}>
               <Text style={styles.cardTitle}>{details[index].name}</Text>
 
+              {/* <Text>{item.unreadCount}</Text> */}
               <View style={styles.cardEmail}>
                 <FeatherIcon
                   color={GlobalColors.colors.gray10}
@@ -106,12 +139,41 @@ function ChatListDoctor({ navigation }) {
                 <Text style={styles.cardEmailText}>{details[index].email}</Text>
               </View>
             </View>
-
+            {uncount[item.otherUserId] > 0 && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  left: 48,
+                  top: 25,
+                  backgroundColor: GlobalColors.colors.mint1,
+                  borderRadius: 99999,
+                  height: 20,
+                  width: 20,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={[
+                    styles.cardEmailText,
+                    {
+                      color: GlobalColors.colors.gray0,
+                      fontSize: 12,
+                      textAlign: "center",
+                      marginLeft: 0,
+                      marginBottom: 0,
+                      fontFamily: "Garet-Book",
+                    },
+                  ]}
+                >
+                  {uncount[item.otherUserId]}
+                </Text>
+              </View>
+            )}
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate("ChatScreen", {
                   receiverId: item.otherUserId,
-                  photo: photo,
                   name: details[index].name,
                 });
               }}

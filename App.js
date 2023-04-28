@@ -41,6 +41,7 @@ import {
   getTokens,
   getUserAppointmentsNotifications,
   getUserNotifications,
+  getUnreadMessagesCount,
 } from "./store/databases";
 import NotificationsAnimalPage from "./screens/NotificationsAnimalPage";
 import { getFormattedDate } from "./util/date";
@@ -66,6 +67,7 @@ import ChatListDoctor from "./screens/ChatListDoctor";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
+
 function AuthenticationStack() {
   return (
     <Stack.Navigator
@@ -349,6 +351,7 @@ function Base() {
   const [minutes, setMinutes] = useState(actualDate.getUTCMinutes());
   const notificationListener = useRef();
   const responseListener = useRef();
+
   useEffect(() => {
     async function fetchToken() {
       const storedToken = await AsyncStorage.getItem("token");

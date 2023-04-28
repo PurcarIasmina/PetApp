@@ -18,24 +18,16 @@ import {
   getImageUrl,
   getMessagesFunction,
   getUserName,
+  setMessagesRead,
+  storeImage,
 } from "../store/databases";
 import { serverTimestamp } from "firebase/firestore";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
+import { Feather } from "@expo/vector-icons";
 
 function ChatScreen({ navigation }) {
-  navigation.setOptions({
-    headerShown: true,
-    headerStyle: {
-      backgroundColor: "white",
-      borderBottomWidth: 0,
-      borderBottomColor: "white",
-      elevation: 0,
-      shadowOpacity: 0,
-      shadowColor: "transparent",
-    },
-  });
   const route = useRoute();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -86,14 +78,83 @@ function ChatScreen({ navigation }) {
     getMessagesFunction(chatid)
       .then((msg) => {
         setMessages(msg);
+        // console.log(msg);
         setIsLoading(false);
       })
       .catch((error) => {
         console.error(error);
       });
   }
-
   useEffect(() => {
+    async function setRead() {
+      await setMessagesRead(authCtx.uid, route.params.receiverId);
+    }
+    setRead();
+  }, [messages]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: GlobalColors.colors.pink500,
+        borderBottomWidth: 0,
+        borderBottomColor: "white",
+        elevation: 0,
+        shadowOpacity: 0,
+        shadowColor: "transparent",
+      },
+      headerLeft: () => (
+        <View
+          style={{
+            flexDirection: "row",
+            backgroundColor: GlobalColors.colors.pink500,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate(
+                authCtx.doctor ? "ChatListDoctor" : "ListDoctorsScreen"
+              );
+            }}
+          >
+            <Feather
+              name="chevron-left"
+              size={20}
+              color={GlobalColors.colors.gray0}
+              style={{ top: 8 }}
+            />
+          </TouchableOpacity>
+          <View
+            style={[
+              styles.avatar,
+              {
+                backgroundColor: GlobalColors.colors.gray0,
+                left: 8,
+              },
+            ]}
+          >
+            <Text
+              style={[styles.initials, { color: GlobalColors.colors.pink500 }]}
+            >
+              {route.params.name[0].toUpperCase()}
+            </Text>
+          </View>
+          <Text
+            style={[
+              styles.initials,
+              {
+                color: GlobalColors.colors.gray0,
+                top: 8,
+                left: 18,
+                fontSize: 18,
+              },
+            ]}
+          >
+            {route.params.name}
+          </Text>
+        </View>
+      ),
+    });
     getAllMessages();
   }, [messages]);
   const galleryPhotoHandler = async () => {
@@ -134,21 +195,29 @@ function ChatScreen({ navigation }) {
       console.log(result.uri);
     }
   };
+
   const onSend = useCallback(async (msgArray = []) => {
     const msg = msgArray[0];
+
+    const chatid =
+      route.params.receiverId > authCtx.uid
+        ? authCtx.uid + "-" + route.params.receiverId
+        : route.params.receiverId + "-" + authCtx.uid;
+    const url = pickedImagePath ? `${chatid}/${Math.random()}.jpeg` : "";
+    if (pickedImagePath) {
+      await storeImage(pickedImagePath, url);
+    }
     const usermsg = {
       ...msg,
       sentBy: authCtx.uid,
       sentTo: route.params.receiverId,
       createdAt: new Date(),
+      read: false,
+      image: await getImageUrl(url),
     };
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, usermsg)
     );
-    const chatid =
-      route.params.receiverId > authCtx.uid
-        ? authCtx.uid + "-" + route.params.receiverId
-        : route.params.receiverId + "-" + authCtx.uid;
 
     await addMessage(chatid, usermsg);
   }, []);
@@ -162,6 +231,7 @@ function ChatScreen({ navigation }) {
     return (
       <View style={styles.avatar}>
         <Text style={styles.initials}>{initials}</Text>
+        {/* <Text>{route.params.name}</Text> */}
       </View>
     );
   };
@@ -180,22 +250,9 @@ function ChatScreen({ navigation }) {
           avatar: "",
         }}
         renderAvatar={renderAvatar}
-        renderUsernameOnMessage={true}
         renderBubble={(props) => {
           return (
             <View>
-              {pickedImagePath != "" && (
-                <Image
-                  {...props}
-                  source={{ uri: pickedImagePath }}
-                  style={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 20,
-                    position: "absolute",
-                  }}
-                />
-              )}
               <Bubble
                 {...props}
                 wrapperStyle={{
@@ -206,13 +263,13 @@ function ChatScreen({ navigation }) {
             </View>
           );
         }}
-        renderMessageImage={(props) => (
-          <Image
-            {...props}
-            source={{ uri: pickedImagePath }}
-            style={{ width: 200, height: 200 }}
-          />
-        )}
+        // renderMessageImage={(props) => (
+        //   <Image
+        //     {...props}
+        //     source={{ uri: props.image }}
+        //     style={{ width: 200, height: 200 }}
+        //   />
+        // )}
         alwaysShowSend
         renderSend={(props) => {
           return (
@@ -224,6 +281,18 @@ function ChatScreen({ navigation }) {
                 justifyContent: "center",
               }}
             >
+              {pickedImagePath !== "" && (
+                <Image
+                  source={{ uri: pickedImagePath }}
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 10,
+                    position: "absolute",
+                    left: -40,
+                  }}
+                />
+              )}
               <TouchableOpacity onPress={takePhotoHandler}>
                 <MaterialCommunityIcon
                   size={24}
