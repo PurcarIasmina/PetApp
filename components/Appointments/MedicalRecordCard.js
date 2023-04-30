@@ -289,7 +289,230 @@ function MedicalRecordCard({ appointment, status }) {
 		</div>
 	</body>
 </html>`;
+  } else {
+    html = `
+    <html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Appointment</title>
+
+		<style>
+			.consultation-box {
+				max-width: 800px;
+				margin: auto;
+				padding: 30px;
+				border: 1px solid #eee;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+				font-size: 16px;
+				line-height: 24px;
+				font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+				color: #555;
+			}
+
+			.consultation-box table {
+				width: 100%;
+				line-height: inherit;
+				text-align: left;
+			}
+
+			.consultation-box table td {
+				padding: 5px;
+				vertical-align: top;
+			}
+
+			.consultation-box table tr td:nth-child(2) {
+				text-align: right;
+			}
+
+			.consultation-box table tr.top table td {
+				padding-bottom: 20px;
+			}
+
+			.consultation-box table tr.top table td.title {
+				font-size: 45px;
+				line-height: 45px;
+				color: #333;
+			}
+
+			.consultation-box table tr.information table td {
+				padding-bottom: 40px;
+			}
+
+			.consultation-box table tr.heading td {
+				background: #eee;
+				border-bottom: 1px solid #ddd;
+				font-weight: bold;
+			}
+
+			.consultation-box table tr.details td {
+				padding-bottom: 20px;
+			}
+
+			.consultation-box table tr.item td {
+				border-bottom: 1px solid #eee;
+			}
+
+			.consultatione-box table tr.item.last td {
+				border-bottom: none;
+			}
+
+			.consultation-box table tr.total td:nth-child(2) {
+				border-top: 2px solid #eee;
+				font-weight: bold;
+			}
+
+			@media only screen and (max-width: 600px) {
+				.consultation-box table tr.top table td {
+					width: 100%;
+					display: block;
+					text-align: center;
+				}
+
+				.consultation-box table tr.information table td {
+					width: 100%;
+					display: block;
+					text-align: center;
+				}
+			}
+
+		
+			.consultation-box.rtl {
+				direction: rtl;
+				font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+			}
+
+			.consultation-box.rtl table {
+				text-align: right;
+			}
+
+			.consultation-box.rtl table tr td:nth-child(2) {
+				text-align: left;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="consultation-box">
+			<table cellpadding="0" cellspacing="0">
+				<tr class="top">
+					<td colspan="2">
+						<table>
+							<tr>
+								<td class="title">
+									<img src="https://i.ibb.co/zVdXbpw/Untitled-1.png" style="width: 100%; max-width: 300px;" />
+								</td>
+
+								<td>
+                                </br>
+                                </br>
+									Date of appointment: ${new Date(appointment.date).toLocaleDateString("en", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })} </br>
+									Next appointment suggestion: ${new Date(
+                    appointment.result.nextAppointment.replace(/\//g, "-")
+                  ).toLocaleDateString("en", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+
+				<tr class="information">
+					<td colspan="2">
+						<table>
+							<tr>
+								
+								<td>
+									Healthy PetApp<br />
+									Doctor ${docDetails.name}<br />
+									${docDetails.email}
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+
+				<tr class="heading">
+					<td>Patient Details</td>
+
+					<td></td>
+				</tr>
+
+				<tr class="item">
+					<td>Name</td>
+
+					<td>${animalDetails.nameA}</td>
+				</tr>
+
+				<tr class="item">
+					<td>Breed</td>
+
+					<td>${animalDetails.breed}</td>
+				</tr>
+
+				<tr class="item">
+					<td>Date of birth</td>
+
+					<td>${animalDetails.date}</td>
+				</tr>
+				
+				<tr class="item">
+					<td>Gender</td>
+
+					<td>${animalDetails.gender}</td>
+				</tr>
+
+				<tr class="item">
+					<td>Owner</td>
+
+					<td>${appointment.ownername}</td>
+				</tr>
+				
+					
+					<tr class="item last">
+					<td>Appointment Reason</td>
+
+					<td>${appointment.result.doctorReason}</td>
+				</tr>
+				<tr class="heading">
+					<td>Doses</td>
+
+					<td>Plan</td>
+				</tr>
+
+				
+                    ${appointment.result.appointmentDoses
+                      .map((pill) => {
+                        return `
+                    <tr class="item">
+                        <td>${pill.doseName}</td>
+                        <td>${pill.doseQuantity}  ${
+                          pill.doseQuantity == 1 ? "dose" : "doses"
+                        } / Lot: ${pill.doseNumber}
+                        </td>
+                    </tr>
+                `;
+                      })
+                      .join("")}
+            
+                
+				
+
+					
+				</tr>
+
+			</table>
+		</div>
+	</body>
+</html>`;
   }
+
   console.log(html);
 
   let generatePdf = async () => {
