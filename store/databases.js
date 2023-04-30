@@ -17,6 +17,7 @@ import {
   orderBy,
   onSnapshot,
   serverTimestamp,
+  metadata,
   addDoc,
   limit,
   get,
@@ -24,13 +25,17 @@ import {
 import {
   getStorage,
   ref,
+  put,
   uploadBytes,
   getDownloadURL,
   updateMetadata,
   deleteObject,
+  uploadBytesResumable,
+  listAll,
 } from "firebase/storage";
 import uuid from "react-native-uuid";
 import { getFormattedDate } from "../util/date";
+import { captureRef, captureScreen } from "react-native-view-shot";
 
 const BACKEND_URL =
   "https://petapp-1a4cd-default-rtdb.europe-west1.firebasedatabase.app";
@@ -854,6 +859,31 @@ export async function storeImage(path, formattedPath) {
   blob.close();
   return snap;
 }
+export async function uploadDocument(uri, formattedPath, onProgress) {
+  const docRef = ref(storage, formattedPath);
+
+  const response = await fetch(uri);
+  const blob = await response.blob();
+
+  const uploadTask = uploadBytesResumable(docRef, blob);
+  uploadTask.on(
+    "state_changed",
+    (snapshot) => {
+      const progress = Math.round(
+        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+      );
+      onProgress(progress);
+    },
+    (error) => {
+      console.log(error);
+    },
+    async () => {
+      const url = await getDownloadURL(docRef);
+      console.log("File uploaded successfully. URL:", url);
+      return url;
+    }
+  );
+}
 
 export async function editImage(path, newPath) {
   const imageRef = ref(storage, path);
@@ -875,7 +905,30 @@ export async function editImage(path, newPath) {
   blob.close();
   return snap;
 }
+export async function getAnimalDocuments(uid, aid) {
+  const documentsRef = ref(storage, `documents/${uid}/${aid}`);
+  const documentsList = await listAll(documentsRef);
 
+  const documentData = documentsList.items.map(async (document) => {
+    const url = await getDownloadURL(document);
+    const fileNameParts = document.name.split(".");
+    const extension = fileNameParts[fileNameParts.length - 1];
+
+    return { name: document.name, url, type: extension };
+  });
+
+  return Promise.all(documentData);
+}
+export async function deleteFileFunction(path) {
+  const fileRef = ref(storage, path);
+  deleteObject(fileRef)
+    .then(() => {
+      console.log("deleted");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
 export async function storeAndGetUrl(path, formattedPath) {
   const imageRef = ref(storage, formattedPath);
   const response = await fetch(path);
@@ -884,7 +937,7 @@ export async function storeAndGetUrl(path, formattedPath) {
     const url = await getDownloadURL(imageRef).then((responseUrl) => {
       return responseUrl;
     });
-    return url; // returnati url-ul direct din promisiunea getDownloadURL
+    return url;
   });
   return snap;
 }

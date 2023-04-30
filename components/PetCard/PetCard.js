@@ -494,7 +494,7 @@ function PetCard({
             tip
             tipText={"Notifications"}
           />
-          <IconButton
+          {/* <IconButton
             onPress={() => {}}
             top={13}
             // label="Download"
@@ -503,9 +503,15 @@ function PetCard({
             size={30}
             tip
             tipText={"Download files"}
-          />
+          /> */}
           <IconButton
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate("AddFilesScreen", {
+                aid: aid,
+                name: namee,
+                photo: photoo,
+              });
+            }}
             // label="Attach"
             top={18}
             icon="attach"
@@ -546,7 +552,7 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     borderRadius: 50,
-    marginHorizontal: 50,
+    marginHorizontal: 100,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 30,

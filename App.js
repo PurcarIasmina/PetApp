@@ -49,6 +49,7 @@ import * as TaskManager from "expo-task-manager";
 import moment from "moment";
 import ChatScreenList from "./screens/ChatScreenList";
 import ChatListDoctor from "./screens/ChatListDoctor";
+import AddFilesScreen from "./screens/AddFilesScreen";
 // const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 // TaskManager.defineTask(
@@ -320,6 +321,15 @@ function AuthenticatedDrawerUser() {
           unmountOnBlur: true,
         }}
       />
+      <Drawer.Screen
+        name="AddFilesScreen"
+        component={AddFilesScreen}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
     </Drawer.Navigator>
   );
 }
@@ -394,7 +404,13 @@ function Base() {
     haveNotifications().then((resp) => {
       for (const key in resp) {
         if (resp[key].date.localeCompare(getFormattedDate(actualDate)) === 0) {
-          console.log(actualDate.getUTCHours());
+          console.log(
+            actualDate.getUTCHours(),
+            actualDate.getUTCMinutes(),
+            authCtx.tokenNotify
+          );
+
+          console.log(resp);
           if (
             resp[key].momentTime.localeCompare("Morning") === 0 &&
             actualDate.getUTCHours() === 7 &&
@@ -428,9 +444,13 @@ function Base() {
           if (
             resp[key].momentTime.localeCompare("Evening") === 0 &&
             actualDate.getUTCHours() === 19 &&
-            actualDate.getUTCMinutes() === 59
+            actualDate.getUTCMinutes() === 44
           ) {
-            console.log("da");
+            console.log("daadada");
+            // scheduleNotificationHandler(
+            //   "Reminder!🌛",
+            //   `Administrate to ${resp[key].name} evening medication`
+            // );
             sendPushNotificationHandler(
               authCtx.tokenNotify,
               "Reminder!🌛",

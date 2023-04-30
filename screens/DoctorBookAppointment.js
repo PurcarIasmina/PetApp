@@ -222,10 +222,11 @@ function DoctorBookAppointment({ navigation }) {
         const slotStartTime = `${i}:${j === 0 ? "00" : "30"}`;
         const slotEndTime = `${j === 0 ? i : i + 1}:${j === 0 ? "30" : "00"}`;
 
+        console.log(selectedDate > currentDate);
         if (
-          (selectedDate.getUTCDate() === currentDate.getUTCDate() &&
+          (selectedDate === currentDate &&
             `${currentHour}:${currentMinute}` < `${slotStartTime}`) ||
-          selectedDate.getUTCDate() > currentDate.getUTCDate()
+          selectedDate > currentDate
         ) {
           const isSlotOccupied =
             navailableSlots.length > 0
