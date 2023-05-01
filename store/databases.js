@@ -3,6 +3,7 @@ import { setStatusBarBackgroundColor } from "expo-status-bar";
 import { useRoute } from "@react-navigation/native";
 import { registerForPushNotificationsAsync } from "../notifications/notifications";
 import { initializeApp, firebase } from "firebase/app";
+
 import {
   doc,
   setDoc,
@@ -139,18 +140,16 @@ export async function getUnreadMessagesCount(userId) {
       // Numără mesajele necitite
       messagesQuerySnapshotPromise.docs.forEach((doc) => {
         if (!doc.data().read && doc.data().sentTo === userId) {
-          console.log("daa");
           unreadCount++;
         }
       });
-      console.log(unreadCount);
+
       // Adaugă numărul de mesaje necitite în obiectul de numărare a mesajelor necitite pentru utilizatorul corespunzător
       if (unreadMessagesCounts[otherUserId]) {
         unreadMessagesCounts[otherUserId] += unreadCount;
       } else {
         unreadMessagesCounts[otherUserId] = unreadCount;
       }
-      console.log(unreadMessagesCounts);
     }
   });
 
@@ -865,24 +864,26 @@ export async function uploadDocument(uri, formattedPath, onProgress) {
   const response = await fetch(uri);
   const blob = await response.blob();
 
-  const uploadTask = uploadBytesResumable(docRef, blob);
-  uploadTask.on(
-    "state_changed",
-    (snapshot) => {
-      const progress = Math.round(
-        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-      );
-      onProgress(progress);
-    },
-    (error) => {
-      console.log(error);
-    },
-    async () => {
-      const url = await getDownloadURL(docRef);
-      console.log("File uploaded successfully. URL:", url);
-      return url;
-    }
-  );
+  return new Promise((resolve, reject) => {
+    const uploadTask = uploadBytesResumable(docRef, blob);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        onProgress(progress);
+      },
+      (error) => {
+        reject(error);
+      },
+      async () => {
+        const url = await getDownloadURL(docRef);
+        console.log("File uploaded successfully. URL:", url);
+        resolve(url);
+      }
+    );
+  });
 }
 
 export async function editImage(path, newPath) {
@@ -924,9 +925,11 @@ export async function deleteFileFunction(path) {
   deleteObject(fileRef)
     .then(() => {
       console.log("deleted");
+      return path;
     })
     .catch((error) => {
       console.log(error);
+      return -1;
     });
 }
 export async function storeAndGetUrl(path, formattedPath) {

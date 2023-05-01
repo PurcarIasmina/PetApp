@@ -2,14 +2,29 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   DrawerContentScrollView,
   DrawerItemList,
+  useDrawerStatus,
 } from "@react-navigation/drawer";
 import { View, StyleSheet, Image, Text } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../../constants/colors";
 import { AuthContext } from "../../context/auth";
-import { useContext } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useStat,
+  useCallback,
+} from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { lessThan } from "react-native-reanimated";
+import { getUnreadMessagesCount } from "../../store/databases";
+
 function CustomDrawer(props) {
   const authCtx = useContext(AuthContext);
+
+  let drawerStatus = useDrawerStatus();
+  drawerStatus = useDrawerStatus();
+
   let name;
   if (authCtx.isDoctor === false) name = `Hello, ${authCtx.name}`;
   else name = `Hello, Doctor ${authCtx.name}`;

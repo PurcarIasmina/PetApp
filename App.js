@@ -1,12 +1,24 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { Text, SafeAreaView } from "react-native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { Text, SafeAreaView, View } from "react-native";
 
 import { StatusBar } from "expo-status-bar";
 // import { StyleSheet, Text, View } from "react-native";
 // import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { useState, useContext, useEffect, useCallback, useRef } from "react";
+import {
+  createDrawerNavigator,
+  useDrawerStatus,
+} from "@react-navigation/drawer";
+import { useFocusEffect } from "@react-navigation/native";
+
+import {
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { GlobalColors } from "./constants/colors";
 import Register from "./screens/Register";
@@ -50,6 +62,7 @@ import moment from "moment";
 import ChatScreenList from "./screens/ChatScreenList";
 import ChatListDoctor from "./screens/ChatListDoctor";
 import AddFilesScreen from "./screens/AddFilesScreen";
+import FloatingIcon from "./components/UI/FloatingIcon";
 // const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 // TaskManager.defineTask(
@@ -97,6 +110,36 @@ function AuthenticationStack() {
   );
 }
 function AuthenticatedDrawerDoctor() {
+  const [uncount, setUncount] = useState({});
+  const [count, setCount] = useState();
+  const authCtx = useContext(AuthContext);
+  const [isFocused, setIsFocused] = useState(true);
+  const [oldCount, setoldCount] = useState(0);
+  const [status, setStatusCount] = useState();
+  useLayoutEffect(() => {
+    async function getUnread() {
+      let resp = {};
+      resp = await getUnreadMessagesCount(authCtx.uid);
+      setUncount(resp);
+    }
+    const interval = setInterval(() => {
+      getUnread();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+  useEffect(() => {
+    if (oldCount !== uncount) {
+      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+      setoldCount(uncount);
+      setCount(total);
+    } else {
+      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+
+      setCount(total);
+    }
+  }, [uncount]);
+
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} />}
@@ -146,7 +189,35 @@ function AuthenticatedDrawerDoctor() {
           title: "Live Chat",
           headerTitle: "",
           drawerIcon: ({ color }) => (
-            <Ionicons color={color} size={20} name="chatbubbles-outline" />
+            <>
+              <Ionicons color={color} size={20} name="chatbubbles-outline" />
+              {count > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    left: 120,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 9999,
+
+                    height: 20,
+
+                    width: 20,
+                    backgroundColor: GlobalColors.colors.pink500,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "Garet-Book",
+                      color: GlobalColors.colors.gray0,
+                      textAlign: "center",
+                    }}
+                  >
+                    {count}
+                  </Text>
+                </View>
+              )}
+            </>
           ),
           unmountOnBlur: true,
         }}
@@ -201,9 +272,40 @@ function AuthenticatedDrawerDoctor() {
 }
 
 function AuthenticatedDrawerUser() {
+  const [uncount, setUncount] = useState({});
+  const [count, setCount] = useState();
+  const authCtx = useContext(AuthContext);
+  const [isFocused, setIsFocused] = useState(true);
+  const [oldCount, setoldCount] = useState(0);
+  const [status, setStatusCount] = useState();
+  useLayoutEffect(() => {
+    async function getUnread() {
+      let resp = {};
+      resp = await getUnreadMessagesCount(authCtx.uid);
+      setUncount(resp);
+    }
+    const interval = setInterval(() => {
+      getUnread();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+  useEffect(() => {
+    if (oldCount !== uncount) {
+      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+      setoldCount(uncount);
+      setCount(total);
+    } else {
+      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+
+      setCount(total);
+    }
+  }, [uncount]);
   return (
     <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawer {...props} />}
+      drawerContent={(props) => (
+        <CustomDrawer {...props} setStatusCount={setStatusCount} />
+      )}
       screenOptions={{
         drawerLabelStyle: {
           marginLeft: -23,
@@ -249,7 +351,35 @@ function AuthenticatedDrawerUser() {
           title: "Live Chat",
           headerTitle: "",
           drawerIcon: ({ color }) => (
-            <Ionicons color={color} size={20} name="chatbubbles-outline" />
+            <>
+              <Ionicons color={color} size={20} name="chatbubbles-outline" />
+              {count > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    left: 120,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 9999,
+
+                    height: 20,
+
+                    width: 20,
+                    backgroundColor: GlobalColors.colors.pink500,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "Garet-Book",
+                      color: GlobalColors.colors.gray0,
+                      textAlign: "center",
+                    }}
+                  >
+                    {count}
+                  </Text>
+                </View>
+              )}
+            </>
           ),
           unmountOnBlur: true,
         }}
@@ -336,6 +466,7 @@ function AuthenticatedDrawerUser() {
 
 function NavigationOption() {
   const authCtx = useContext(AuthContext);
+
   return (
     <NavigationContainer>
       {!authCtx.isAuthenticated && <AuthenticationStack />}

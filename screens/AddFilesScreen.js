@@ -14,6 +14,10 @@ import * as DocumentPicker from "expo-document-picker";
 import { GlobalColors } from "../constants/colors";
 import { ProgressBar } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import { FloatingAction } from "react-native-floating-action";
+import { shareAsync } from "expo-sharing";
+import { printToFileAsync } from "expo-print";
+
 import {
   useContext,
   useEffect,
@@ -34,6 +38,7 @@ import Feather from "react-native-vector-icons/Feather";
 import AwesomeAlert from "react-native-awesome-alerts";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 
+import * as FileSystem from "expo-file-system";
 const getFileIcon = (extension) => {
   switch (extension) {
     case "pdf":
@@ -92,33 +97,51 @@ function AddFilesScreen({ navigation }) {
   const [url, setUrl] = useState("");
   const [document, setDocument] = useState({});
   const [showAlert, setShowAlert] = useState(false);
-  const [deleteFile, setDeleteFile] = useState(false);
+  const [deleteFile, setDeleteFile] = useState("");
   const [fetching, setFetching] = useState(false);
   const [deleteFinished, setDeleteFinished] = useState(false);
-
-  console.log(documents);
+  const [startDelete, setStartDelete] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState("");
   useEffect(() => {
     async function getDocuments() {
       try {
         setFetching(true);
         let resp = [];
         resp = await getAnimalDocuments(authCtx.uid, route.params.aid);
+        resp.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
         setDocuments(resp);
         console.log(progress);
-        setDeleteFile(false);
+        setDeleteFile("");
+        setDeleteFinished(false);
         setFetching(false);
-        setDeleteFinished(true);
+        setStartDelete(false);
       } catch (error) {
         console.log(error);
       }
     }
+    setFetching(false);
     getDocuments();
-  }, [deleteFile, deleteFinished]);
+  }, [deleteFinished]);
+
+  useEffect(() => {
+    if (startDelete === true) {
+      console.log(deleteFile);
+      deleteFileFunction(
+        `documents/${authCtx.uid}/${route.params.aid}/${deleteFile}`
+      );
+      setDeleteFinished(true);
+    }
+  }, [startDelete]);
 
   useEffect(() => {
     if (Object.keys(document).length > 0) {
       setLoading(true);
-      setDocuments((documents) => [...documents, document]);
+      setDocuments((documents) => {
+        const newDocuments = [...documents, document];
+        newDocuments.sort((a, b) => a.name.localeCompare(b.name));
+        return newDocuments;
+      });
+      console.log(documents);
       setUploadProgress(0);
       setTimeout(function () {
         setLoading(false);
@@ -127,11 +150,26 @@ function AddFilesScreen({ navigation }) {
     }
   }, [document]);
   let newDocument = {};
-  const deleteDoc = (name) => {
-    setShowAlert(false);
-    console.log(name);
-    deleteFileFunction(name).then(() => setDeleteFile(true));
-  };
+  const actions = [
+    {
+      text: "Button 1",
+      icon: <MaterialCommunityIcon name="camera" size={24} color="#fff" />,
+      name: "btn1",
+      position: 1,
+    },
+    {
+      text: "Button 2",
+      icon: <MaterialCommunityIcon name="pencil" size={24} color="#fff" />,
+      name: "btn2",
+      position: 2,
+    },
+    {
+      text: "Button 3",
+      icon: <MaterialCommunityIcon name="folder" size={24} color="#fff" />,
+      name: "btn3",
+      position: 3,
+    },
+  ];
   const selectDoc = async () => {
     try {
       setLoading(true);
@@ -144,29 +182,44 @@ function AddFilesScreen({ navigation }) {
         setLoading(false);
       }
 
-      const uploadedUrl = await uploadDocument(
+      const upldUrl = await uploadDocument(
         result.uri,
         `documents/${authCtx.uid}/${route.params.aid}/${result.name}`,
         (progress) => setUploadProgress(progress)
-      );
+      ).then((url) => {
+        console.log(url);
+        const fileNameParts = result.name.split(".");
+        const extension = fileNameParts[fileNameParts.length - 1];
+        setDocument({
+          name: result.name,
+          type: extension,
+          url: url,
+        });
+      });
+
       const fileNameParts = result.name.split(".");
       const extension = fileNameParts[fileNameParts.length - 1];
 
-      console.log(uploadedUrl);
       setUploadProgress(0);
-      setUrl(uploadedUrl);
-      setDocument({
-        name: result.name,
-        url: uploadedUrl,
-        type: extension,
-      });
+      setUploadedUrl(upldUrl);
+      setUrl(upldUrl);
     } catch (error) {
       console.log(error);
     } finally {
       setDone(!done);
     }
   };
+  const floatingActionStyle = {
+    floatingIcon: {
+      width: 60,
+      height: 60,
+    },
+    iconWidth: 60,
+    iconHeight: 60,
+  };
+
   const openFile = async (document) => {
+    console.log(document);
     try {
       const supported = await Linking.canOpenURL(document);
       if (supported) {
@@ -178,6 +231,27 @@ function AddFilesScreen({ navigation }) {
       console.log("An error occurred", error);
     }
   };
+  async function shareDocument(url) {
+    console.log(url);
+    try {
+      const fileExtension = url.split(".").pop(); // Get the file extension
+      const fileDirectory = FileSystem.documentDirectory; // Save the file in the app's document directory
+      const fileName = `myFile.${fileExtension}`; // Set the file name
+      const downloadResumable = FileSystem.createDownloadResumable(
+        url,
+        `${fileDirectory}${fileName}`
+      );
+
+      // Download the file to the app's document directory
+      const { uri: downloadedFileUri } =
+        await downloadResumable.downloadAsync();
+
+      // Share the downloaded file
+      await shareAsync(downloadedFileUri);
+    } catch (error) {
+      console.log("Error downloading and sharing file", error);
+    }
+  }
   if (fetching) return <LoadingOverlay message={"Loading..."} />;
   return (
     <View style={styles.container}>
@@ -208,6 +282,24 @@ function AddFilesScreen({ navigation }) {
             },
           ]}
         >
+          {/* <FloatingAction
+            actions={actions}
+            color="#2ecc71"
+            onPressItem={(name) => {
+              console.log(`Pressed item with name: ${name}`);
+            }}
+            floatingIcon={
+              <MaterialCommunityIcon
+                name="message-text-outline"
+                size={24}
+                color="#fff"
+              />
+            }
+            floatingActionStyle={floatingActionStyle}
+            distanceToEdge={10}
+            overrideWithAction={true}
+            floatingButtonStyle={{ width: 50, height: 50 }}
+          /> */}
           <Text style={styles.title}>
             Upload files/documents for {route.params.name}{" "}
           </Text>
@@ -231,11 +323,31 @@ function AddFilesScreen({ navigation }) {
           />
         )} */}
       </View>
-
+      {documents.length === 0 && (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 80,
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              fontFamily: "Garet-Book",
+              fontSize: 20,
+              color: GlobalColors.colors.pink500,
+            }}
+          >
+            No files uploaded!
+          </Text>
+        </View>
+      )}
       <FlatList
         data={documents}
         renderItem={({ item, index }) => (
           <>
+            {/* {console.log(index, item.name)} */}
             <View
               style={{
                 flexDirection: "row",
@@ -257,7 +369,7 @@ function AddFilesScreen({ navigation }) {
                     progress={progress}
                     showsText={true}
                     formatText={() => `${progress}%`}
-                    style={{ marginRight: 10 }}
+                    style={{ marginRight: 10, left: -2 }}
                   />
                 </View>
               )}
@@ -269,17 +381,32 @@ function AddFilesScreen({ navigation }) {
                   name={getFileIcon(item.type).name}
                   size={20}
                   color={getFileIcon(item.type).color}
-                  style={{ top: 2 }}
+                  style={{
+                    top: 2,
+                    left: item === document && loading ? -4 : 0,
+                  }}
                 />
 
                 <Text
-                  style={[styles.docStyle, { marginRight: loading ? 20 : 10 }]}
+                  style={[
+                    styles.docStyle,
+                    {
+                      marginRight: loading ? 60 : 50,
+                      left: item === document && loading ? -4 : 0,
+                    },
+                  ]}
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
                   {item.name}
                 </Text>
               </TouchableOpacity>
+              <Feather
+                name="share-2"
+                color={GlobalColors.colors.pink500}
+                onPress={shareDocument.bind(this, item.url)}
+                style={{ position: "absolute", left: 363, top: 4 }}
+              />
             </View>
             <View>
               <MaterialCommunityIcon
@@ -289,46 +416,48 @@ function AddFilesScreen({ navigation }) {
                 style={{ position: "absolute", top: -45, left: 5 }}
                 onPress={() => {
                   setShowAlert(true);
+                  setDeleteFile(item.name);
                 }}
               />
             </View>
-            <AwesomeAlert
-              show={showAlert}
-              title="Are you sure you want to delete this file?"
-              titleStyle={{ color: GlobalColors.colors.pink500, fontSize: 18 }}
-              showCancelButton={true}
-              cancelText="No"
-              cancelButtonStyle={{
-                backgroundColor: GlobalColors.colors.pastel1,
-                width: 80,
-                alignItems: "center",
-              }}
-              cancelButtonTextStyle={{
-                fontSize: 19,
-                color: GlobalColors.colors.pink10,
-              }}
-              onCancelPressed={() => {
-                setShowAlert(false);
-              }}
-              showConfirmButton={true}
-              confirmText="Yes"
-              confirmButtonStyle={{
-                backgroundColor: GlobalColors.colors.pink10,
-                width: 85,
-                alignItems: "center",
-              }}
-              confirmButtonTextStyle={{
-                fontSize: 19,
-                color: GlobalColors.colors.pastel1,
-              }}
-              onConfirmPressed={deleteDoc.bind(
-                this,
-                `documents/${authCtx.uid}/${route.params.aid}/${item.name}`
-              )}
-            />
           </>
         )}
+        keyExtractor={(item) => Math.random() * 100}
       ></FlatList>
+      <AwesomeAlert
+        show={showAlert}
+        title="Are you sure you want to delete this file?"
+        titleStyle={{ color: GlobalColors.colors.pink500, fontSize: 18 }}
+        showCancelButton={true}
+        cancelText="No"
+        cancelButtonStyle={{
+          backgroundColor: GlobalColors.colors.pastel1,
+          width: 80,
+          alignItems: "center",
+        }}
+        cancelButtonTextStyle={{
+          fontSize: 19,
+          color: GlobalColors.colors.pink10,
+        }}
+        onCancelPressed={() => {
+          setShowAlert(false);
+        }}
+        showConfirmButton={true}
+        confirmText="Yes"
+        confirmButtonStyle={{
+          backgroundColor: GlobalColors.colors.pink10,
+          width: 85,
+          alignItems: "center",
+        }}
+        confirmButtonTextStyle={{
+          fontSize: 19,
+          color: GlobalColors.colors.pastel1,
+        }}
+        onConfirmPressed={() => {
+          setShowAlert(false);
+          setStartDelete(true);
+        }}
+      />
     </View>
   );
 }

@@ -274,16 +274,18 @@ function MedicalRecordCard({ appointment, status }) {
                         }/ ${pill.pillCount} ${
                           pill.pillCount === 1 ? "pill" : "pills"
                         }</td>
-                    </tr>
-                `;
+                    
+                        </tr>
+                        <tr class="item">
+  
+  <td>Additional info: ${
+    pill.additionalInfo !== "" ? pill.additionalInfo : "-"
+  }</td>
+</tr>
+                       
+                   `;
                       })
                       .join("")}
-            
-                
-				
-
-					
-				</tr>
 
 			</table>
 		</div>
@@ -496,7 +498,15 @@ function MedicalRecordCard({ appointment, status }) {
                           pill.doseQuantity == 1 ? "dose" : "doses"
                         } / Lot: ${pill.doseNumber}
                         </td>
+                       
+                       
                     </tr>
+                    <tr class="item">
+                    <td>Additional info: ${
+                      pill.additionalInfo !== "" ? pill.additionalInfo : "-"
+                    }</td>
+                    </tr>
+                
                 `;
                       })
                       .join("")}
