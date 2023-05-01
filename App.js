@@ -63,6 +63,8 @@ import ChatScreenList from "./screens/ChatScreenList";
 import ChatListDoctor from "./screens/ChatListDoctor";
 import AddFilesScreen from "./screens/AddFilesScreen";
 import FloatingIcon from "./components/UI/FloatingIcon";
+import PetHotel from "./screens/PetHotel";
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 // const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 // TaskManager.defineTask(
@@ -303,9 +305,7 @@ function AuthenticatedDrawerUser() {
   }, [uncount]);
   return (
     <Drawer.Navigator
-      drawerContent={(props) => (
-        <CustomDrawer {...props} setStatusCount={setStatusCount} />
-      )}
+      drawerContent={(props) => <CustomDrawer {...props} />}
       screenOptions={{
         drawerLabelStyle: {
           marginLeft: -23,
@@ -384,13 +384,13 @@ function AuthenticatedDrawerUser() {
           unmountOnBlur: true,
         }}
       />
+
       <Drawer.Screen
         name="ChatScreen"
         component={ChatScreen}
         options={{
           drawerItemStyle: { display: "none" },
           headerTitle: "",
-          unmountOnBlur: true,
           unmountOnBlur: true,
         }}
       />
@@ -402,6 +402,22 @@ function AuthenticatedDrawerUser() {
           headerTitle: "",
           drawerIcon: ({ color }) => (
             <Ionicons color={color} size={20} name="calendar-outline" />
+          ),
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="PetHotel"
+        component={PetHotel}
+        options={{
+          title: "Pet Hotel",
+          headerTitle: "",
+          drawerIcon: ({ color }) => (
+            <MaterialCommunityIcon
+              color={color}
+              size={20}
+              name="office-building"
+            />
           ),
           unmountOnBlur: true,
         }}
