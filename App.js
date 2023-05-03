@@ -65,6 +65,9 @@ import AddFilesScreen from "./screens/AddFilesScreen";
 import FloatingIcon from "./components/UI/FloatingIcon";
 import PetHotel from "./screens/PetHotel";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import BookHotel from "./screens/BookHotel";
+import PayScreen from "./screens/PayScreen";
+import UserReservations from "./screens/UserReservations";
 // const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 // TaskManager.defineTask(
@@ -425,6 +428,33 @@ function AuthenticatedDrawerUser() {
       <Drawer.Screen
         name="PetScreen"
         component={PetScreen}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="BookHotel"
+        component={BookHotel}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="PayScreen"
+        component={PayScreen}
+        options={{
+          drawerItemStyle: { display: "none" },
+          headerTitle: "",
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="UserReservations"
+        component={UserReservations}
         options={{
           drawerItemStyle: { display: "none" },
           headerTitle: "",

@@ -116,7 +116,7 @@ function DoseCardPlan({ navigation }) {
               {" "}
               Way of admnistration
             </Text>
-            <View View style={{ marginTop: 5, left: 5, flexDirection: "row" }}>
+            <View style={{ marginTop: 5, left: 5, flexDirection: "row" }}>
               <Text style={[styles.subtitle, { fontSize: 15 }]}>Oral</Text>
               <Checkbox
                 style={styles.checkBox}

@@ -227,7 +227,72 @@ export async function addAnimal(name, breed, date, owner, color, gender, uid) {
   });
   return { response: response, aid: aid };
 }
+export async function addReservation(
+  name,
+  animals,
+  endDate,
+  startDate,
+  pay,
+  email,
+  phone,
+  totalPayment,
+  uid
+) {
+  const response = await axios.post(BACKEND_URL + "/reservations.json", {
+    name: name,
+    email: email,
+    phone: phone,
+    animals: animals,
+    endDate: endDate,
+    startDate: startDate,
+    pay: pay,
+    totalPayment: totalPayment,
+    uid: uid,
+  });
+  return response;
+}
+export async function getReservations(uid) {
+  const response = await axios.get(BACKEND_URL + "/reservations.json");
+  let reservationsPast = [];
+  let reservationsActive = [];
+  if (response.data) {
+    const reservationsKeys = Object.keys(response.data);
+    const reservationsFiltered = Object.values(response.data);
+    reservationsFiltered.map((notification, index) => {
+      notification.key = reservationsKeys[index];
+    });
 
+    const filtered = reservationsFiltered.filter(function (reservation) {
+      return reservation.uid === uid;
+    });
+    const currentDate = new Date();
+    const timezoneOffset = 180;
+    const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+    const romaniaDateTime = new Date(romanianTime);
+    for (const key in filtered) {
+      const reservationDetail = {
+        animals: filtered[key].animals,
+        startDate: filtered[key].startDate,
+        endDate: filtered[key].endDate,
+        uid: filtered[key].uid,
+        email: filtered[key].email,
+        phone: filtered[key].phone,
+        generatedId: filtered[key].key,
+        name: filtered[key].name,
+        pay: filtered[key].pay,
+        payment: filtered[key].payment,
+      };
+      if (
+        getFormattedDate(new Date(filtered[key].startDate)) >
+        getFormattedDate(romaniaDateTime)
+      )
+        reservationsActive.push(reservationDetail);
+      else reservationsPast.push(reservationDetail);
+    }
+  }
+
+  return { active: reservationsActive, past: reservationsPast };
+}
 // export async function addToken(uid) {
 //   const expoToken = await registerForPushNotificationsAsync();
 //   const resp = await axios.put(BACKEND_URL + `/tokens/${uid}.json`, {
