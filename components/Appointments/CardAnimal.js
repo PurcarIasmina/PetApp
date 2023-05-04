@@ -7,10 +7,17 @@ import { getAge } from "../../util/date";
 function AnimalCard({ animal, setCount, setId }) {
   const [pressed, setPressed] = useState(false);
   function onPress() {
+    console.log(animal.id);
     !pressed ? setPressed(true) : setPressed(false);
     if (!pressed) {
-      setCount((prevCount) => prevCount + 1), setId(animal.aid);
-    } else setCount((prevCount) => prevCount - 1);
+      setCount((prevCount) => prevCount + 1),
+        setId((prevAnimalIds) => [...prevAnimalIds, animal.aid]);
+    } else {
+      setCount((prevCount) => prevCount - 1),
+        setId((prevAnimalIds) =>
+          prevAnimalIds.filter((animalId) => animalId !== animal.aid)
+        );
+    }
   }
   return (
     <TouchableOpacity onPress={onPress}>
@@ -37,10 +44,9 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   itemsContainer: {
-    backgroundColor: "white",
     flexDirection: "row",
     width: "80%",
-    marginHorizontal: 25,
+    marginHorizontal: 10,
     marginVertical: 10,
     borderRadius: 20,
   },
@@ -67,6 +73,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   pressed: {
-    backgroundColor: GlobalColors.colors.pink100,
+    backgroundColor: GlobalColors.colors.gray0,
+    borderWidth: 1,
+    borderColor: GlobalColors.colors.pink100,
   },
 });

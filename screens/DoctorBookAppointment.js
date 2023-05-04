@@ -56,7 +56,7 @@ function DoctorBookAppointment({ navigation }) {
     did: route.params.details.did,
   });
   const authCtx = useContext(AuthContext);
-  const [id, setId] = useState();
+  const [id, setId] = useState([]);
   const [fetching, setFetching] = useState(false);
   const [navailableSlots, setNAvailableSlots] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -67,7 +67,7 @@ function DoctorBookAppointment({ navigation }) {
     "Garet-Book": require("../constants/fonts/Garet-Book.ttf"),
     "Roboto-Regular": require("../constants/fonts/Roboto-Regular.ttf"),
   });
-
+  console.log(id);
   const monthNames = [
     "Jan.",
     "Feb.",
@@ -140,11 +140,27 @@ function DoctorBookAppointment({ navigation }) {
 
   const handleNextDay = () => {
     const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+
+    if (nextDate.getUTCDay() === 0 || nextDate.getUTCDay() === 6) {
+      const daysUntilMonday = 8 - nextDate.getUTCDay();
+
+      if (daysUntilMonday <= 5) {
+        nextDate.setDate(nextDate.getUTCDate() + daysUntilMonday);
+      }
+    }
+
     setDate(nextDate);
     setSelectedDate(nextDate);
   };
+
   const handlePrevDay = () => {
     const prevDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+
+    if (date.getUTCDay() === 1) {
+      const daysUntilFriday = 2;
+      prevDate.setDate(prevDate.getUTCDate() - daysUntilFriday);
+    }
+
     setDate(prevDate);
     setSelectedDate(prevDate);
   };
@@ -166,17 +182,23 @@ function DoctorBookAppointment({ navigation }) {
     return null;
   }
   const renderDate = (date, index) => {
+    const isWeekend = date.getUTCDay() === 0 || date.getUTCDay() === 6;
+
+    const onPressHandler = isWeekend ? undefined : () => onDateSelect(date);
+
     return (
       <TouchableOpacity
-        onPress={() => onDateSelect(date)}
+        onPress={onPressHandler}
+        disabled={isWeekend}
         onLayout={onLayoutRootView}
       >
         <View
-          style={
+          style={[
             date.toLocaleDateString() === selectedDate.toLocaleDateString()
               ? [styles.containerdate, styles.selectedDate]
-              : styles.containerdate
-          }
+              : styles.containerdate,
+            isWeekend && { opacity: 0.4 },
+          ]}
           key={index}
         >
           <>
@@ -189,6 +211,7 @@ function DoctorBookAppointment({ navigation }) {
       </TouchableOpacity>
     );
   };
+
   function handleSlotPressed(item) {
     if (item !== selectedSlot) {
       setModalVisible(true);
@@ -201,7 +224,7 @@ function DoctorBookAppointment({ navigation }) {
       await addAppointment(
         docDetails.did,
         authCtx.uid,
-        id,
+        id[0],
         getFormattedDate(selectedDate),
         selectedSlot,
         appointmentReason,
@@ -222,11 +245,16 @@ function DoctorBookAppointment({ navigation }) {
         const slotStartTime = `${i}:${j === 0 ? "00" : "30"}`;
         const slotEndTime = `${j === 0 ? i : i + 1}:${j === 0 ? "30" : "00"}`;
 
-        console.log(selectedDate > currentDate);
+        console.log(
+          `${currentHour}:${currentMinute}` < `${slotStartTime}`,
+          getFormattedDate(selectedDate) === getFormattedDate(currentDate),
+          currentDate,
+          selectedDate
+        );
         if (
-          (selectedDate === currentDate &&
+          (getFormattedDate(selectedDate) === getFormattedDate(currentDate) &&
             `${currentHour}:${currentMinute}` < `${slotStartTime}`) ||
-          selectedDate > currentDate
+          getFormattedDate(selectedDate) > getFormattedDate(currentDate)
         ) {
           const isSlotOccupied =
             navailableSlots.length > 0
@@ -259,7 +287,7 @@ function DoctorBookAppointment({ navigation }) {
     } else {
       setConfirmModal(true);
       try {
-        const animalDetails = await getAnimalDetails(id);
+        const animalDetails = await getAnimalDetails(id[0]);
         const animalPhoto = await getImageUrl(
           `${animalDetails.uid}/${animalDetails.aid}.jpeg`
         );
@@ -282,7 +310,9 @@ function DoctorBookAppointment({ navigation }) {
           ></Image>
           <View>
             <Text></Text>
-            <Text style={styles.name}>Dr.{docDetails.name}</Text>
+            <Text style={[styles.name, { left: -23 }]}>
+              Dr.{docDetails.name}
+            </Text>
             <View style={{ flexDirection: "row" }}>
               <FontAwesome
                 name={docDetails.gender === "Female" ? "venus" : "mars"}
@@ -385,6 +415,7 @@ function DoctorBookAppointment({ navigation }) {
         style={styles.modal}
         onDismiss={() => {
           setModalVisible(false), setConfirmModal(false), setCount(0);
+          setId([]);
         }}
         animationType="slide"
       >
@@ -654,6 +685,7 @@ const styles = StyleSheet.create({
   },
   selectedDate: {
     backgroundColor: GlobalColors.colors.white1,
+    borderColor: GlobalColors.colors.pink500,
   },
   slots: { flex: 1 },
   slotTitle: {
@@ -721,10 +753,10 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   itemsContainer: {
-    backgroundColor: "white",
+    // backgroundColor: "white",
     flexDirection: "row",
     width: "80%",
-    marginHorizontal: 30,
+    marginHorizontal: 10,
     marginVertical: 10,
     borderRadius: 20,
   },

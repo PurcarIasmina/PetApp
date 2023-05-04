@@ -35,11 +35,11 @@ function AnimalRecords({ navigation }) {
   const [aid, setAid] = [route.params ? route.params.aid : null];
   //   console.log(aid);
   const [fetching, setFetching] = useState(false);
-  const [status, setStatus] = useState();
+  const [status, setStatus] = useState(0);
   const [selectedYear, setSelectedYear] = useState(null);
   const [yearPressed, setPressed] = useState(false);
   const authCtx = useContext(AuthContext);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (status === 0 && consultations.length > 0) {
       setMinYear(
         consultations.reduce(
@@ -87,7 +87,7 @@ function AnimalRecords({ navigation }) {
 
       console.log(maxYear);
     }
-  }, [status]);
+  }, [status, vaccines, consultations, disinfestations]);
   useEffect(() => {
     async function getAppointments() {
       try {

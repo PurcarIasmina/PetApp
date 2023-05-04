@@ -78,7 +78,8 @@
     "react-native-wheel-picker": "^1.2.0",
     "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "rn-tooltip": "^3.0.3",
-    "expo-location": "~14.3.0"
+    "expo-location": "~14.3.0",
+    "@stripe/stripe-react-native": "0.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6"

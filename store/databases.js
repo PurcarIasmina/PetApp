@@ -280,7 +280,7 @@ export async function getReservations(uid) {
         generatedId: filtered[key].key,
         name: filtered[key].name,
         pay: filtered[key].pay,
-        payment: filtered[key].payment,
+        payment: filtered[key].totalPayment,
       };
       if (
         getFormattedDate(new Date(filtered[key].startDate)) >

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from "react-native";
 import { Button } from "react-native-paper";
 import { Calendar, CalendarTheme } from "react-native-calendars";
@@ -22,11 +23,18 @@ import Checkbox from "expo-checkbox";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../context/auth";
 import { addReservation } from "../store/databases";
+import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+const API_URL = "http://localhost:3000";
 function PayScreen({ navigation }) {
   const route = useRoute();
   console.log(route.params);
   const moment = require("moment");
+  console.log(newPrice);
 
+  const today = new Date();
+  const formattedDate = `${
+    today.getMonth() + 1
+  }/${today.getDate()}/${today.getFullYear()}`;
   let daysDifference = 1;
   if (route.params.endDate) {
     const startDate = moment(route.params.startDate, "YYYY-MM-DD");
@@ -68,6 +76,9 @@ function PayScreen({ navigation }) {
   const [emailInvalid, setEmailInvalid] = useState(false);
   const [phoneInvalid, setPhoneInvalid] = useState(false);
   const [checkInvalid, setCheckInvalid] = useState(false);
+  const newPrice =
+    (100 * route.params.animals.length * daysDifference).toString() + "00";
+  const stripe = useStripe();
   const handleCheck = (text) => {
     setCheckedItems(text);
   };
@@ -110,17 +121,116 @@ function PayScreen({ navigation }) {
           checkedItems,
           email,
           phone,
-          100 * route.params.animals.length * daysDifference,
+          (100 * route.params.animals.length * daysDifference).toString(),
           authCtx.uid
         );
-        navigation.navigate("UserReservations");
+        if (resp) {
+          if (checkedItems === "Arrival")
+            navigation.navigate("UserReservations");
+          else subscribe();
+        }
       } catch (error) {
         console.log(error);
       }
     }
   }
+  const subscribe = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/pay", {
+        method: "POST",
+        body: JSON.stringify({ newPrice }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) return Alert.alert(data.message);
+      const clientSecret = data.clientSecret;
+      const initSheet = await stripe.initPaymentSheet({
+        paymentIntentClientSecret: clientSecret,
+        appearance: {
+          font: {
+            family: "AvenirNext-Regular",
+            scale: 1.15,
+          },
+          shapes: {
+            borderRadius: 12,
+            borderWidth: 0.5,
+          },
+          primaryButton: {
+            shapes: {
+              borderRadius: 10,
+            },
+            colors: {
+              text: "#FFFFFF",
+            },
+          },
+          colors: {
+            // icon: GlobalColors.colors.darkDustyPurple,
+            // primary: Colors.colors.darkDustyPurple,
+            background: "#FFFFFF",
+            // componentBackground: Colors.colors.cardBackgroundColor,
+            // componentBorder: Colors.colors.gray,
+            // componentDivider: Colors.colors.gray,
+            // primaryText: Colors.colors.darkDustyPurple,
+            // secondaryText: Colors.colors.dustyPurple,
+            // componentText: Colors.colors.gray,
+            // placeholderText: Colors.colors.gray,
+          },
+        },
+        applePay: {
+          merchantCountryCode: "US",
+        },
+      });
+      if (initSheet.error) {
+        return Alert.alert(initSheet.error.message);
+        // showMessage({
+        //   message: "The payment could not be initilized!",
+        //   floating: true,
+        //   // position: top,
+        //   icon: "info",
+        //   backgroundColor: Colors.colors.darkDustyPurple,
+        //   color: "white",
+        // });
+        // return;
+      }
+      const presentSheet = await stripe.presentPaymentSheet({
+        clientSecret,
+      });
+      if (presentSheet.error) {
+        // showMessage({
+        //   message: "The payment could not go through!",
+        //   floating: true,
+        //   // position: top,
+        //   icon: "info",
+        //   backgroundColor: Colors.colors.darkDustyPurple,
+        //   color: "white",
+        // });
+        // return;
+        return Alert.alert(
+          "The payment has been canceled!",
+          "Please try again!",
+          [
+            {
+              text: "OK",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "default",
+            },
+          ]
+        );
+      }
+
+      navigation.navigate("UserReservations");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Something went wrong, try again later!");
+    }
+  };
   return (
-    <>
+    <StripeProvider
+      publishableKey="pk_test_51N3nKMJ0sudgjiHdgS11OUwbHrjL1z3kFnkVrFcOu6qHVTOknIapZVj2F3R2A6VVkHSvQ4yTO9LvJfPJEU41qXxH00WjiWqv2r"
+      merchantIdentifier="merchant.com.stripe.react.native"
+    >
       <View style={{ flex: 1, backgroundColor: "white" }}>
         <Text style={styles.title}>Enter your details</Text>
         {error !== "Check payment method!" && error.length > 0 && (
@@ -313,7 +423,7 @@ function PayScreen({ navigation }) {
           Submit
         </Button>
       </View>
-    </>
+    </StripeProvider>
   );
 }
 export default PayScreen;

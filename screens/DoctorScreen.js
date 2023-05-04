@@ -31,31 +31,31 @@ Notifications.setNotificationHandler({
   }),
 });
 function DoctorScreen({ navigation }) {
-  const getPermissions = async () => {
-    const { status } = await Notifications.requestPermissionsAsync();
+  // const getPermissions = async () => {
+  //   const { status } = await Notifications.requestPermissionsAsync();
 
-    if (status !== "granted") {
-      // permisiunea nu a fost acordată, deci notificările nu vor funcționa
-      return;
-    }
-  };
+  //   if (status !== "granted") {
+  //     // permisiunea nu a fost acordată, deci notificările nu vor funcționa
+  //     return;
+  //   }
+  // };
 
-  function scheduleNotificationHandler(doctorId, slot, date) {
-    console.log("am fost");
-    getPermissions();
-    Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Upload consultation result!",
-        body: "Alooo",
-        data: {
-          doctorId: doctorId,
-        },
-      },
-      trigger: {
-        seconds: 5,
-      },
-    });
-  }
+  // function scheduleNotificationHandler(doctorId, slot, date) {
+  //   console.log("am fost");
+  //   getPermissions();
+  //   Notifications.scheduleNotificationAsync({
+  //     content: {
+  //       title: "Upload consultation result!",
+  //       body: "Alooo",
+  //       data: {
+  //         doctorId: doctorId,
+  //       },
+  //     },
+  //     trigger: {
+  //       seconds: 5,
+  //     },
+  //   });
+  // }
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -101,16 +101,31 @@ function DoctorScreen({ navigation }) {
   const swiper = useRef();
   const formattedMonth = monthNames[date.getUTCMonth()];
 
-  const handlePrevDay = () => {
-    const prevDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-    setDate(prevDate);
-    setSelectedDate(prevDate);
-  };
-
   const handleNextDay = () => {
     const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+
+    if (nextDate.getUTCDay() === 0 || nextDate.getUTCDay() === 6) {
+      const daysUntilMonday = 8 - nextDate.getUTCDay();
+
+      if (daysUntilMonday <= 5) {
+        nextDate.setDate(nextDate.getUTCDate() + daysUntilMonday);
+      }
+    }
+
     setDate(nextDate);
     setSelectedDate(nextDate);
+  };
+
+  const handlePrevDay = () => {
+    const prevDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+
+    if (date.getUTCDay() === 1) {
+      const daysUntilFriday = 2;
+      prevDate.setDate(prevDate.getUTCDate() - daysUntilFriday);
+    }
+
+    setDate(prevDate);
+    setSelectedDate(prevDate);
   };
 
   const onDateSelect = (date) => {
@@ -169,19 +184,25 @@ function DoctorScreen({ navigation }) {
   if (fetching) return;
   <LoadingOverlay message={"Loading..."} />;
   const renderDate = (date, index) => {
-    console.log(date.getUTCDate());
-    console.log(selectedDate.getUTCDate());
+    const isWeekend = date.getUTCDay() === 0 || date.getUTCDay() === 6;
+
+    const onPressHandler = isWeekend ? undefined : () => onDateSelect(date);
     return (
       <TouchableOpacity
         onPress={() => onDateSelect(date)}
         onLayout={onLayoutRootView}
+        disabled={isWeekend}
       >
         <View
-          style={
+          style={[
             date.toLocaleDateString() === selectedDate.toLocaleDateString()
               ? [styles.containerdate, styles.selectedDate]
-              : styles.containerdate
-          }
+              : styles.containerdate,
+            isWeekend && {
+              opacity: 0.5,
+              backgroundColor: GlobalColors.colors.gray0,
+            },
+          ]}
           key={index}
         >
           <>
@@ -228,9 +249,28 @@ function DoctorScreen({ navigation }) {
         <Text style={styles.appointments}>
           {appointments.length > 0
             ? appointments.length === 1
-              ? `You have ${appointments.length} appointment today`
-              : `You have ${appointments.length} appointments today`
-            : `You have no appointments today`}
+              ? `You ${
+                  getFormattedDate(selectedDate) < getFormattedDate(currentDate)
+                    ? `had`
+                    : `have`
+                } ${appointments.length} appointment ${
+                  getFormattedDate(selectedDate) !==
+                  getFormattedDate(currentDate)
+                    ? `on selected date`
+                    : `today`
+                }`
+              : `You ${currentDate.getUTCHours() < 18 ? `have` : `had`} ${
+                  appointments.length
+                } appointments today`
+            : `You ${
+                getFormattedDate(selectedDate) < getFormattedDate(currentDate)
+                  ? `had`
+                  : `have`
+              } no appointments ${
+                getFormattedDate(selectedDate) !== getFormattedDate(currentDate)
+                  ? `on this date`
+                  : `today`
+              }`}
         </Text>
         <View style={styles.datespicker}>
           <Swiper
@@ -358,6 +398,7 @@ const styles = StyleSheet.create({
   },
   selectedDate: {
     backgroundColor: GlobalColors.colors.white1,
+    borderColor: GlobalColors.colors.pink500,
   },
   appointmentsContainer: {
     flex: 1,

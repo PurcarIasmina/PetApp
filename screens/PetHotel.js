@@ -19,13 +19,23 @@ function PetHotel({ navigation }) {
     },
     headerRight: () => (
       <TouchableOpacity
-        style={{ marginRight: 20 }}
+        style={{ marginRight: 20, flexDirection: "row", top: 3 }}
         onPress={() => navigation.navigate("UserReservations")}
       >
-        <FontAwesome
-          name="save"
-          size={21}
+        <Text
+          style={{
+            fontFamily: "Garet-Book",
+            color: GlobalColors.colors.pink500,
+            fontSize: 14,
+          }}
+        >
+          Reservations
+        </Text>
+        <Feather
+          name={"chevron-right"}
           color={GlobalColors.colors.pink500}
+          size={15}
+          style={{ top: 3, left: 2 }}
         />
       </TouchableOpacity>
     ),

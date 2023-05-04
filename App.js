@@ -68,6 +68,7 @@ import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIc
 import BookHotel from "./screens/BookHotel";
 import PayScreen from "./screens/PayScreen";
 import UserReservations from "./screens/UserReservations";
+import { LogBox } from "react-native";
 // const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
 
 // TaskManager.defineTask(
@@ -87,6 +88,8 @@ import UserReservations from "./screens/UserReservations";
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
+LogBox.ignoreLogs(["Warning: ..."]);
+LogBox.ignoreAllLogs(true);
 function AuthenticationStack() {
   return (
     <Stack.Navigator
@@ -452,6 +455,7 @@ function AuthenticatedDrawerUser() {
           unmountOnBlur: true,
         }}
       />
+
       <Drawer.Screen
         name="UserReservations"
         component={UserReservations}

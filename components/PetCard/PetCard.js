@@ -391,6 +391,7 @@ function PetCard({
                 : GlobalColors.colors.pink500
             }
             hasPadding
+            style={{ marginLeft: 50, width: 110 }}
             options={options}
             testID="gender-switch-selector"
             accessibilityLabel="gender-switch-selector"
@@ -604,17 +605,19 @@ const styles = StyleSheet.create({
   },
   editContainer: {
     margin: 10,
+    marginHorizontal: 20,
+    paddingVertical: 20,
     marginBottom: -60,
-    padding: 10,
+
     borderRadius: 40,
     height: 400,
     backgroundColor: GlobalColors.colors.white1,
     shadowColor: "#171717",
-    shadowOffset: { width: -2, height: 4 },
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowRadius: 4,
     alignContent: "center",
-    // justifyContent:'center',
+    paddingHorizontal: 20,
   },
   editField: {
     flexDirection: "column",

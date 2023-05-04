@@ -597,7 +597,7 @@ function MedicalRecordCard({ appointment, status }) {
           </View>
         )}
       </View>
-      <View style={{ marginTop: 25, left: 30 }}>
+      <View style={{ marginTop: 45, left: 180, position: "absolute" }}>
         <View style={{ alignItems: "center", marginLeft: 20 }}>
           {appointment.result.diagnostic && (
             <Text style={[styles.diagnostic, { marginLeft: -20, bottom: 10 }]}>
@@ -627,11 +627,19 @@ function MedicalRecordCard({ appointment, status }) {
               />
             </View>
           )}
-          <ScrollView style={{ left: -15 }}>
+          <ScrollView
+            style={{
+              position: "absolute",
+              left: -20,
+              top: 15,
+            }}
+          >
             {appointment.result.pillsPlan && (
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: "row" }}>
-                  <Text style={styles.diagnostic}>Medicine Plan</Text>
+                  <Text style={[styles.diagnostic, { marginBottom: 4 }]}>
+                    Medicine Plan
+                  </Text>
                   <MaterialCommunityIcon
                     name={"pill"}
                     size={15}
@@ -674,9 +682,17 @@ function MedicalRecordCard({ appointment, status }) {
                           />
                         )}
                       </View>
-                      <Text style={styles.diagnostic}>
-                        How long : {pill.pillTimes} days
-                      </Text>
+                      <View
+                        style={{ flexDirection: "row", alignItems: "baseline" }}
+                      >
+                        <Text style={styles.diagnostic}>How long:</Text>
+                        <Text style={[styles.diagnostic, { marginLeft: 5 }]}>
+                          {pill.pillTimes}
+                        </Text>
+                        <Text style={[styles.diagnostic, { marginLeft: 5 }]}>
+                          days
+                        </Text>
+                      </View>
                     </View>
                   ))}
               </View>
@@ -713,6 +729,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignSelf: "center",
     padding: 20,
+    overflow: "scroll",
     flexDirection: "row",
   },
   diagnostic: {
@@ -750,6 +767,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   pillContainer: {
-    marginVertical: 3,
+    marginVertical: 4,
   },
 });
