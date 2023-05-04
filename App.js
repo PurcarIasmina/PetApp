@@ -585,11 +585,7 @@ function Base() {
     haveNotifications().then((resp) => {
       for (const key in resp) {
         if (resp[key].date.localeCompare(getFormattedDate(actualDate)) === 0) {
-          console.log(
-            actualDate.getUTCHours(),
-            actualDate.getUTCMinutes(),
-            authCtx.tokenNotify
-          );
+          console.log(resp[key].name);
 
           console.log(resp);
           if (
@@ -598,8 +594,7 @@ function Base() {
             actualDate.getUTCMinutes() === 59
           ) {
             console.log("da");
-            sendPushNotificationHandler(
-              authCtx.tokenNotify,
+            scheduleNotificationHandler(
               "Reminder! ☕️",
               `Administrate to ${resp[key].name} morning medication`
             );
@@ -610,8 +605,7 @@ function Base() {
             actualDate.getUTCHours() === 12 &&
             actualDate.getUTCMinutes() === 59
           ) {
-            sendPushNotificationHandler(
-              authCtx.tokenNotify,
+            scheduleNotificationHandler(
               "Reminder!🍴",
               `Administrate to ${resp[key].name} lunch medication`
             );
@@ -624,7 +618,7 @@ function Base() {
           );
           if (
             resp[key].momentTime.localeCompare("Evening") === 0 &&
-            actualDate.getUTCHours() === 19 &&
+            actualDate.getUTCHours() === 17 &&
             actualDate.getUTCMinutes() === 44
           ) {
             console.log("daadada");
@@ -632,8 +626,7 @@ function Base() {
             //   "Reminder!🌛",
             //   `Administrate to ${resp[key].name} evening medication`
             // );
-            sendPushNotificationHandler(
-              authCtx.tokenNotify,
+            scheduleNotificationHandler(
               "Reminder!🌛",
               `Administrate to ${resp[key].name} evening medication`
             );
@@ -665,11 +658,12 @@ function Base() {
         // console.log(diffInDays);
         if (
           diffInDays === 7 ||
-          (diffInDays === 1 && actualDate.getUTCHours() === 19)
+          (diffInDays === 1 &&
+            actualDate.getUTCHours() === 19 &&
+            actualDate.getUTCMinutes() === 30)
         ) {
           if (resp[key].active === true) {
-            sendPushNotificationHandler(
-              authCtx.tokenNotify,
+            scheduleNotificationHandler(
               "Reminder! 🕒",
               `You have an appointment for ${resp[key].name} on ${new Date(
                 resp[key].date
@@ -680,8 +674,7 @@ function Base() {
               })}`
             );
           } else {
-            sendPushNotificationHandler(
-              authCtx.tokenNotify,
+            scheduleNotificationHandler(
               "Reminder! 🕒",
               `Your vet recommends an appointment for ${
                 resp[key].name

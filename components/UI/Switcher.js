@@ -25,7 +25,7 @@ function Switcher({
   slot,
   active,
 }) {
-  console.log(status, "STATUS");
+  console.log(status, name);
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   console.log(isSwitchOn);
   const authCtx = useContext(AuthContext);

@@ -30,6 +30,7 @@ function UserAppointments() {
         console.log(error);
       }
     }
+    console.log(authCtx.uid);
     async function getPastAppointments() {
       try {
         setFetching(true);
@@ -53,6 +54,7 @@ function UserAppointments() {
     getActiveAppointments();
     getPastAppointments();
     getCanceledAppointments();
+    console.log(pastAppointments, "canceled");
     setFetching(false);
   }, [status]);
   function handlerOnPress() {

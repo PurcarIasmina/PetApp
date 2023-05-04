@@ -22,6 +22,7 @@ import { getFormattedDate } from "../util/date";
 import NotificationsNextAppointemnt from "./NotificationsNextAppointment";
 import { getUserStatusAppointments } from "../store/databases";
 import { calendarFormat } from "moment";
+import Feather from "react-native-vector-icons/Feather";
 function NotificationsAnimalPage({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -38,7 +39,7 @@ function NotificationsAnimalPage({ navigation }) {
   const route = useRoute();
   const authCtx = useContext(AuthContext);
   const [aid, setAid] = [route.params ? route.params.aid : null];
-  const [name, setName] = [route.params ? route.params.animalName : null];
+  const [name, setName] = [route.params ? route.params.name : null];
   const [pills, setPills] = useState([]);
   const [pillsFoSelected, setPillsForSelected] = useState([]);
   const [notificationsForSelectedDay, setNotificationsForSelectedDay] =
@@ -164,34 +165,54 @@ function NotificationsAnimalPage({ navigation }) {
   }, [selectedDaterecieved]);
 
   navigation.setOptions({
-    headerRight: () =>
+    headerLeft: () =>
       pills.length > 0 && (
-        <TouchableOpacity
-          style={{ marginRight: 20, flexDirection: "row" }}
-          onPress={() => {
-            showCalendar(!calendar);
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginLeft: 10,
+            top: 1,
           }}
         >
-          {calendar && (
+          <TouchableOpacity
+            style={{ marginRight: 20 }}
+            onPress={() => {
+              showCalendar(!calendar);
+            }}
+          >
             <MaterialCommunityIcon
-              name={"arrow-right"}
-              size={18}
+              name={!calendar ? "calendar-arrow-right" : "pill"}
+              size={20}
               color={GlobalColors.colors.pink500}
-              style={{ top: 4, right: 4 }}
             />
-          )}
-          <MaterialCommunityIcon
-            name={!calendar ? "calendar-arrow-right" : "pill"}
-            size={20}
-            color={GlobalColors.colors.pink500}
-            style={{ top: 4, right: 4 }}
-          />
-          {/* <Text style={[styles.momentDayText, { fontSize: 14 }]}>
-            Appointments
-          </Text> */}
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
       ),
+    headerRight: () => (
+      <TouchableOpacity
+        style={{ marginRight: 20, flexDirection: "row", top: 2 }}
+        onPress={() => navigation.navigate("PetScreen", { ...route.params })}
+      >
+        <Feather
+          name={"chevron-left"}
+          color={GlobalColors.colors.pink500}
+          size={15}
+          style={{ top: 3, left: 2 }}
+        />
+        <Text
+          style={{
+            fontFamily: "Garet-Book",
+            color: GlobalColors.colors.pink500,
+            fontSize: 14,
+          }}
+        >
+          Back
+        </Text>
+      </TouchableOpacity>
+    ),
   });
+
   //   useEffect(() => {
   //     async function getNotificationss() {
   //       try {
@@ -305,7 +326,7 @@ function NotificationsAnimalPage({ navigation }) {
       </View>
       {item.additionalInfo.length > 0 && (
         <View>
-          <Text> item.additionalInfo</Text>
+          <Text> {item.additionalInfo}</Text>
         </View>
       )}
     </View>

@@ -6,12 +6,16 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useEffect, useContext, useState } from "react";
-import { getReservations } from "../store/databases";
+import { deleteReservation, getReservations } from "../store/databases";
 import { AuthContext } from "../context/auth";
 import { GlobalColors } from "../constants/colors";
 import Feather from "react-native-vector-icons/Feather";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from "moment";
+import AwesomeAlert from "react-native-awesome-alerts";
+import { Ionicons } from "@expo/vector-icons";
+import LoadingOverlay from "../components/UI/LoadingOverlay";
+
 function UserReservations({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -47,19 +51,43 @@ function UserReservations({ navigation }) {
     ),
   });
   const authCtx = useContext(AuthContext);
+  const [showAlert, setShowAlert] = useState(false);
   const [reservations, setReservations] = useState({});
+  const [deleted, setDeleted] = useState(false);
+  const [deletedFinished, setDeleteFinished] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [id, setId] = useState();
   useEffect(() => {
     async function getUserReservations() {
+      setFetching(true);
       const resp = await getReservations(authCtx.uid);
       setReservations(resp);
       console.log(reservations);
+      setFetching(false);
     }
     getUserReservations();
-  }, []);
-  const renderItem = (item) => {
+  }, [deletedFinished]);
+  console.log(id, "id");
+  useEffect(() => {
+    async function handlerDeleteReservations() {
+      if (deleted === true) {
+        try {
+          setShowAlert(false);
+          const resp = await deleteReservation(id);
+          setDeleteFinished(true);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+    handlerDeleteReservations();
+  }, [deleted]);
+
+  const renderItem = (item, active) => {
     const date = `${moment(item.startDate).format("ddd, DD.MM")} ${
       item.endDate ? `- ${moment(item.endDate).format("ddd, DD.MM")}` : ""
     }`;
+
     return (
       <View style={styles.cardItem}>
         <View
@@ -112,27 +140,99 @@ function UserReservations({ navigation }) {
             {item.pay === "Arrival" ? `at arrival` : ` online`}
           </Text>
         </View>
+
+        {active && (
+          <>
+            <View style={styles.closeCircle}>
+              <TouchableOpacity
+                onPress={() => {
+                  setId(item.generatedId), setShowAlert(true);
+                }}
+              >
+                <Ionicons
+                  style={styles.closeCircleElement}
+                  size={25}
+                  name={"md-close-circle-outline"}
+                />
+              </TouchableOpacity>
+            </View>
+            <AwesomeAlert
+              show={showAlert}
+              title="Are you sure you want to cancel this reservation?"
+              titleStyle={{ color: GlobalColors.colors.pink500, fontSize: 18 }}
+              showCancelButton={true}
+              cancelText="No"
+              cancelButtonStyle={{
+                backgroundColor: GlobalColors.colors.pastel1,
+                width: 80,
+                alignItems: "center",
+              }}
+              cancelButtonTextStyle={{
+                fontSize: 19,
+                color: GlobalColors.colors.pink10,
+              }}
+              onCancelPressed={() => {
+                setShowAlert(false);
+              }}
+              showConfirmButton={true}
+              confirmText="Yes"
+              confirmButtonStyle={{
+                backgroundColor: GlobalColors.colors.pink10,
+                width: 85,
+                alignItems: "center",
+              }}
+              confirmButtonTextStyle={{
+                fontSize: 19,
+                color: GlobalColors.colors.pastel1,
+              }}
+              onConfirmPressed={() => {
+                setShowAlert(false), setDeleted(true);
+              }}
+            />
+          </>
+        )}
       </View>
     );
   };
+  if (fetching) return <LoadingOverlay message={"Loading..."} />;
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { marginBottom: 20 }]}>
         Active reservations
       </Text>
+      {reservations &&
+        reservations.active &&
+        Object.keys(reservations.active).length === 0 && (
+          <Text
+            style={[styles.title, { fontSize: 14, marginBottom: 40, top: -20 }]}
+          >
+            No active reservations!
+          </Text>
+        )}
       <View>
         <FlatList
           data={reservations.active}
-          renderItem={({ item, index }) => renderItem(item)}
+          renderItem={({ item, index }) => renderItem(item, true)}
         />
       </View>
-      <Text style={styles.title}>Past reservations</Text>
-      <View>
-        <FlatList
-          data={reservations.past}
-          renderItem={({ item, index }) => renderItem(item)}
-        />
-      </View>
+      <Text style={[styles.title, { marginBottom: 20 }]}>
+        Past reservations
+      </Text>
+      {reservations &&
+        reservations.past &&
+        Object.keys(reservations.past).length === 0 && (
+          <Text style={[styles.title, { fontSize: 14, top: -20 }]}>
+            No past reservations!
+          </Text>
+        )}
+      {reservations.past && (
+        <View>
+          <FlatList
+            data={reservations.past}
+            renderItem={({ item, index }) => renderItem(item, false)}
+          />
+        </View>
+      )}
     </View>
   );
 }
@@ -167,5 +267,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 33,
     marginBottom: 2,
+  },
+  closeCircle: {
+    // marginLeft: Dimensions.get("screen").width / 3,
+    position: "absolute",
+    left: 340,
+  },
+  closeCircleElement: {
+    color: GlobalColors.colors.gray10,
+    size: 30,
+    top: 0,
+    right: 2,
   },
 });

@@ -11,6 +11,7 @@ import HeaderButtonAppointment from "../components/UI/HeaderButtonAppointment";
 import { GlobalColors } from "../constants/colors";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
+import Feather from "react-native-vector-icons/Feather";
 function AnimalRecords({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -22,6 +23,28 @@ function AnimalRecords({ navigation }) {
       shadowOpacity: 0,
       shadowColor: "transparent",
     },
+    headerRight: () => (
+      <TouchableOpacity
+        style={{ marginRight: 20, flexDirection: "row", top: 5 }}
+        onPress={() => navigation.navigate("PetScreen", { ...route.params })}
+      >
+        <Feather
+          name={"chevron-left"}
+          color={GlobalColors.colors.pink500}
+          size={15}
+          style={{ top: 3, left: 2 }}
+        />
+        <Text
+          style={{
+            fontFamily: "Garet-Book",
+            color: GlobalColors.colors.pink500,
+            fontSize: 14,
+          }}
+        >
+          Back
+        </Text>
+      </TouchableOpacity>
+    ),
   });
 
   const route = useRoute();

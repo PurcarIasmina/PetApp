@@ -35,7 +35,7 @@ function PayScreen({ navigation }) {
   const formattedDate = `${
     today.getMonth() + 1
   }/${today.getDate()}/${today.getFullYear()}`;
-  let daysDifference = 1;
+  let daysDifference = 0;
   if (route.params.endDate) {
     const startDate = moment(route.params.startDate, "YYYY-MM-DD");
     const endDate = moment(route.params.endDate, "YYYY-MM-DD");
@@ -77,7 +77,8 @@ function PayScreen({ navigation }) {
   const [phoneInvalid, setPhoneInvalid] = useState(false);
   const [checkInvalid, setCheckInvalid] = useState(false);
   const newPrice =
-    (100 * route.params.animals.length * daysDifference).toString() + "00";
+    (100 * route.params.animals.length * (daysDifference + 1)).toString() +
+    "00";
   const stripe = useStripe();
   const handleCheck = (text) => {
     setCheckedItems(text);
@@ -121,7 +122,7 @@ function PayScreen({ navigation }) {
           checkedItems,
           email,
           phone,
-          (100 * route.params.animals.length * daysDifference).toString(),
+          (100 * route.params.animals.length * (daysDifference + 1)).toString(),
           authCtx.uid
         );
         if (resp) {
@@ -167,7 +168,7 @@ function PayScreen({ navigation }) {
           },
           colors: {
             // icon: GlobalColors.colors.darkDustyPurple,
-            // primary: Colors.colors.darkDustyPurple,
+            primary: GlobalColors.colors.pink500,
             background: "#FFFFFF",
             // componentBackground: Colors.colors.cardBackgroundColor,
             // componentBorder: Colors.colors.gray,
@@ -175,7 +176,7 @@ function PayScreen({ navigation }) {
             // primaryText: Colors.colors.darkDustyPurple,
             // secondaryText: Colors.colors.dustyPurple,
             // componentText: Colors.colors.gray,
-            // placeholderText: Colors.colors.gray,
+            // placeholderText: Colors.colors.gray,P
           },
         },
         applePay: {
@@ -315,7 +316,7 @@ function PayScreen({ navigation }) {
               <Text
                 style={{ color: GlobalColors.colors.blue500, fontSize: 15 }}
               >
-                {daysDifference}
+                {daysDifference + 1}
               </Text>
             </Text>
             <Text style={styles.subtitle}>
@@ -342,7 +343,7 @@ function PayScreen({ navigation }) {
                   top: 5,
                 }}
               >
-                {100 * route.params.animals.length * daysDifference} lei
+                {100 * route.params.animals.length * (daysDifference + 1)} lei
               </Text>
             </View>
           </View>

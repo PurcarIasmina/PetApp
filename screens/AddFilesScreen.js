@@ -8,7 +8,6 @@ import {
   Linking,
   TouchableOpacity,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
 import { Button, TouchableRipple } from "react-native-paper";
 import * as DocumentPicker from "expo-document-picker";
 import { GlobalColors } from "../constants/colors";
@@ -37,7 +36,7 @@ import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIc
 import Feather from "react-native-vector-icons/Feather";
 import AwesomeAlert from "react-native-awesome-alerts";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-
+import { useRoute } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 const getFileIcon = (extension) => {
   switch (extension) {
@@ -75,6 +74,7 @@ const getFileIcon = (extension) => {
 };
 
 function AddFilesScreen({ navigation }) {
+  const route = useRoute();
   navigation.setOptions({
     headerShown: true,
     headerStyle: {
@@ -85,9 +85,30 @@ function AddFilesScreen({ navigation }) {
       shadowOpacity: 0,
       shadowColor: "transparent",
     },
+    headerRight: () => (
+      <TouchableOpacity
+        style={{ marginRight: 20, flexDirection: "row", top: 5 }}
+        onPress={() => navigation.navigate("PetScreen", { ...route.params })}
+      >
+        <Feather
+          name={"chevron-left"}
+          color={GlobalColors.colors.pink500}
+          size={15}
+          style={{ top: 3, left: 2 }}
+        />
+        <Text
+          style={{
+            fontFamily: "Garet-Book",
+            color: GlobalColors.colors.pink500,
+            fontSize: 14,
+          }}
+        >
+          Back
+        </Text>
+      </TouchableOpacity>
+    ),
   });
 
-  const route = useRoute();
   const [uploading, setUploading] = useState(false);
   const [progress, setUploadProgress] = useState(0);
   const authCtx = useContext(AuthContext);

@@ -632,7 +632,10 @@ function MedicalRecordCard({ appointment, status }) {
               position: "absolute",
               left: -20,
               top: 15,
+              height: 130,
             }}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
           >
             {appointment.result.pillsPlan && (
               <View style={{ flex: 1 }}>
@@ -723,14 +726,13 @@ export default MedicalRecordCard;
 const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: GlobalColors.colors.gray0,
-    height: 250,
     width: 380,
     borderRadius: 10,
     marginVertical: 10,
     alignSelf: "center",
     padding: 20,
-    overflow: "scroll",
     flexDirection: "row",
+    height: 250,
   },
   diagnostic: {
     fontSize: 15,

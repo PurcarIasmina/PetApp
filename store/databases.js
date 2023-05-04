@@ -265,6 +265,8 @@ export async function getReservations(uid) {
     const filtered = reservationsFiltered.filter(function (reservation) {
       return reservation.uid === uid;
     });
+    filtered.sort((a, b) => a.startDate > b.startDate);
+    console.log(filtered);
     const currentDate = new Date();
     const timezoneOffset = 180;
     const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
@@ -292,6 +294,13 @@ export async function getReservations(uid) {
   }
 
   return { active: reservationsActive, past: reservationsPast };
+}
+
+export async function deleteReservation(generatedId) {
+  const response = await axios.delete(
+    BACKEND_URL + `/reservations/${generatedId}.json`
+  );
+  return response;
 }
 // export async function addToken(uid) {
 //   const expoToken = await registerForPushNotificationsAsync();
@@ -611,13 +620,14 @@ export async function getUserStatusAppointments(uid, status) {
       console.log(romaniaDateTime);
     } else if (status === 1) {
       filtered = appointments.filter(function (appointment) {
+        console.log(appointment.uid === uid);
         return (
-          (appointment.uid === uid &&
-            appointment.canceled === 0 &&
-            appointment.date < getFormattedDate(new Date(romaniaDateTime))) ||
-          (appointment.date === getFormattedDate(new Date(romaniaDateTime)) &&
-            appointment.slot.slice(6, 11) <
-              romaniaDateTime.toISOString().slice(11, 16))
+          appointment.uid === uid &&
+          appointment.canceled === 0 &&
+          (appointment.date < getFormattedDate(new Date(romaniaDateTime)) ||
+            (appointment.date === getFormattedDate(new Date(romaniaDateTime)) &&
+              appointment.slot.slice(6, 11) <
+                romaniaDateTime.toISOString().slice(11, 16)))
         );
       });
     } else {

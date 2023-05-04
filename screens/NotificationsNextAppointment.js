@@ -20,7 +20,7 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
   const [selectedDaterecieved, setSelctedDateReceived] = useState();
   //   console.log(nextAppointments);
 
-  console.log(markedDates);
+  console.log(markedDates, "marked dates");
   const [nextActiveAppointments, setNextActiveAppointments] = useState([]);
   const [datesActive, setDatesActive] = useState([]);
   const [datesFuture, setDatesFuture] = useState([]);
@@ -231,6 +231,7 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
     return null;
   };
   if (fetching) return <LoadingOverlay message={"Loading.."} />;
+  console.log(markedDates, markedDatesActive);
   return (
     <View>
       <Calendar

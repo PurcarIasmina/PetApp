@@ -56,6 +56,7 @@ function PetCard({
   const [colorr, setColor] = useState(color);
   const [photoo, setPhoto] = useState(photo);
   const [genderr, setGender] = useState(gender);
+  console.log(genderr);
   const [bottom, setBottom] = useState(false);
   const [typeInvalid, setTypeInvalid] = useState({
     nameInvalid: false,
@@ -380,7 +381,7 @@ function PetCard({
         </View>
         <View style={styles.genderField}>
           <SwitchSelector
-            initial={0}
+            initial={genderr === "Female" ? 0 : 1}
             onPress={setValue.bind(this, "gender")}
             textColor={GlobalColors.colors.pink500}
             selectedColor={GlobalColors.colors.pastel1}
@@ -401,11 +402,11 @@ function PetCard({
           <View style={styles.editButtonContainer}>
             <IconButton
               left={150}
-              bottom={0}
               icon="save"
               label=""
               color="gray"
               size={25}
+              bottom={4}
               onPress={saveHandler}
             />
           </View>
@@ -464,8 +465,14 @@ function PetCard({
             onPress={() => {
               navigation.navigate("AnimalRecords", {
                 aid: aidd,
+                name: namee,
+                photo: photoo,
+                breed: breedd,
+                datebirth: datebirthh,
+                owner: ownerr,
+                color: colorr,
+                gender: genderr,
                 generatedId: generatedId,
-                photoUrl: photo,
               });
             }}
             top={18}
@@ -482,9 +489,14 @@ function PetCard({
             onPress={() => {
               navigation.navigate("AnimalNotifications", {
                 aid: aidd,
+                name: namee,
+                photo: photoo,
+                breed: breedd,
+                datebirth: datebirthh,
+                owner: ownerr,
+                color: colorr,
+                gender: genderr,
                 generatedId: generatedId,
-                animalName: namee,
-                photoUrl: photo,
               });
             }}
             // label="Reminders"
@@ -508,9 +520,15 @@ function PetCard({
           <IconButton
             onPress={() => {
               navigation.navigate("AddFilesScreen", {
-                aid: aid,
+                aid: aidd,
                 name: namee,
                 photo: photoo,
+                breed: breedd,
+                datebirth: datebirthh,
+                owner: ownerr,
+                color: colorr,
+                gender: genderr,
+                generatedId: generatedId,
               });
             }}
             // label="Attach"
@@ -630,8 +648,8 @@ const styles = StyleSheet.create({
     width: "90%",
     borderBottomColor: GlobalColors.colors.pink500,
     borderBottomWidth: 0.5,
-    height: 30,
-    paddingVertical: 10,
+    height: 32,
+    paddingVertical: 8,
     color: "gray",
     fontWeight: "bold",
     alignContent: "center",
