@@ -226,34 +226,38 @@ function AnimalRecords({ navigation }) {
           );
         })}
       </ScrollView>
-      {((status === 0 && consultations.length === 0) ||
-        (status === 1 && vaccines.length === 0) ||
-        (disinfestations.length === 0 && status === 2)) && (
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            top: -Dimensions.get("screen").width,
-          }}
-        >
-          <Ionicons
-            name={"calendar-outline"}
-            color={GlobalColors.colors.gray10}
-            size={40}
-          />
-          <Text
+
+      <View style={{ position: "absolute", top: 100 }}>
+        {((status === 0 && consultations.length === 0) ||
+          (status === 1 && vaccines.length === 0) ||
+          (disinfestations.length === 0 && status === 2)) && (
+          <View
             style={{
-              fontWeight: "600",
-              fontSize: 20,
-              color: GlobalColors.colors.gray10,
-              marginRight: 3,
+              position: "absolute",
+              justifyContent: "center",
+              alignItems: "center",
+              alignSelf: "center",
+              left: 150,
+              top: 200,
             }}
           >
-            No Records
-          </Text>
-        </View>
-      )}
-      <View style={styles.listContainer}>
+            <Ionicons
+              name={"calendar-outline"}
+              color={GlobalColors.colors.gray10}
+              size={40}
+            />
+            <Text
+              style={{
+                fontWeight: "600",
+                fontSize: 20,
+                color: GlobalColors.colors.gray10,
+                marginRight: 3,
+              }}
+            >
+              No Records
+            </Text>
+          </View>
+        )}
         <FlatList
           data={
             status === 0
@@ -284,7 +288,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   listContainer: {
-    top: -450,
+    // justifyContent: "center",
+    // alignItems: "center",
   },
   headerButtons: {
     flexDirection: "row",

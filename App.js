@@ -618,8 +618,8 @@ function Base() {
           );
           if (
             resp[key].momentTime.localeCompare("Evening") === 0 &&
-            actualDate.getUTCHours() === 17 &&
-            actualDate.getUTCMinutes() === 44
+            actualDate.getUTCHours() === 21 &&
+            actualDate.getUTCMinutes() === 16
           ) {
             console.log("daadada");
             // scheduleNotificationHandler(

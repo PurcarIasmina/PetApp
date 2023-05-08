@@ -598,15 +598,38 @@ function MedicalRecordCard({ appointment, status }) {
         )}
       </View>
       <View style={{ marginTop: 45, left: 180, position: "absolute" }}>
-        <View style={{ alignItems: "center", marginLeft: 20 }}>
+        <View
+          style={{
+            alignItems: "center",
+            marginLeft: 20,
+            paddingRight: 10,
+          }}
+        >
           {appointment.result.diagnostic && (
-            <Text style={[styles.diagnostic, { marginLeft: -20, bottom: 10 }]}>
+            <Text
+              ellipsizeMode="tail"
+              style={[
+                styles.diagnostic,
+                { marginLeft: -20, bottom: 10, marginRight: 10 },
+              ]}
+            >
               Diagnostic: {appointment.result.diagnostic}
             </Text>
           )}
           {appointment.result.doctorReason.localeCompare("Vaccine") === 0 && (
-            <View style={{ flexDirection: "row", left: -20, bottom: 10 }}>
-              <Text style={styles.diagnostic}>Vaccine Plan</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                left: -20,
+                bottom: 10,
+              }}
+            >
+              <Text
+                ellipsizeMode="tail"
+                style={[styles.diagnostic, { marginRight: 10 }]}
+              >
+                Vaccine Plan
+              </Text>
               <MaterialCommunityIcon
                 name={"pill"}
                 size={15}
@@ -729,7 +752,7 @@ const styles = StyleSheet.create({
     width: 380,
     borderRadius: 10,
     marginVertical: 10,
-    alignSelf: "center",
+    marginHorizontal: 25,
     padding: 20,
     flexDirection: "row",
     height: 250,

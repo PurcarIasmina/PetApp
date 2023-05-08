@@ -155,7 +155,6 @@ function DoctorBookAppointment({ navigation }) {
 
   const handlePrevDay = () => {
     const prevDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-
     if (date.getUTCDay() === 1) {
       const daysUntilFriday = 2;
       prevDate.setDate(prevDate.getUTCDate() - daysUntilFriday);
@@ -183,7 +182,7 @@ function DoctorBookAppointment({ navigation }) {
   }
   const renderDate = (date, index) => {
     const isWeekend = date.getUTCDay() === 0 || date.getUTCDay() === 6;
-
+    console.log(date);
     const onPressHandler = isWeekend ? undefined : () => onDateSelect(date);
 
     return (

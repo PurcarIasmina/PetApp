@@ -179,12 +179,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 4,
   },
   dateStyle: {
     color: "white",
     fontFamily: "Garet-Book",
     fontSize: 18,
     padding: 3,
+    textAlign: "center",
   },
   nameStyle: {
     color: GlobalColors.colors.pink500,
