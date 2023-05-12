@@ -23,7 +23,6 @@ function formatDate(dateString) {
   } else return "";
 }
 function MedicalRecordCard({ appointment, status }) {
-  //   console.log(appointment);
   const [docDetails, setDocDetails] = useState({});
   const [fetching, setFetching] = useState(false);
   const [animalDetails, setAnimalDetails] = useState({});
@@ -32,7 +31,6 @@ function MedicalRecordCard({ appointment, status }) {
       try {
         setFetching(true);
         const resp = await getUserDetails(appointment.did);
-        console.log(resp);
         setDocDetails(resp);
 
         setFetching(false);

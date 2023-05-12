@@ -4,9 +4,13 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../../constants/colors";
 import { useNavigation } from "@react-navigation/native";
 import { getAge } from "../../util/date";
+import Swipeable from "react-native-gesture-handler/Swipeable";
 import LoadingOverlay from "../UI/LoadingOverlay";
-function PetElement({ animal }) {
+import { deleteAnimal } from "../../store/databases";
+import { useState } from "react";
+function PetElement({ animal, setDeleting }) {
   const navigation = useNavigation();
+  const [fetching, setFetching] = useState(false);
   function onPressHandler() {
     navigation.navigate("PetScreen", {
       name: animal.name,
@@ -20,31 +24,63 @@ function PetElement({ animal }) {
       generatedId: animal.generatedId,
     });
   }
-  if (!animal) {
+
+  async function onDelete() {
+    setFetching(true);
+    await deleteAnimal(animal.generatedId);
+    setDeleting(true);
+    setFetching(false);
+  }
+
+  function renderRightActions() {
+    return (
+      <View
+        style={{
+          margin: 0,
+          alignContent: "center",
+          justifyContent: "center",
+          width: 80,
+
+          borderRadius: 30,
+        }}
+      >
+        <Ionicons name="trash" size={40} color="white" onPress={onDelete} />
+      </View>
+    );
+  }
+
+  if (!animal || fetching) {
     return <LoadingOverlay message="Loading..." />;
   }
   return (
-    <TouchableOpacity onPress={onPressHandler}>
-      <View style={styles.elementContainer}>
-        <View
-          style={{
-            maxHeight: 100,
-            overflow: "hidden",
-            borderRadius: 30,
-            alignSelf: "center",
-          }}
-        >
-          <Image style={styles.image} source={{ uri: animal.photoUrl }} />
+    <Swipeable
+      renderRightActions={renderRightActions}
+      // onSwipeableOpen={() => closeRow(index)}
+      // ref={(ref) => (row[index] = ref)}
+      rightOpenValue={-100}
+    >
+      <TouchableOpacity onPress={onPressHandler}>
+        <View style={styles.elementContainer}>
+          <View
+            style={{
+              maxHeight: 100,
+              overflow: "hidden",
+              borderRadius: 30,
+              alignSelf: "center",
+            }}
+          >
+            <Image style={styles.image} source={{ uri: animal.photoUrl }} />
+          </View>
+          <View style={styles.detailsContainer}>
+            <Text style={styles.name}>{animal.name}</Text>
+            <Text style={styles.date}>{animal.date}</Text>
+            <Text style={styles.date}>{`${getAge(animal.date).years}y ${
+              getAge(animal.date).months
+            }m ${getAge(animal.date).days}d`}</Text>
+          </View>
         </View>
-        <View style={styles.detailsContainer}>
-          <Text style={styles.name}>{animal.name}</Text>
-          <Text style={styles.date}>{animal.date}</Text>
-          <Text style={styles.date}>{`${getAge(animal.date).years}y ${
-            getAge(animal.date).months
-          }m ${getAge(animal.date).days}d`}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Swipeable>
   );
 }
 export default PetElement;

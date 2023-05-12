@@ -14,6 +14,7 @@ function UserAnimalsScreen({ navigation }) {
   const authCtx = useContext(AuthContext);
   const [animalsFetching, setAnimalsFetching] = useState(false);
   const [animals, setAnimals] = useState([]);
+  const [deleting, setDeleting] = useState(false);
   let animalss;
   let screen = null;
   navigation.setOptions({
@@ -39,6 +40,26 @@ function UserAnimalsScreen({ navigation }) {
     }
     getAnimals();
   }, []);
+
+  useEffect(() => {
+    if (deleting === true) {
+      async function getAnimals() {
+        try {
+          setAnimalsFetching(true);
+          console.log(authCtx.uid);
+          animalss = await getUsersAnimals(authCtx.uid);
+          console.log(animalss);
+          setAnimals(animalss);
+        } catch (error) {
+          console.log(error);
+        }
+        setAnimalsFetching(false);
+        setDeleting(false);
+      }
+      getAnimals();
+    }
+  }, [deleting]);
+
   //    const getAnimals = async ()=>{
   //     try{
   //     setAnimalsFetching(true)
@@ -100,7 +121,7 @@ function UserAnimalsScreen({ navigation }) {
       <FlatList
         data={animals}
         renderItem={({ item }) => {
-          return <PetElement animal={{ ...item }} />;
+          return <PetElement setDeleting={setDeleting} animal={{ ...item }} />;
         }}
         keyExtractor={(item) => item.aid}
       ></FlatList>

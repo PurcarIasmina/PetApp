@@ -121,18 +121,20 @@ function AuthenticatedDrawerDoctor() {
   const [uncount, setUncount] = useState({});
   const [count, setCount] = useState();
   const authCtx = useContext(AuthContext);
-  const [isFocused, setIsFocused] = useState(true);
   const [oldCount, setoldCount] = useState(0);
-  const [status, setStatusCount] = useState();
-  useLayoutEffect(() => {
+
+  useEffect(() => {
     async function getUnread() {
       let resp = {};
       resp = await getUnreadMessagesCount(authCtx.uid);
+
       setUncount(resp);
+      setoldCount(resp);
     }
+
     const interval = setInterval(() => {
       getUnread();
-    }, 3000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -283,18 +285,20 @@ function AuthenticatedDrawerUser() {
   const [uncount, setUncount] = useState({});
   const [count, setCount] = useState();
   const authCtx = useContext(AuthContext);
-  const [isFocused, setIsFocused] = useState(true);
   const [oldCount, setoldCount] = useState(0);
-  const [status, setStatusCount] = useState();
-  useLayoutEffect(() => {
+
+  useEffect(() => {
     async function getUnread() {
       let resp = {};
       resp = await getUnreadMessagesCount(authCtx.uid);
+
       setUncount(resp);
+      setoldCount(resp);
     }
+
     const interval = setInterval(() => {
       getUnread();
-    }, 3000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -308,7 +312,7 @@ function AuthenticatedDrawerUser() {
 
       setCount(total);
     }
-  }, [uncount]);
+  }, []);
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} />}
