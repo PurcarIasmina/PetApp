@@ -295,6 +295,10 @@ export async function getReservations(uid) {
 
   return { active: reservationsActive, past: reservationsPast };
 }
+export async function deleteAnimal(aid) {
+  const response = await axios.delete(BACKEND_URL + `/animals/${aid}.json`);
+  return response;
+}
 
 export async function deleteReservation(generatedId) {
   const response = await axios.delete(
@@ -462,16 +466,23 @@ export async function getUserNotifications(uid) {
       return notification.uid === uid;
     });
     for (const key in filtered) {
-      const notificationDetail = {
-        aid: filtered[key].aid,
-        date: filtered[key].date,
-        uid: filtered[key].uid,
-        pill: filtered[key].pill,
-        momentTime: filtered[key].momentTime,
-        generatedId: filtered[key].key,
-        name: filtered[key].name,
-      };
-      notificationsDetails.push(notificationDetail);
+      const animalsResponse = await axios.get(BACKEND_URL + `/animals.json`);
+      const animals = Object.values(animalsResponse.data);
+      const animalExists = animals.some(
+        (animal) => animal.aid === filtered[key].aid
+      );
+      if (animalExists) {
+        const notificationDetail = {
+          aid: filtered[key].aid,
+          date: filtered[key].date,
+          uid: filtered[key].uid,
+          pill: filtered[key].pill,
+          momentTime: filtered[key].momentTime,
+          generatedId: filtered[key].key,
+          name: filtered[key].name,
+        };
+        notificationsDetails.push(notificationDetail);
+      }
     }
   }
   return notificationsDetails;
@@ -494,15 +505,22 @@ export async function getUserAppointmentsNotifications(uid) {
     });
     console.log(filtered);
     for (const key in filtered) {
-      const notificationDetail = {
-        aid: filtered[key].aid,
-        date: filtered[key].date,
-        uid: filtered[key].uid,
-        name: filtered[key].name,
-        generatedId: filtered[key].key,
-        active: filtered[key].active,
-      };
-      notificationsDetails.push(notificationDetail);
+      const animalsResponse = await axios.get(BACKEND_URL + `/animals.json`);
+      const animals = Object.values(animalsResponse.data);
+      const animalExists = animals.some(
+        (animal) => animal.aid === filtered[key].aid
+      );
+      if (animalExists) {
+        const notificationDetail = {
+          aid: filtered[key].aid,
+          date: filtered[key].date,
+          uid: filtered[key].uid,
+          name: filtered[key].name,
+          generatedId: filtered[key].key,
+          active: filtered[key].active,
+        };
+        notificationsDetails.push(notificationDetail);
+      }
     }
   }
   return notificationsDetails;
@@ -531,9 +549,12 @@ export async function getDoctorSlotsAppointments(did, date) {
     });
     console.log(filtered);
     for (const key in filtered) {
-      const slot = filtered[key].slot;
+      let detail = await getAnimalDetails(filtered[key].aid);
+      if (Object.keys(detail).length > 0) {
+        const slot = filtered[key].slot;
 
-      slots.push(slot);
+        slots.push(slot);
+      }
     }
     console.log(slots);
   }
@@ -559,28 +580,31 @@ export async function getAppointments(did, date) {
   console.log(did, date);
   console.log(filtered);
 
-  // console.log(filtered);
   for (const key in filtered) {
-    const appointmentDetail = {
-      did: filtered[key].did,
-      date: filtered[key].date,
-      uid: filtered[key].uid,
-      slot: filtered[key].slot,
-      animal: await getAnimalDetails(filtered[key].aid),
-      reason: filtered[key].reason,
-      ownername: filtered[key].ownername,
-      photoUrl: await getImageUrl(
-        `${filtered[key].uid}/${filtered[key].aid}.jpeg`
-      ),
-      generatedId: filtered[key].key,
-    };
-    {
-      filtered[key].hasOwnProperty("done")
-        ? (appointmentDetail["done"] = 1)
-        : null;
+    let detail = await getAnimalDetails(filtered[key].aid);
+    console.log(detail);
+    if (Object.keys(detail).length > 0) {
+      const appointmentDetail = {
+        did: filtered[key].did,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        slot: filtered[key].slot,
+        animal: detail,
+        reason: filtered[key].reason,
+        ownername: filtered[key].ownername,
+        photoUrl: await getImageUrl(
+          `${filtered[key].uid}/${filtered[key].aid}.jpeg`
+        ),
+        generatedId: filtered[key].key,
+      };
+      {
+        filtered[key].hasOwnProperty("done")
+          ? (appointmentDetail["done"] = 1)
+          : null;
+      }
+      console.log(appointmentDetail);
+      appointmentsDetails.push(appointmentDetail);
     }
-    console.log(appointmentDetail);
-    appointmentsDetails.push(appointmentDetail);
   }
   // console.log(appointmentsDetails);
   appointmentsDetails.sort((ap1, ap2) => ap1.slot.localeCompare(ap2.slot));
@@ -637,22 +661,26 @@ export async function getUserStatusAppointments(uid, status) {
     }
 
     for (const key in filtered) {
-      const appointmentDetail = {
-        did: filtered[key].did,
-        date: filtered[key].date,
-        uid: filtered[key].uid,
-        slot: filtered[key].slot,
-        animal: await getAnimalDetails(filtered[key].aid),
-        reason: filtered[key].reason,
-        canceled: filtered[key].canceled,
-        ownername: filtered[key].ownername,
-        photoUrl: await getImageUrl(
-          `${filtered[key].uid}/${filtered[key].aid}.jpeg`
-        ),
-        generatedId: filtered[key].key,
-      };
+      let detail = await getAnimalDetails(filtered[key].aid);
+      console.log(detail);
+      if (Object.keys(detail).length > 0) {
+        const appointmentDetail = {
+          did: filtered[key].did,
+          date: filtered[key].date,
+          uid: filtered[key].uid,
+          slot: filtered[key].slot,
+          animal: detail,
+          reason: filtered[key].reason,
+          canceled: filtered[key].canceled,
+          ownername: filtered[key].ownername,
+          photoUrl: await getImageUrl(
+            `${filtered[key].uid}/${filtered[key].aid}.jpeg`
+          ),
+          generatedId: filtered[key].key,
+        };
 
-      appointmentsDetails.push(appointmentDetail);
+        appointmentsDetails.push(appointmentDetail);
+      }
     }
   }
 
@@ -813,11 +841,14 @@ export async function login(email, password) {
     password: password,
     returnSecureToken: true,
   });
-  const token = response.data.idToken;
-  const id = response.data.localId;
-  const name = await getUserName(id);
-  const loginresult = { token: token, id: id, name: name };
-  return loginresult;
+  if (response.data) {
+    const token = response.data.idToken;
+    const id = response.data.localId;
+    const name = await getUserName(id);
+    const loginresult = { token: token, id: id, name: name };
+    return loginresult;
+  }
+  return null;
 }
 export async function getUserName(id) {
   const docRef = doc(db, "users", id);
