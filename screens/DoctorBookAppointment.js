@@ -87,9 +87,23 @@ function DoctorBookAppointment({ navigation }) {
   let currentDate = new Date();
   const timezoneOffset = 180;
   const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
-  currentDate = new Date(romanianTime);
+  currentDate =
+    // new Date(romanianTime).getDay() === 6 || 0
+    //   ? new Date(romanianTime).getDay() === 6
+    //     ? new Date(romanianTime) + 2
+    //     : new Date(romanianTime) + 1
+    //   :
+    new Date(romanianTime);
 
-  const [date, setDate] = useState(new Date(currentDate));
+  const auxDate = new Date(currentDate);
+  if (
+    auxDate instanceof Date &&
+    (auxDate.getUTCDay() === 0 || auxDate.getUTCDay() === 6)
+  ) {
+    const daysToAdd = auxDate.getUTCDay() === 0 ? 1 : 2;
+    auxDate.setUTCDate(auxDate.getUTCDate() + daysToAdd);
+  }
+  const [date, setDate] = useState(new Date(auxDate));
   const [selectedDate, setSelectedDate] = useState(new Date(date));
   console.log(selectedDate);
   const swiper = useRef();
