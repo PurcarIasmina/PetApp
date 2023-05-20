@@ -153,31 +153,34 @@ function DoctorBookAppointment({ navigation }) {
   }, [selectedDate]);
 
   const handleNextDay = () => {
-    const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+    const timezoneOffset = new Date().getTimezoneOffset();
+    const nextDate = moment(date).add(1, "day").add(timezoneOffset, "minutes");
 
-    if (nextDate.getUTCDay() === 0 || nextDate.getUTCDay() === 6) {
-      const daysUntilMonday = 8 - nextDate.getUTCDay();
+    if (nextDate.isoWeekday() === 6 || nextDate.isoWeekday() === 7) {
+      const daysUntilMonday = 8 - nextDate.isoWeekday();
 
       if (daysUntilMonday <= 5) {
-        nextDate.setDate(nextDate.getUTCDate() + daysUntilMonday);
+        nextDate.add(daysUntilMonday, "days");
       }
     }
 
-    setDate(nextDate);
-    setSelectedDate(nextDate);
+    setDate(nextDate.toDate());
+    setSelectedDate(nextDate.toDate());
   };
 
   const handlePrevDay = () => {
-    const prevDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
-    if (date.getUTCDay() === 1) {
+    const prevDate = moment(date)
+      .subtract(1, "day")
+      .add(timezoneOffset, "minutes");
+
+    if (prevDate.isoWeekday() === 7) {
       const daysUntilFriday = 2;
-      prevDate.setDate(prevDate.getUTCDate() - daysUntilFriday);
+      prevDate.subtract(daysUntilFriday, "days");
     }
 
-    setDate(prevDate);
-    setSelectedDate(prevDate);
+    setDate(prevDate.toDate());
+    setSelectedDate(prevDate.toDate());
   };
-
   const onDateSelect = (date) => {
     setSelectedDate(date);
     setDate(date);

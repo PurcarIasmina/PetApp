@@ -19,6 +19,7 @@ import moment from "moment";
 import { Ionicons } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import UserAnimalsScreen from "./UserAnimalsScreen";
+import { getAllReservations, getNumberReservations } from "../store/databases";
 
 function BookHotel({ navigation }) {
   navigation.setOptions({
@@ -47,21 +48,21 @@ function BookHotel({ navigation }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [visible, setVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState("Select dates");
+  const [selectedDate, setSelectedDate] = useState("Select dates...");
   const [animals, setAnimals] = useState([{ name: "", breed: "" }]);
   const [dateInvalid, setDateInvalid] = useState(false);
   const [animalDatesInvalid, setAnimalDatesInvalid] = useState(false);
+  const [reservations, setReservations] = useState([]);
+
   useEffect(() => {
-    if (startDate && !endDate)
-      setSelectedDate(`${moment(startDate).format("ddd, DD.MM")} `);
-    else if (startDate && endDate)
-      setSelectedDate(
-        `${moment(startDate).format("ddd, DD.MM")} - ${moment(endDate).format(
-          "ddd, DD.MM"
-        )} `
-      );
-    else setSelectedDate("Select dates...");
-  }, [endDate, startDate]);
+    async function getreservations() {
+      let resp = [];
+      resp = await getAllReservations();
+      setReservations(resp);
+      console.log(reservations, "reservations");
+    }
+    getreservations();
+  }, []);
   const calendarTheme = {
     calendarBackground: GlobalColors.colors.gray0,
     textSectionTitleColor: "#b6c1cd",
@@ -91,6 +92,10 @@ function BookHotel({ navigation }) {
     if (selectedDate === "Select dates...") {
       setDateInvalid(true);
       return updateError("Select a date!", setError);
+    }
+    if (getAvailableSpots(startDate, selectedDate) - animals.length < 0) {
+      setDateInvalid(true);
+      return updateError("No places available for selected dates!", setError);
     }
     const emptyAnimalFields = animals.filter(
       (animal) => animal.name.trim() === "" || animal.breed.trim() === ""
@@ -192,7 +197,22 @@ function BookHotel({ navigation }) {
     };
     setAnimals(newAnimals);
   };
+  const getAvailableSpots = (startDate, endDate) => {
+    const totalSpots = 10;
+    const overlappingReservations = reservations.filter((reservation) => {
+      const resStartDate = reservation.startDate;
+      const resEndDate = reservation.endDate;
 
+      return (
+        (resStartDate >= startDate && resStartDate <= endDate) ||
+        (resEndDate >= startDate && resEndDate <= endDate) ||
+        (resStartDate <= startDate && resEndDate >= endDate)
+      );
+    });
+
+    const availableSpots = totalSpots - overlappingReservations.length;
+    return availableSpots;
+  };
   const handleAnimalBreedChange = (index, value) => {
     const newAnimals = [...animals];
     newAnimals[index] = {
@@ -242,6 +262,7 @@ function BookHotel({ navigation }) {
     }
     return inputs;
   };
+
   return (
     <>
       <ScrollView style={{ backgroundColor: "white", flex: 1 }}>
@@ -249,6 +270,11 @@ function BookHotel({ navigation }) {
         {error === "Select a date!" && (
           <Text style={[styles.title, { fontSize: 14, marginBottom: 2 }]}>
             Select date!
+          </Text>
+        )}
+        {error === "No places available for selected dates!" && (
+          <Text style={[styles.title, { fontSize: 14, marginBottom: 2 }]}>
+            No places available for selected dates!
           </Text>
         )}
         <TouchableOpacity onPress={() => setVisible(true)}>
@@ -350,6 +376,14 @@ function BookHotel({ navigation }) {
                     style={{ left: -150, top: -20 }}
                   />
                 </TouchableOpacity>
+                {startDate && endDate && (
+                  <Text
+                    style={[styles.subtitle, { fontSize: 15, marginLeft: 0 }]}
+                  >
+                    {getAvailableSpots(startDate, endDate)} places available for
+                    selected dates!
+                  </Text>
+                )}
                 <View style={{ width: "100%" }}>
                   <Calendar
                     markedDates={markedDates}
@@ -359,6 +393,33 @@ function BookHotel({ navigation }) {
                     theme={calendarTheme}
                   />
                 </View>
+                <Button
+                  name="close-circle-outline"
+                  textColor={GlobalColors.colors.pink500}
+                  style={{
+                    backgroundColor: GlobalColors.colors.gray0,
+                    paddingHorizontal: 30,
+                    top: 10,
+                    alignSelf: "center",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.25,
+                    elevation: 5,
+                    shadowRadius: 4,
+                  }}
+                  size={30}
+                  disabled={startDate != null && endDate != null ? false : true}
+                  onPress={() => {
+                    setSelectedDate(
+                      `${moment(startDate).format("ddd, DD.MM")} - ${moment(
+                        endDate
+                      ).format("ddd, DD.MM")} `
+                    );
+                    setVisible(false);
+                  }}
+                >
+                  Select
+                </Button>
               </View>
             </View>
           </Modal>

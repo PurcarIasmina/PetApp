@@ -13,13 +13,19 @@ import ButtonCustom from "../components/UI/ButtonCustom";
 import { GlobalColors } from "../constants/colors";
 import { useFonts } from "expo-font";
 import LoginForm from "../components/Auth/LoginForm";
-import { addToken, getUserName, login } from "../store/databases";
+import {
+  addToken,
+  getUnreadMessagesCount,
+  getUserName,
+  login,
+} from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { useState, useContext, useCallback, useRef, useEffect } from "react";
 import { AuthContext } from "../context/auth";
 import HomeScreenUser from "./HomeScreenUser";
 import * as SplashScreen from "expo-splash-screen";
 import { registerForPushNotificationsAsync } from "../notifications/notifications";
+import { ChatContext } from "../context/ChatContext";
 
 function doctorValidation(value) {
   const reg = /@doctor\.petapp\.ro/;
@@ -32,14 +38,15 @@ function Login({ navigation }) {
   });
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const authCtx = useContext(AuthContext);
-
+  const chatCtx = useContext(ChatContext);
   async function loginHandler({ email, password }) {
     setIsAuthenticating(true);
     try {
       const { token, id, name } = await login(email, password);
-      const tokenn = await registerForPushNotificationsAsync();
-      console.log(tokenn);
-      authCtx.authenticate(token, tokenn);
+      const resp = await getUnreadMessagesCount(id);
+      console.log(resp, "resp");
+      chatCtx.messages(resp);
+      authCtx.authenticate(token);
       authCtx.userDetails(name, id);
       if (doctorValidation(email)) authCtx.checkIsDoctor("doctor");
       if (!authCtx.doctor) navigation.replace("HomeScreenUser");

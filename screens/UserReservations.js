@@ -4,6 +4,7 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useEffect, useContext, useState } from "react";
 import { deleteReservation, getReservations } from "../store/databases";
@@ -15,7 +16,8 @@ import moment from "moment";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { Ionicons } from "@expo/vector-icons";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-
+import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+const API_URL = "http://localhost:3000";
 function UserReservations({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -82,7 +84,91 @@ function UserReservations({ navigation }) {
     }
     handlerDeleteReservations();
   }, [deleted]);
+  const subscribe = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/pay", {
+        method: "POST",
+        body: JSON.stringify({ newPrice }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
+      const data = await response.json();
+
+      console.log(data, "id");
+      if (!response.ok) return Alert.alert(data.message);
+      const clientSecret = data.clientSecret;
+      const initSheet = await stripe.initPaymentSheet({
+        paymentIntentClientSecret: clientSecret,
+        appearance: {
+          font: {
+            family: "AvenirNext-Regular",
+            scale: 1.15,
+          },
+          shapes: {
+            borderRadius: 12,
+            borderWidth: 0.5,
+          },
+          primaryButton: {
+            shapes: {
+              borderRadius: 10,
+            },
+            colors: {
+              text: "#FFFFFF",
+            },
+          },
+          colors: {
+            primary: GlobalColors.colors.pink500,
+            background: "#FFFFFF",
+          },
+        },
+        merchantCountryCode: "US",
+        applePay: true,
+      });
+      if (initSheet.error) {
+        return Alert.alert(initSheet.error.message);
+      }
+      const presentSheet = await stripe.presentPaymentSheet({
+        clientSecret,
+      });
+      if (presentSheet.error) {
+        return Alert.alert(
+          "The payment has been canceled!",
+          "Please try again!",
+          [
+            {
+              text: "OK",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "default",
+            },
+          ]
+        );
+      }
+      const paymentId = data.clientSecret.split("_secret");
+      const id = paymentId[0];
+      console.log(presentSheet, "id");
+      if (id) {
+        console.log(presentSheet);
+        const resp = await addReservation(
+          name,
+          route.params.animals,
+          route.params.endDate ? route.params.endDate : "",
+          route.params.startDate,
+          checkedItems,
+          email,
+          phone,
+          (100 * route.params.animals.length * (daysDifference + 1)).toString(),
+          authCtx.uid,
+          id
+        );
+        navigation.navigate("UserReservations");
+      }
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Something went wrong, try again later!");
+    }
+  };
   const renderItem = (item, active) => {
     const date = `${moment(item.startDate).format("ddd, DD.MM")} ${
       item.endDate ? `- ${moment(item.endDate).format("ddd, DD.MM")}` : ""
@@ -187,6 +273,7 @@ function UserReservations({ navigation }) {
               }}
               onConfirmPressed={() => {
                 setShowAlert(false), setDeleted(true);
+                subscribe();
               }}
             />
           </>
@@ -196,44 +283,52 @@ function UserReservations({ navigation }) {
   };
   if (fetching) return <LoadingOverlay message={"Loading..."} />;
   return (
-    <View style={styles.container}>
-      <Text style={[styles.title, { marginBottom: 20 }]}>
-        Active reservations
-      </Text>
-      {reservations &&
-        reservations.active &&
-        Object.keys(reservations.active).length === 0 && (
-          <Text
-            style={[styles.title, { fontSize: 14, marginBottom: 40, top: -20 }]}
-          >
-            No active reservations!
-          </Text>
-        )}
-      <View>
-        <FlatList
-          data={reservations.active}
-          renderItem={({ item, index }) => renderItem(item, true)}
-        />
-      </View>
-      <Text style={[styles.title, { marginBottom: 20 }]}>
-        Past reservations
-      </Text>
-      {reservations &&
-        reservations.past &&
-        Object.keys(reservations.past).length === 0 && (
-          <Text style={[styles.title, { fontSize: 14, top: -20 }]}>
-            No past reservations!
-          </Text>
-        )}
-      {reservations.past && (
+    <StripeProvider
+      publishableKey="pk_test_51N3nKMJ0sudgjiHdgS11OUwbHrjL1z3kFnkVrFcOu6qHVTOknIapZVj2F3R2A6VVkHSvQ4yTO9LvJfPJEU41qXxH00WjiWqv2r"
+      merchantIdentifier="merchant.com.stripe.react.native"
+    >
+      <View style={styles.container}>
+        <Text style={[styles.title, { marginBottom: 20 }]}>
+          Active reservations
+        </Text>
+        {reservations &&
+          reservations.active &&
+          Object.keys(reservations.active).length === 0 && (
+            <Text
+              style={[
+                styles.title,
+                { fontSize: 14, marginBottom: 40, top: -20 },
+              ]}
+            >
+              No active reservations!
+            </Text>
+          )}
         <View>
           <FlatList
-            data={reservations.past}
-            renderItem={({ item, index }) => renderItem(item, false)}
+            data={reservations.active}
+            renderItem={({ item, index }) => renderItem(item, true)}
           />
         </View>
-      )}
-    </View>
+        <Text style={[styles.title, { marginBottom: 20 }]}>
+          Past reservations
+        </Text>
+        {reservations &&
+          reservations.past &&
+          Object.keys(reservations.past).length === 0 && (
+            <Text style={[styles.title, { fontSize: 14, top: -20 }]}>
+              No past reservations!
+            </Text>
+          )}
+        {reservations.past && (
+          <View>
+            <FlatList
+              data={reservations.past}
+              renderItem={({ item, index }) => renderItem(item, false)}
+            />
+          </View>
+        )}
+      </View>
+    </StripeProvider>
   );
 }
 export default UserReservations;

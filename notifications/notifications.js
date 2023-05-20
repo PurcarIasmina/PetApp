@@ -18,7 +18,7 @@ export const getPermissions = async () => {
     return;
   }
 };
-export function scheduleNotificationHandler(title, body, name) {
+export function scheduleNotificationHandler(title, body, date) {
   getPermissions();
   Notifications.scheduleNotificationAsync({
     content: {
@@ -27,7 +27,7 @@ export function scheduleNotificationHandler(title, body, name) {
       data: {},
     },
     trigger: {
-      seconds: 20,
+      date: date,
     },
   });
 }

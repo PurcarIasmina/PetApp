@@ -324,11 +324,11 @@ function NotificationsAnimalPage({ navigation }) {
           />
         </View>
       </View>
-      {item.additionalInfo.length > 0 && (
+      {/* {item.additionalInfo.length > 0 && (
         <View>
           <Text> {item.additionalInfo}</Text>
         </View>
-      )}
+      )} */}
     </View>
   );
   if (fetching) return <LoadingOverlay message={"Loading..."} />;

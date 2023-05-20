@@ -114,22 +114,27 @@ function PayScreen({ navigation }) {
   async function submitHandler() {
     if (handlerValidation()) {
       try {
-        const resp = await addReservation(
-          name,
-          route.params.animals,
-          route.params.endDate ? route.params.endDate : "",
-          route.params.startDate,
-          checkedItems,
-          email,
-          phone,
-          (100 * route.params.animals.length * (daysDifference + 1)).toString(),
-          authCtx.uid
-        );
-        if (resp) {
-          if (checkedItems === "Arrival")
+        if (checkedItems === "Arrival") {
+          const resp = await addReservation(
+            name,
+            route.params.animals,
+            route.params.endDate ? route.params.endDate : "",
+            route.params.startDate,
+            checkedItems,
+            email,
+            phone,
+            (
+              100 *
+              route.params.animals.length *
+              (daysDifference + 1)
+            ).toString(),
+            authCtx.uid,
+            null
+          );
+          if (resp) {
             navigation.navigate("UserReservations");
-          else subscribe();
-        }
+          }
+        } else subscribe();
       } catch (error) {
         console.log(error);
       }
@@ -144,7 +149,10 @@ function PayScreen({ navigation }) {
           "Content-Type": "application/json",
         },
       });
+
       const data = await response.json();
+
+      console.log(data, "id");
       if (!response.ok) return Alert.alert(data.message);
       const clientSecret = data.clientSecret;
       const initSheet = await stripe.initPaymentSheet({
@@ -167,47 +175,20 @@ function PayScreen({ navigation }) {
             },
           },
           colors: {
-            // icon: GlobalColors.colors.darkDustyPurple,
             primary: GlobalColors.colors.pink500,
             background: "#FFFFFF",
-            // componentBackground: Colors.colors.cardBackgroundColor,
-            // componentBorder: Colors.colors.gray,
-            // componentDivider: Colors.colors.gray,
-            // primaryText: Colors.colors.darkDustyPurple,
-            // secondaryText: Colors.colors.dustyPurple,
-            // componentText: Colors.colors.gray,
-            // placeholderText: Colors.colors.gray,P
           },
         },
-        applePay: {
-          merchantCountryCode: "US",
-        },
+        merchantCountryCode: "US",
+        applePay: true,
       });
       if (initSheet.error) {
         return Alert.alert(initSheet.error.message);
-        // showMessage({
-        //   message: "The payment could not be initilized!",
-        //   floating: true,
-        //   // position: top,
-        //   icon: "info",
-        //   backgroundColor: Colors.colors.darkDustyPurple,
-        //   color: "white",
-        // });
-        // return;
       }
       const presentSheet = await stripe.presentPaymentSheet({
         clientSecret,
       });
       if (presentSheet.error) {
-        // showMessage({
-        //   message: "The payment could not go through!",
-        //   floating: true,
-        //   // position: top,
-        //   icon: "info",
-        //   backgroundColor: Colors.colors.darkDustyPurple,
-        //   color: "white",
-        // });
-        // return;
         return Alert.alert(
           "The payment has been canceled!",
           "Please try again!",
@@ -220,8 +201,25 @@ function PayScreen({ navigation }) {
           ]
         );
       }
-
-      navigation.navigate("UserReservations");
+      const paymentId = data.clientSecret.split("_secret");
+      const id = paymentId[0];
+      console.log(presentSheet, "id");
+      if (id) {
+        console.log(presentSheet);
+        const resp = await addReservation(
+          name,
+          route.params.animals,
+          route.params.endDate ? route.params.endDate : "",
+          route.params.startDate,
+          checkedItems,
+          email,
+          phone,
+          (100 * route.params.animals.length * (daysDifference + 1)).toString(),
+          authCtx.uid,
+          id
+        );
+        navigation.navigate("UserReservations");
+      }
     } catch (error) {
       console.log(error);
       Alert.alert("Something went wrong, try again later!");

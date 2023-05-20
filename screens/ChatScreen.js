@@ -44,9 +44,13 @@ import * as ImagePicker from "expo-image-picker";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { ChatContext } from "../context/ChatContext";
 function ChatScreen({ navigation }) {
   const route = useRoute();
-
+  const { unreadMessages, markMessageAsRead, incrementUnreadMessages } =
+    useContext(ChatContext);
+  const chatCtx = useContext(ChatContext);
+  console.log(chatCtx.unreadMessages);
   const [isLoading, setIsLoading] = useState(true);
   const [messages, setMessages] = useState([]);
   const [newVal, setNew] = useState(false);
@@ -55,7 +59,9 @@ function ChatScreen({ navigation }) {
   const [imagePicked, setImagePicked] = useState(false);
   const [urlImage, setUrlImage] = useState("");
   const [auxImage, setAuxImage] = useState("");
-
+  useEffect(() => {
+    console.log(unreadMessages);
+  }, [unreadMessages]);
   const chatid =
     route.params.receiverId > authCtx.uid
       ? authCtx.uid + "-" + route.params.receiverId
@@ -178,6 +184,7 @@ function ChatScreen({ navigation }) {
   useEffect(() => {
     async function setRead() {
       await setMessagesRead(authCtx.uid, route.params.receiverId);
+      // markMessageAsRead(route.params.receiverId);
     }
     setRead();
   }, [messages]);
@@ -236,6 +243,8 @@ function ChatScreen({ navigation }) {
     setUrlImage(res);
   };
   const onSend = async (msgArray) => {
+    incrementUnreadMessages(route.params.receiverId);
+    console.log(unreadMessages);
     const msg = msgArray[0];
 
     // if (pickedImagePath !== "") {
