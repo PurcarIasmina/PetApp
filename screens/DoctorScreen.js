@@ -76,12 +76,10 @@ function DoctorScreen({ navigation }) {
   currentDate = new Date(romanianTime);
   const [date, setDate] = useState(new Date(currentDate));
   const [selectedDate, setSelectedDate] = useState(new Date(date));
-  // console.log(date);
   const [appointments, setAppointments] = useState([]);
   const [fetching, setFetching] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  // console.log(currentDate);
-  // console.log(currentDate.getUTCDate());
+
   const monthNames = [
     "Jan.",
     "Feb.",

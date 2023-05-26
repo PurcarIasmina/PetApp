@@ -45,7 +45,7 @@ function DoseCardPlan({ navigation }) {
       <View style={styles.container}>
         <Text style={styles.title}>Dose Plan</Text>
         <View style={{ marginTop: 20 }}>
-          <Text style={styles.subtitle}>Dose name</Text>
+          <Text style={[styles.subtitle, { fontSize: 15 }]}>Dose name</Text>
           <View style={styles.pillInputContainer}>
             <Icon
               style={[styles.icon, { marginLeft: 5, top: 5 }]}
@@ -84,7 +84,7 @@ function DoseCardPlan({ navigation }) {
               <TouchableOpacity onPress={handleIncrement}>
                 <Icon
                   name="angle-up"
-                  style={[styles.icon, { marginHorizontal: -10 }]}
+                  style={[styles.icon, { marginHorizontal: -8 }]}
                   size={15}
                   color={GlobalColors.colors.darkGrey}
                 />
@@ -104,7 +104,7 @@ function DoseCardPlan({ navigation }) {
               <TouchableOpacity onPress={handleDecrement}>
                 <Icon
                   name="angle-down"
-                  style={[styles.icon, { marginHorizontal: 10 }]}
+                  style={[styles.icon, { marginHorizontal: 8 }]}
                   color={GlobalColors.colors.darkGrey}
                   size={15}
                 />
@@ -153,7 +153,7 @@ function DoseCardPlan({ navigation }) {
             </View>
           </View>
           <View>
-            <Text style={[styles.subtitle, { top: 30, left: 5, fontSize: 16 }]}>
+            <Text style={[styles.subtitle, { top: 30, left: 5, fontSize: 15 }]}>
               Additional notes
             </Text>
             <View style={styles.additionalNotesContainer}>
@@ -176,6 +176,7 @@ function DoseCardPlan({ navigation }) {
                 doseName: doseName,
                 doseQuantity: doseQuantity,
                 doseNumber: doseNumber,
+                administration: checkedItems,
                 additionalInfo: additionalInfo,
               },
               doses: [
@@ -184,6 +185,7 @@ function DoseCardPlan({ navigation }) {
                   doseName: doseName,
                   doseQuantity: doseQuantity,
                   doseNumber: doseNumber,
+                  administration: checkedItems,
                   additionalInfo: additionalInfo,
                 },
               ],

@@ -87,7 +87,6 @@ function NotificationsAnimalPage({ navigation }) {
         })
       );
 
-      //   console.log(pillsFoSelected);
       setMorning(
         resp
           .filter((pill) => {
@@ -265,7 +264,6 @@ function NotificationsAnimalPage({ navigation }) {
         );
       })
     );
-    // console.log(pillsFoSelected);
     setSelctedDateReceived(selectedDate);
     setNotificationsForSelectedDay(
       notifications.filter(

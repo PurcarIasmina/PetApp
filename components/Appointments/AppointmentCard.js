@@ -17,6 +17,7 @@ function AppointmentCard({ appointment }) {
   const navigation = useNavigation();
   console.log(appointment);
   const [docDetails, setDocDetails] = useState({});
+  console.log(appointment);
   useEffect(() => {
     async function getDocNm() {
       try {
@@ -546,7 +547,7 @@ function AppointmentCard({ appointment }) {
             (actualDate === appointment.date &&
               actualTime > appointment.slot)) && (
             <View style={styles.uploadContainer}>
-              {!appointment.hasOwnProperty("done") && (
+              {appointment.done === 0 && (
                 <TouchableOpacity
                   onPress={() =>
                     navigation.navigate("AppointmentResult", {
@@ -561,7 +562,7 @@ function AppointmentCard({ appointment }) {
                   />
                 </TouchableOpacity>
               )}
-              {appointment.hasOwnProperty("done") && (
+              {appointment.done === 1 && (
                 <MaterialCommunityIcon
                   color={GlobalColors.colors.pink500}
                   name={"archive-check-outline"}

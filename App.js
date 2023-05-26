@@ -119,19 +119,18 @@ function AuthenticatedDrawerDoctor() {
   // console.log(total);
   // const [oldCount, setoldCount] = useState(0);
 
-  useEffect(() => {
-    async function getUnread() {
-      const resp = await getUnreadMessagesForAUser(authCtx.uid);
-      setCount(resp);
-      console.log(resp);
-    }
+  // useEffect(() => {
+  //   async function getUnread() {
+  //     const resp = await getUnreadMessagesForAUser(authCtx.uid);
+  //     setCount(resp);
+  //   }
 
-    const interval = setInterval(() => {
-      getUnread();
-    }, 1000);
+  //   const interval = setInterval(() => {
+  //     getUnread();
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
   // useEffect(() => {
   //   if (oldCount !== uncount) {
   //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
@@ -285,18 +284,18 @@ function AuthenticatedDrawerUser() {
   // const { unreadMessages, markMessageAsRead, incrementUnreadMessages } =
   //   useContext(ChatContext);
   // const unreadCount = unreadMessages[authCtx.uid] || 0;
-  useLayoutEffect(() => {
-    async function getUnread() {
-      const resp = await getUnreadMessagesForAUser(authCtx.uid);
-      setCount(resp);
-    }
+  // useLayoutEffect(() => {
+  //   async function getUnread() {
+  //     const resp = await getUnreadMessagesForAUser(authCtx.uid);
+  //     setCount(resp);
+  //   }
 
-    const interval = setInterval(() => {
-      getUnread();
-    }, 1000);
+  //   const interval = setInterval(() => {
+  //     getUnread();
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  });
+  //   return () => clearInterval(interval);
+  // });
   // console.log(authCtx.uid);
   // console.log(unreadMessages, "unread");
   // useEffect(() => {
@@ -586,7 +585,6 @@ function Base() {
       try {
         let resp = [];
         resp = await getUserAppointmentsNotifications(authCtx.uid);
-        console.log(resp, "ce am primit");
         setNotificationsAppointment(resp);
         return resp;
       } catch (error) {
@@ -605,11 +603,10 @@ function Base() {
       for (const key in resp) {
         if (resp[key].date.localeCompare(getFormattedDate(actualDate)) === 0) {
           if (resp[key].momentTime.localeCompare("Morning") === 0) {
-            console.log("da");
             scheduleNotificationHandler(
               "Reminder! ☕️",
               `Administrate to ${resp[key].name} morning medication`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 08:00`)
+              new Date(`${getFormattedDate(new Date(actualDate))} 08:00:00`)
             );
           }
 
@@ -617,7 +614,7 @@ function Base() {
             scheduleNotificationHandler(
               "Reminder!🍴",
               `Administrate to ${resp[key].name} lunch medication`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 13:00`)
+              new Date(`${getFormattedDate(new Date(actualDate))} 13:00:00`)
             );
           }
 
@@ -625,16 +622,14 @@ function Base() {
             scheduleNotificationHandler(
               "Reminder!🌛",
               `Administrate to ${resp[key].name} evening medication`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 20:00`)
+              new Date(`${getFormattedDate(new Date(actualDate))} 20:00:00`)
             );
           }
         }
       }
 
       responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          console.log(response);
-        });
+        Notifications.addNotificationResponseReceivedListener((response) => {});
       return () => {
         Notifications.removeNotificationSubscription(
           notificationListener.current
@@ -643,16 +638,13 @@ function Base() {
       };
     });
     haveNotificationsForAppointments().then((resp) => {
-      console.log(resp, "resp");
       for (const key in resp) {
         const dateApp = moment(resp[key].date, "YYYY-MM-DD");
         const actualDateMoment = moment(
           getFormattedDate(actualDate),
           "YYYY-MM-DD"
         );
-        console.log(dateApp, "date");
         const diffInDays = dateApp.diff(actualDateMoment, "days");
-        console.log(diffInDays);
         if (diffInDays === 7 || diffInDays === 1) {
           if (resp[key].active === true) {
             scheduleNotificationHandler(
@@ -683,9 +675,7 @@ function Base() {
       }
 
       responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          console.log(response);
-        });
+        Notifications.addNotificationResponseReceivedListener((response) => {});
       return () => {
         Notifications.removeNotificationSubscription(
           notificationListener.current

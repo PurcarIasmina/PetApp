@@ -54,7 +54,6 @@ function UserAppointments() {
     getActiveAppointments();
     getPastAppointments();
     getCanceledAppointments();
-    console.log(pastAppointments, "canceled");
     setFetching(false);
   }, [status]);
   function handlerOnPress() {

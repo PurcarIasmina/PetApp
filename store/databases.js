@@ -200,8 +200,6 @@ export async function setMessagesRead(userId, otherId) {
           messageData.sentTo === userId &&
           messageData.sentBy === otherId
         ) {
-          console.log("daa");
-
           await updateDoc(messageDoc.ref, { read: true });
         }
       }
@@ -348,11 +346,11 @@ export async function getAllReservations() {
         pay: filtered[key].pay,
         payment: filtered[key].totalPayment,
       };
-      if (
-        getFormattedDate(new Date(filtered[key].startDate)) >
-        getFormattedDate(romaniaDateTime)
-      )
-        reservations.push(reservationDetail);
+      // if (
+      //   getFormattedDate(new Date(filtered[key].startDate)) >
+      //   getFormattedDate(romaniaDateTime)
+      // )
+      reservations.push(reservationDetail);
     }
   }
 
@@ -598,7 +596,7 @@ export async function cancelAppointment(appointmentId, data) {
   console.log(appointmentId);
   return response;
 }
-export async function getDoctorSlotsAppointments(did, date) {
+export async function getDoctorNotAvailableSlotsAppointments(did, date) {
   const slots = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);
   if (response.data) {
@@ -659,16 +657,14 @@ export async function getAppointments(did, date) {
         photoUrl: await getImageUrl(
           `${filtered[key].uid}/${filtered[key].aid}.jpeg`
         ),
+        done: filtered[key].done,
         generatedId: filtered[key].key,
       };
-      {
-        filtered[key].hasOwnProperty("done")
-          ? (appointmentDetail["done"] = 1)
-          : null;
-        filtered[key].hasOwnProperty("result")
-          ? (appointmentDetail["result"] = filtered[key].result)
-          : null;
-      }
+
+      filtered[key].hasOwnProperty("result")
+        ? (appointmentDetail["result"] = filtered[key].result)
+        : null;
+
       console.log(appointmentDetail);
       appointmentsDetails.push(appointmentDetail);
     }
@@ -689,8 +685,7 @@ export async function getUserStatusAppointments(uid, status) {
       appointment.key = appointmentKeys[index];
     });
 
-    let filtered;
-    console.log(status + "status");
+    let filtered = [];
     const currentDate = new Date();
     const timezoneOffset = 180;
     const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
@@ -706,9 +701,6 @@ export async function getUserStatusAppointments(uid, status) {
                 romaniaDateTime.toISOString().slice(11, 16)))
         );
       });
-      console.log(romaniaDateTime.toISOString().slice(11, 16));
-
-      console.log(romaniaDateTime);
     } else if (status === 1) {
       filtered = appointments.filter(function (appointment) {
         console.log(appointment.uid === uid);
@@ -729,7 +721,6 @@ export async function getUserStatusAppointments(uid, status) {
 
     for (const key in filtered) {
       let detail = await getAnimalDetails(filtered[key].aid);
-      console.log(detail);
       if (Object.keys(detail).length > 0) {
         const appointmentDetail = {
           did: filtered[key].did,
@@ -740,9 +731,6 @@ export async function getUserStatusAppointments(uid, status) {
           reason: filtered[key].reason,
           canceled: filtered[key].canceled,
           ownername: filtered[key].ownername,
-          photoUrl: await getImageUrl(
-            `${filtered[key].uid}/${filtered[key].aid}.jpeg`
-          ),
           generatedId: filtered[key].key,
         };
 
@@ -778,7 +766,7 @@ export async function getAnimalDoneAppointments(uid, aid) {
     filtered = appointments.filter(function (appointment) {
       return (
         appointment.uid === uid &&
-        appointment.hasOwnProperty("done") &&
+        appointment.done === 1 &&
         appointment.aid === aid
       );
     });
@@ -831,7 +819,7 @@ export function calculateAnimalPillDays(doneAppointments) {
       const daysSinceAppointment = Math.floor(
         diffInTime / (1000 * 60 * 60 * 24)
       );
-      // console.log(daysSinceAppointment + "dif");
+
       for (const keyn in consultations[key].result.pillsPlan) {
         const pill = consultations[key].result.pillsPlan[keyn];
         if (pill.pillTimes > daysSinceAppointment) {

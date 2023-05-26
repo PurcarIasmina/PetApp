@@ -29,7 +29,7 @@ function PayScreen({ navigation }) {
   const route = useRoute();
   console.log(route.params);
   const moment = require("moment");
-  console.log(newPrice);
+  console.log(reservationPrice);
 
   const today = new Date();
   const formattedDate = `${
@@ -76,9 +76,8 @@ function PayScreen({ navigation }) {
   const [emailInvalid, setEmailInvalid] = useState(false);
   const [phoneInvalid, setPhoneInvalid] = useState(false);
   const [checkInvalid, setCheckInvalid] = useState(false);
-  const newPrice =
-    (100 * route.params.animals.length * (daysDifference + 1)).toString() +
-    "00";
+  const reservationPrice =
+    (100 * route.params.animals.length * daysDifference).toString() + "00";
   const stripe = useStripe();
   const handleCheck = (text) => {
     setCheckedItems(text);
@@ -123,11 +122,7 @@ function PayScreen({ navigation }) {
             checkedItems,
             email,
             phone,
-            (
-              100 *
-              route.params.animals.length *
-              (daysDifference + 1)
-            ).toString(),
+            (100 * route.params.animals.length * daysDifference).toString(),
             authCtx.uid,
             null
           );
@@ -144,7 +139,7 @@ function PayScreen({ navigation }) {
     try {
       const response = await fetch("http://localhost:3000/pay", {
         method: "POST",
-        body: JSON.stringify({ newPrice }),
+        body: JSON.stringify({ reservationPrice }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -152,7 +147,6 @@ function PayScreen({ navigation }) {
 
       const data = await response.json();
 
-      console.log(data, "id");
       if (!response.ok) return Alert.alert(data.message);
       const clientSecret = data.clientSecret;
       const initSheet = await stripe.initPaymentSheet({
@@ -201,25 +195,20 @@ function PayScreen({ navigation }) {
           ]
         );
       }
-      const paymentId = data.clientSecret.split("_secret");
-      const id = paymentId[0];
-      console.log(presentSheet, "id");
-      if (id) {
-        console.log(presentSheet);
-        const resp = await addReservation(
-          name,
-          route.params.animals,
-          route.params.endDate ? route.params.endDate : "",
-          route.params.startDate,
-          checkedItems,
-          email,
-          phone,
-          (100 * route.params.animals.length * (daysDifference + 1)).toString(),
-          authCtx.uid,
-          id
-        );
-        navigation.navigate("UserReservations");
-      }
+
+      const resp = await addReservation(
+        name,
+        route.params.animals,
+        route.params.endDate ? route.params.endDate : "",
+        route.params.startDate,
+        checkedItems,
+        email,
+        phone,
+        (100 * route.params.animals.length * (daysDifference + 1)).toString(),
+        authCtx.uid,
+        data.paymentId
+      );
+      navigation.navigate("UserReservations");
     } catch (error) {
       console.log(error);
       Alert.alert("Something went wrong, try again later!");
@@ -341,7 +330,7 @@ function PayScreen({ navigation }) {
                   top: 5,
                 }}
               >
-                {100 * route.params.animals.length * (daysDifference + 1)} lei
+                {100 * route.params.animals.length * daysDifference} lei
               </Text>
             </View>
           </View>

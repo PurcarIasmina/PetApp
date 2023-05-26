@@ -30,7 +30,7 @@ import { Button, Modal } from "react-native-paper";
 import {
   addAppointment,
   getAnimalDetails,
-  getDoctorSlotsAppointments,
+  getDoctorNotAvailableSlotsAppointments,
   getImageUrl,
   getUsersAnimals,
 } from "../store/databases";
@@ -131,18 +131,15 @@ function DoctorBookAppointment({ navigation }) {
 
     getAnimals();
   }, []);
-  useLayoutEffect(() => {
+  useEffect(() => {
     async function getDoctorAvailableslots() {
       try {
-        const slots = await getDoctorSlotsAppointments(
+        const slots = await getDoctorNotAvailableSlotsAppointments(
           docDetails.did,
           getFormattedDate(selectedDate)
         );
-
         setNAvailableSlots(slots);
-
         const availableSlots = calculateAvailableSlots(slots);
-        console.log(availableSlots);
         setAvailableSlots(availableSlots);
       } catch (error) {
         console.log(error);
@@ -260,13 +257,6 @@ function DoctorBookAppointment({ navigation }) {
       for (let j = 0; j < 2; j++) {
         const slotStartTime = `${i}:${j === 0 ? "00" : "30"}`;
         const slotEndTime = `${j === 0 ? i : i + 1}:${j === 0 ? "30" : "00"}`;
-
-        console.log(
-          `${currentHour}:${currentMinute}` < `${slotStartTime}`,
-          getFormattedDate(selectedDate) === getFormattedDate(currentDate),
-          currentDate,
-          selectedDate
-        );
         if (
           (getFormattedDate(selectedDate) === getFormattedDate(currentDate) &&
             `${currentHour}:${currentMinute}` < `${slotStartTime}`) ||

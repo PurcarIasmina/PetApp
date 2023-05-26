@@ -25,13 +25,13 @@ import { getFormattedDate } from "../util/date";
 import { v4 } from "uuid";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 function AddPetScreen({ navigation }) {
-  const [namee, setName] = useState("");
-  const [datebirthh, setDateBirth] = useState();
-  const [breedd, setBreed] = useState("");
-  const [ownerr, setOwner] = useState("");
-  const [colorr, setColor] = useState("");
-  const [photoo, setPhoto] = useState("");
-  const [genderr, setGender] = useState("Female");
+  const [name, setName] = useState("");
+  const [datebirth, setDateBirth] = useState();
+  const [breed, setBreed] = useState("");
+  const [owner, setOwner] = useState("");
+  const [color, setColor] = useState("");
+  const [photo, setPhoto] = useState("");
+  const [gender, setGender] = useState("Female");
   const [bottom, setBottom] = useState(false);
   const [typeInvalid, setTypeInvalid] = useState({
     nameInvalid: false,
@@ -49,8 +49,6 @@ function AddPetScreen({ navigation }) {
   const bs = createRef();
   const fall = new Animated.Value(1);
 
-  const [pickedImagePath, setPickedImagePath] = useState("");
-  const [imagePicked, setImagePicked] = useState(false);
   const [addingAnimal, setAddingAnimal] = useState(false);
   const options = [
     { label: "Female", value: "Female" },
@@ -73,12 +71,12 @@ function AddPetScreen({ navigation }) {
   }
   function handlerValidation() {
     if (
-      !namee.trim() ||
-      !ownerr.trim() ||
-      !breedd.trim() ||
-      !colorr.trim() ||
-      !photoo ||
-      !datebirthh
+      !name.trim() ||
+      !owner.trim() ||
+      !breed.trim() ||
+      !color.trim() ||
+      !photo ||
+      !datebirth
     ) {
       typeInvalid.nameInvalid = true;
       typeInvalid.ownerInvalid = true;
@@ -97,45 +95,38 @@ function AddPetScreen({ navigation }) {
     if (handlerValidation()) {
       try {
         setAddingAnimal(true);
-        console.log("aici");
         const resp = await addAnimal(
-          namee,
-          breedd,
-          datebirthh,
-          ownerr,
-          colorr,
-          genderr,
+          name,
+          breed,
+          datebirth,
+          owner,
+          color,
+          gender,
           authCtx.uid
         );
-        const imagePath = `${authCtx.uid}/${resp.aid}.jpeg`;
-        console.log(resp.token);
-        const respPhoto = await storeImage(pickedImagePath, imagePath);
+        if (resp) {
+          const imagePath = `${authCtx.uid}/${resp.aid}.jpeg`;
+          console.log(resp.token);
+          const respPhoto = await storeImage(photo, imagePath);
 
-        if (respPhoto) {
-          try {
-            const imgUrl = await getImageUrl(imagePath);
-            navigation.navigate("PetScreen", {
-              name: namee,
-              breed: breedd,
-              datebirth: datebirthh,
-              owner: ownerr,
-              color: colorr,
-              gender: genderr,
-              photo: imgUrl,
-            });
-          } catch (error) {
-            console.log(error);
+          if (respPhoto) {
+            try {
+              const imgUrl = await getImageUrl(imagePath);
+              navigation.navigate("PetScreen", {
+                name: name,
+                breed: breed,
+                datebirth: datebirth,
+                owner: owner,
+                color: color,
+                gender: gender,
+                photo: imgUrl,
+              });
+            } catch (error) {
+              console.log(error);
+            }
           }
         }
         setAddingAnimal(false);
-        setName("");
-        setDateBirth();
-        setBreed("");
-        setColor("");
-        setName("");
-        setGender();
-        setOwner("");
-        setPhoto("");
       } catch (error) {
         console.log(error);
       }
@@ -163,8 +154,6 @@ function AddPetScreen({ navigation }) {
     });
 
     if (!result.cancelled) {
-      setPickedImagePath(result.uri);
-      setImagePicked(true);
       setPhoto(result.uri);
     }
   };
@@ -180,8 +169,6 @@ function AddPetScreen({ navigation }) {
     const result = await ImagePicker.launchCameraAsync();
 
     if (!result.cancelled) {
-      setPickedImagePath(result.uri);
-      setImagePicked(true);
       setPhoto(result.uri);
     }
   };
@@ -256,9 +243,9 @@ function AddPetScreen({ navigation }) {
             imageStyle={{
               borderRadius: 100,
               borderColor: GlobalColors.colors.pink500,
-              borderWidth: photoo ? 0 : 1,
+              borderWidth: photo ? 0 : 1,
             }}
-            source={{ uri: photoo }}
+            source={{ uri: photo }}
           >
             <View
               style={{
@@ -273,7 +260,7 @@ function AddPetScreen({ navigation }) {
                 }}
                 name="camera"
                 color={
-                  photoo
+                  photo
                     ? GlobalColors.colors.white1
                     : GlobalColors.colors.pink500
                 }
@@ -285,7 +272,7 @@ function AddPetScreen({ navigation }) {
                   borderWidth: 1,
                   borderColor: typeInvalid.photoInvalid
                     ? "#8b0000"
-                    : photoo
+                    : photo
                     ? GlobalColors.colors.white1
                     : GlobalColors.colors.pink500,
                   borderRadius: 10,
@@ -300,6 +287,7 @@ function AddPetScreen({ navigation }) {
               style={[
                 styles.fieldName,
                 typeInvalid.nameInvalid && styles.inputInvalid,
+                { marginTop: 30 },
               ]}
             >
               Name
@@ -308,7 +296,7 @@ function AddPetScreen({ navigation }) {
               isInvalid={typeInvalid.nameInvalid}
               onChangeText={setValue.bind(this, "name")}
               style={styles.field}
-              defaultValue={namee}
+              defaultValue={name}
               keyboardType="default"
             />
           </View>
@@ -324,7 +312,7 @@ function AddPetScreen({ navigation }) {
             <TextInput
               onChangeText={setValue.bind(this, "breed")}
               style={styles.field}
-              defaultValue={breedd}
+              defaultValue={breed}
               keyboardType="default"
             />
           </View>
@@ -335,8 +323,8 @@ function AddPetScreen({ navigation }) {
                 typeInvalid.dateInvalid && styles.inputInvalid,
               ]}
             >{`Date:  ${
-              datebirthh
-                ? moment(datebirthh).format("MM/DD/YYYY")
+              datebirth
+                ? moment(datebirth).format("MM/DD/YYYY")
                 : "Please select date"
             }`}</Text>
             <TouchableOpacity onPress={() => setOpen(true)}>
@@ -349,7 +337,7 @@ function AddPetScreen({ navigation }) {
             </TouchableOpacity>
             <DateTimePickerModal
               mode="date"
-              date={datebirthh}
+              date={datebirth}
               isVisible={open}
               onConfirm={onConfirmDate}
               onCancel={() => {
@@ -369,7 +357,7 @@ function AddPetScreen({ navigation }) {
             <TextInput
               onChangeText={setValue.bind(this, "owner")}
               style={styles.field}
-              defaultValue={ownerr}
+              defaultValue={owner}
               keyboardType="default"
             />
           </View>
@@ -385,7 +373,7 @@ function AddPetScreen({ navigation }) {
             <TextInput
               onChangeText={setValue.bind(this, "color")}
               style={styles.field}
-              defaultValue={colorr}
+              defaultValue={color}
               keyboardType="default"
             />
           </View>
@@ -403,6 +391,7 @@ function AddPetScreen({ navigation }) {
               }
               hasPadding
               options={options}
+              style={{ left: 40 }}
               testID="gender-switch-selector"
               accessibilityLabel="gender-switch-selector"
             />
@@ -410,7 +399,7 @@ function AddPetScreen({ navigation }) {
           <View style={{ flexDirection: "row" }}>
             <View style={styles.editButtonContainer}>
               <IconButton
-                left={150}
+                left={160}
                 bottom={-30}
                 icon="save"
                 label=""
@@ -485,30 +474,32 @@ const styles = StyleSheet.create({
   editContainer: {
     margin: 10,
     marginBottom: -60,
+    marginHorizontal: 20,
     padding: 10,
+
     borderRadius: 40,
     height: 430,
-    backgroundColor: GlobalColors.colors.white1,
+    backgroundColor: GlobalColors.colors.gray0,
     shadowColor: "#171717",
     shadowOffset: { width: -2, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
     alignContent: "center",
-    // justifyContent:'center',
+    justifyContent: "center",
+    top: 30,
   },
   editField: {
     flexDirection: "column",
-    marginHorizontal: 60,
+    marginHorizontal: 40,
     marginVertical: 5,
     alignContent: "center",
     justifyContent: "center",
   },
   field: {
-    width: "90%",
     borderBottomColor: GlobalColors.colors.pink500,
     borderBottomWidth: 0.5,
-    height: 30,
-    paddingVertical: 10,
+    height: 35,
+    paddingVertical: 5,
     color: "gray",
     fontWeight: "bold",
     alignContent: "center",
@@ -517,7 +508,7 @@ const styles = StyleSheet.create({
   fieldName: {
     fontFamily: "Garet-Book",
     color: GlobalColors.colors.pink500,
-    fontWeight: "900",
+    fontWeight: "700",
   },
   iconContainer: {
     marginTop: 300,
@@ -594,7 +585,7 @@ const styles = StyleSheet.create({
   },
   editDateField: {
     flexDirection: "row",
-    marginHorizontal: 60,
+    marginHorizontal: 40,
     marginVertical: 5,
   },
   genderField: {
@@ -625,6 +616,6 @@ const styles = StyleSheet.create({
     color: "#8b0000",
     alignSelf: "center",
     fontWeight: "bold",
-    marginTop: -20,
+    top: 30,
   },
 });

@@ -53,10 +53,8 @@ function AnimalRecords({ navigation }) {
   const [maxYear, setMaxYear] = useState();
   const [consultations, setConsultations] = useState([]);
   const [vaccines, setVaccines] = useState([]);
-  const [disinfestations, setDisinfestations] = useState([]);
-  //   console.log(route.params);
+  const [dewormings, setDewormings] = useState([]);
   const [aid, setAid] = [route.params ? route.params.aid : null];
-  //   console.log(aid);
   const [fetching, setFetching] = useState(false);
   const [status, setStatus] = useState(0);
   const [selectedYear, setSelectedYear] = useState(null);
@@ -93,16 +91,16 @@ function AnimalRecords({ navigation }) {
       );
 
       console.log(maxYear);
-    } else if (status === 2 && disinfestations.length > 0) {
+    } else if (status === 2 && dewormings.length > 0) {
       setMinYear(
-        disinfestations.reduce(
+        dewormings.reduce(
           (min, appointment) => Math.min(min, appointment.date.split("-")[0]),
           Infinity
         )
       );
 
       setMaxYear(
-        disinfestations.reduce(
+        dewormings.reduce(
           (max, appointment) => Math.max(max, appointment.date.split("-")[0]),
           -Infinity
         )
@@ -110,7 +108,7 @@ function AnimalRecords({ navigation }) {
 
       console.log(maxYear);
     }
-  }, [status, vaccines, consultations, disinfestations]);
+  }, [status, vaccines, consultations, dewormings]);
   useEffect(() => {
     async function getAppointments() {
       try {
@@ -132,10 +130,10 @@ function AnimalRecords({ navigation }) {
             )
           );
 
-          setDisinfestations(
+          setDewormings(
             resp.filter(
               (item) =>
-                item.result.doctorReason.localeCompare("Disinfestation") === 0
+                item.result.doctorReason.localeCompare("Deworming") === 0
             )
           );
         }
@@ -190,7 +188,7 @@ function AnimalRecords({ navigation }) {
           <HeaderButtonAppointment
             pressed={status === 2 ? "pressed" : null}
             status={"Disinfestations"}
-            count={disinfestations.length}
+            count={dewormings.length}
             textSize={11.6}
           />
         </TouchableRipple>
@@ -230,7 +228,7 @@ function AnimalRecords({ navigation }) {
       <View style={{ position: "absolute", top: 100 }}>
         {((status === 0 && consultations.length === 0) ||
           (status === 1 && vaccines.length === 0) ||
-          (disinfestations.length === 0 && status === 2)) && (
+          (dewormings.length === 0 && status === 2)) && (
           <View
             style={{
               position: "absolute",
@@ -260,11 +258,7 @@ function AnimalRecords({ navigation }) {
         )}
         <FlatList
           data={
-            status === 0
-              ? consultations
-              : status === 1
-              ? vaccines
-              : disinfestations
+            status === 0 ? consultations : status === 1 ? vaccines : dewormings
           }
           renderItem={({ item, index }) => {
             if (selectedYear) {

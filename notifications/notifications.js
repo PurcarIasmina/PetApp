@@ -24,7 +24,6 @@ export function scheduleNotificationHandler(title, body, date) {
     content: {
       title: title,
       body: body,
-      data: {},
     },
     trigger: {
       date: date,

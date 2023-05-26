@@ -30,10 +30,7 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
         setFetching(true);
         let aux = [];
         aux = await getAnimalDoneAppointments(authCtx.uid, aid);
-        // console.log(aux);
         setNextAppointments(aux);
-
-        // console.log(datesFuture, "datess");
         if (aux.length > 0) setFetching(false);
         return aux;
       } catch (error) {
@@ -48,11 +45,9 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
         setFetching(true);
         let active = [];
         active = await getUserStatusAppointments(authCtx.uid, 0);
-        // console.log(active, "active");
         setNextActiveAppointments(
           active.filter((app) => app.animal.aid.localeCompare(aid) === 0)
         );
-
         setFetching(false);
       } catch (error) {
         console.log(error);
