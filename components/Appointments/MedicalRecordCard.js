@@ -521,8 +521,6 @@ function MedicalRecordCard({ appointment, status }) {
 </html>`;
   }
 
-  console.log(html);
-
   let generatePdf = async () => {
     const file = await printToFileAsync({
       html: html,
@@ -636,8 +634,7 @@ function MedicalRecordCard({ appointment, status }) {
               />
             </View>
           )}
-          {appointment.result.doctorReason.localeCompare("Disinfestation") ===
-            0 && (
+          {appointment.result.doctorReason.localeCompare("Deworming") === 0 && (
             <View style={{ flexDirection: "row", left: -20, bottom: 10 }}>
               <Text style={styles.diagnostic}>Disinfestation Plan</Text>
               <MaterialCommunityIcon
