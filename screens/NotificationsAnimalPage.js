@@ -87,7 +87,6 @@ function NotificationsAnimalPage({ navigation }) {
         })
       );
 
-      //   console.log(pillsFoSelected);
       setMorning(
         resp
           .filter((pill) => {
@@ -265,7 +264,6 @@ function NotificationsAnimalPage({ navigation }) {
         );
       })
     );
-    // console.log(pillsFoSelected);
     setSelctedDateReceived(selectedDate);
     setNotificationsForSelectedDay(
       notifications.filter(
@@ -324,11 +322,11 @@ function NotificationsAnimalPage({ navigation }) {
           />
         </View>
       </View>
-      {item.additionalInfo.length > 0 && (
+      {/* {item.additionalInfo.length > 0 && (
         <View>
           <Text> {item.additionalInfo}</Text>
         </View>
-      )}
+      )} */}
     </View>
   );
   if (fetching) return <LoadingOverlay message={"Loading..."} />;

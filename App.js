@@ -54,6 +54,7 @@ import {
   getUserAppointmentsNotifications,
   getUserNotifications,
   getUnreadMessagesCount,
+  getUnreadMessagesForAUser,
 } from "./store/databases";
 import NotificationsAnimalPage from "./screens/NotificationsAnimalPage";
 import { getFormattedDate } from "./util/date";
@@ -69,21 +70,7 @@ import BookHotel from "./screens/BookHotel";
 import PayScreen from "./screens/PayScreen";
 import UserReservations from "./screens/UserReservations";
 import { LogBox } from "react-native";
-// const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
-
-// TaskManager.defineTask(
-//   BACKGROUND_NOTIFICATION_TASK,
-//   ({ data, error, executionInfo }) => {
-//     if (error) {
-//       console.log("error occurred");
-//     }
-//     if (data) {
-//       console.log("data-----", data);
-//     }
-//   }
-// );
-
-// Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+import ChatProvider, { ChatContext } from "./context/ChatContext";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -118,37 +105,44 @@ function AuthenticationStack() {
   );
 }
 function AuthenticatedDrawerDoctor() {
-  const [uncount, setUncount] = useState({});
-  const [count, setCount] = useState();
+  // const [uncount, setUncount] = useState({});
+  const [count, setCount] = useState(0);
   const authCtx = useContext(AuthContext);
-  const [oldCount, setoldCount] = useState(0);
+  // const { unreadMessages, markMessageAsRead, incrementUnreadMessages } =
+  //   useContext(ChatContext);
+  // const chatCtx = useContext(ChatContext);
+  // console.log(chatCtx.unreadMessages, "unread");
+  // const total = Object.values(chatCtx.unreadMessages).reduce(
+  //   (acc, val) => acc + val,
+  //   0
+  // );
+  // console.log(total);
+  // const [oldCount, setoldCount] = useState(0);
 
-  useEffect(() => {
-    async function getUnread() {
-      let resp = {};
-      resp = await getUnreadMessagesCount(authCtx.uid);
+  // useEffect(() => {
+  //   async function getUnread() {
+  //     const resp = await getUnreadMessagesForAUser(authCtx.uid);
+  //     setCount(resp);
+  //   }
 
-      setUncount(resp);
-      setoldCount(resp);
-    }
+  //   const interval = setInterval(() => {
+  //     getUnread();
+  //   }, 1000);
 
-    const interval = setInterval(() => {
-      getUnread();
-    }, 1000);
+  //   return () => clearInterval(interval);
+  // }, []);
+  // useEffect(() => {
+  //   if (oldCount !== uncount) {
+  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+  //     setoldCount(uncount);
 
-    return () => clearInterval(interval);
-  }, []);
-  useEffect(() => {
-    if (oldCount !== uncount) {
-      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
-      setoldCount(uncount);
-      setCount(total);
-    } else {
-      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+  //     setCount(total);
+  //   } else {
+  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
 
-      setCount(total);
-    }
-  }, [uncount]);
+  //     setCount(total);
+  //   }
+  // }, [uncount]);
 
   return (
     <Drawer.Navigator
@@ -282,37 +276,56 @@ function AuthenticatedDrawerDoctor() {
 }
 
 function AuthenticatedDrawerUser() {
-  const [uncount, setUncount] = useState({});
-  const [count, setCount] = useState();
+  // const [uncount, setUncount] = useState({});
+  let aux = 0;
+  const [count, setCount] = useState(0);
   const authCtx = useContext(AuthContext);
-  const [oldCount, setoldCount] = useState(0);
+  // const [oldCount, setoldCount] = useState(0);
+  // const { unreadMessages, markMessageAsRead, incrementUnreadMessages } =
+  //   useContext(ChatContext);
+  // const unreadCount = unreadMessages[authCtx.uid] || 0;
+  // useLayoutEffect(() => {
+  //   async function getUnread() {
+  //     const resp = await getUnreadMessagesForAUser(authCtx.uid);
+  //     setCount(resp);
+  //   }
 
-  useEffect(() => {
-    async function getUnread() {
-      let resp = {};
-      resp = await getUnreadMessagesCount(authCtx.uid);
+  //   const interval = setInterval(() => {
+  //     getUnread();
+  //   }, 1000);
 
-      setUncount(resp);
-      setoldCount(resp);
-    }
+  //   return () => clearInterval(interval);
+  // });
+  // console.log(authCtx.uid);
+  // console.log(unreadMessages, "unread");
+  // useEffect(() => {
+  //   async function getUnread() {
+  //     let resp = {};
+  //     resp = await getUnreadMessagesCount(authCtx.uid);
+  //     console.log(resp, "resp");
+  //     setUncount(resp);
+  //     setoldCount(resp);
+  //   }
 
-    const interval = setInterval(() => {
-      getUnread();
-    }, 1000);
+  //   const interval = setInterval(() => {
+  //     getUnread();
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
-  useEffect(() => {
-    if (oldCount !== uncount) {
-      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
-      setoldCount(uncount);
-      setCount(total);
-    } else {
-      let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+  //   return () => clearInterval(interval);
+  // }, []);
+  // useEffect(() => {
+  //   if (oldCount !== uncount) {
+  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+  //     setoldCount(uncount);
 
-      setCount(total);
-    }
-  }, []);
+  //     setCount(total);
+  //   } else {
+  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
+
+  //     setCount(total);
+  //   }
+  // }, [uncount]);
+
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} />}
@@ -561,7 +574,7 @@ function Base() {
       try {
         let resp = [];
         resp = await getUserNotifications(authCtx.uid);
-        // console.log(resp, "aloo");
+
         setNotifications(resp);
         return resp;
       } catch (error) {
@@ -572,7 +585,6 @@ function Base() {
       try {
         let resp = [];
         resp = await getUserAppointmentsNotifications(authCtx.uid);
-        console.log(resp, "ce am primit");
         setNotificationsAppointment(resp);
         return resp;
       } catch (error) {
@@ -586,62 +598,48 @@ function Base() {
     const interval = setInterval(() => {
       updateDate();
     }, 60000);
+
     haveNotifications().then((resp) => {
       for (const key in resp) {
-        if (resp[key].date.localeCompare(getFormattedDate(actualDate)) === 0) {
-          console.log(resp[key].name);
-
-          console.log(resp);
-          if (
-            resp[key].momentTime.localeCompare("Morning") === 0 &&
-            actualDate.getUTCHours() === 7 &&
-            actualDate.getUTCMinutes() === 59
-          ) {
-            console.log("da");
+        if (
+          (resp[key].date.localeCompare(getFormattedDate(actualDate)) ===
+            actualDate.getTime()) ===
+          "08:00:00"
+        ) {
+          if (resp[key].momentTime.localeCompare("Morning") === 0) {
             scheduleNotificationHandler(
               "Reminder! ☕️",
-              `Administrate to ${resp[key].name} morning medication`
+              `Administrate to ${resp[key].name} morning medication`,
+              new Date(`${getFormattedDate(new Date(actualDate))} 08:00:00`)
             );
           }
 
           if (
             resp[key].momentTime.localeCompare("Lunch") === 0 &&
-            actualDate.getUTCHours() === 12 &&
-            actualDate.getUTCMinutes() === 59
+            actualDate.getTime() === "13:00:00"
           ) {
             scheduleNotificationHandler(
               "Reminder!🍴",
-              `Administrate to ${resp[key].name} lunch medication`
+              `Administrate to ${resp[key].name} lunch medication`,
+              new Date(`${getFormattedDate(new Date(actualDate))} 13:00:00`)
             );
           }
 
-          console.log(
-            actualDate.getUTCHours(),
-            actualDate.getUTCMinutes(),
-            resp[key].momentTime.localeCompare("Evening")
-          );
           if (
             resp[key].momentTime.localeCompare("Evening") === 0 &&
-            actualDate.getUTCHours() === 21 &&
-            actualDate.getUTCMinutes() === 16
+            actualDate.getTime() === "23:50:00"
           ) {
-            console.log("daadada");
-            // scheduleNotificationHandler(
-            //   "Reminder!🌛",
-            //   `Administrate to ${resp[key].name} evening medication`
-            // );
             scheduleNotificationHandler(
               "Reminder!🌛",
-              `Administrate to ${resp[key].name} evening medication`
+              `Administrate to ${resp[key].name} evening medication`,
+              new Date(`${getFormattedDate(new Date(actualDate))} 23:35:00`)
             );
           }
         }
       }
 
       responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          console.log(response);
-        });
+        Notifications.addNotificationResponseReceivedListener((response) => {});
       return () => {
         Notifications.removeNotificationSubscription(
           notificationListener.current
@@ -650,22 +648,14 @@ function Base() {
       };
     });
     haveNotificationsForAppointments().then((resp) => {
-      // console.log(resp, "resp");
       for (const key in resp) {
         const dateApp = moment(resp[key].date, "YYYY-MM-DD");
         const actualDateMoment = moment(
           getFormattedDate(actualDate),
           "YYYY-MM-DD"
         );
-        // console.log(actualDateMoment, "date");
         const diffInDays = dateApp.diff(actualDateMoment, "days");
-        // console.log(diffInDays);
-        if (
-          diffInDays === 7 ||
-          (diffInDays === 1 &&
-            actualDate.getUTCHours() === 19 &&
-            actualDate.getUTCMinutes() === 30)
-        ) {
+        if (diffInDays === 7 || diffInDays === 1) {
           if (resp[key].active === true) {
             scheduleNotificationHandler(
               "Reminder! 🕒",
@@ -675,7 +665,8 @@ function Base() {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
-              })}`
+              })}`,
+              new Date(`${getFormattedDate(new Date(actualDate))} 21:53:00`)
             );
           } else {
             scheduleNotificationHandler(
@@ -686,16 +677,15 @@ function Base() {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
-              })}`
+              })}`,
+              new Date(`${getFormattedDate(new Date(actualDate))} 19:30:00`)
             );
           }
         }
       }
 
       responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          console.log(response);
-        });
+        Notifications.addNotificationResponseReceivedListener((response) => {});
       return () => {
         Notifications.removeNotificationSubscription(
           notificationListener.current
@@ -703,7 +693,6 @@ function Base() {
         Notifications.removeNotificationSubscription(responseListener.current);
       };
     });
-
     return () => clearInterval(interval);
   }, [actualDate]);
   const onLayoutRootView = useCallback(async () => {
@@ -721,7 +710,9 @@ export default function App() {
       <StatusBar style="light" />
 
       <AuthContextProvider>
-        <Base />
+        <ChatProvider>
+          <Base />
+        </ChatProvider>
       </AuthContextProvider>
     </>
   );

@@ -1,7 +1,7 @@
 import { Text, Image, View, StyleSheet, Dimensions } from "react-native";
 import Button from "../components/UI/ButtonCustom";
 import { GlobalColors } from "../constants/colors";
-import { LinearGradient } from "expo-linear-gradient";
+
 function WelcomeScreen({ navigation }) {
   function handlerRegister() {
     navigation.navigate("RegisterIn");

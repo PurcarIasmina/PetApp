@@ -29,7 +29,7 @@ function PayScreen({ navigation }) {
   const route = useRoute();
   console.log(route.params);
   const moment = require("moment");
-  console.log(newPrice);
+  console.log(reservationPrice);
 
   const today = new Date();
   const formattedDate = `${
@@ -76,9 +76,8 @@ function PayScreen({ navigation }) {
   const [emailInvalid, setEmailInvalid] = useState(false);
   const [phoneInvalid, setPhoneInvalid] = useState(false);
   const [checkInvalid, setCheckInvalid] = useState(false);
-  const newPrice =
-    (100 * route.params.animals.length * (daysDifference + 1)).toString() +
-    "00";
+  const reservationPrice =
+    (100 * route.params.animals.length * daysDifference).toString() + "00";
   const stripe = useStripe();
   const handleCheck = (text) => {
     setCheckedItems(text);
@@ -114,22 +113,23 @@ function PayScreen({ navigation }) {
   async function submitHandler() {
     if (handlerValidation()) {
       try {
-        const resp = await addReservation(
-          name,
-          route.params.animals,
-          route.params.endDate ? route.params.endDate : "",
-          route.params.startDate,
-          checkedItems,
-          email,
-          phone,
-          (100 * route.params.animals.length * (daysDifference + 1)).toString(),
-          authCtx.uid
-        );
-        if (resp) {
-          if (checkedItems === "Arrival")
+        if (checkedItems === "Arrival") {
+          const resp = await addReservation(
+            name,
+            route.params.animals,
+            route.params.endDate ? route.params.endDate : "",
+            route.params.startDate,
+            checkedItems,
+            email,
+            phone,
+            (100 * route.params.animals.length * daysDifference).toString(),
+            authCtx.uid,
+            null
+          );
+          if (resp) {
             navigation.navigate("UserReservations");
-          else subscribe();
-        }
+          }
+        } else subscribe();
       } catch (error) {
         console.log(error);
       }
@@ -139,12 +139,14 @@ function PayScreen({ navigation }) {
     try {
       const response = await fetch("http://localhost:3000/pay", {
         method: "POST",
-        body: JSON.stringify({ newPrice }),
+        body: JSON.stringify({ reservationPrice }),
         headers: {
           "Content-Type": "application/json",
         },
       });
+
       const data = await response.json();
+
       if (!response.ok) return Alert.alert(data.message);
       const clientSecret = data.clientSecret;
       const initSheet = await stripe.initPaymentSheet({
@@ -167,47 +169,20 @@ function PayScreen({ navigation }) {
             },
           },
           colors: {
-            // icon: GlobalColors.colors.darkDustyPurple,
             primary: GlobalColors.colors.pink500,
             background: "#FFFFFF",
-            // componentBackground: Colors.colors.cardBackgroundColor,
-            // componentBorder: Colors.colors.gray,
-            // componentDivider: Colors.colors.gray,
-            // primaryText: Colors.colors.darkDustyPurple,
-            // secondaryText: Colors.colors.dustyPurple,
-            // componentText: Colors.colors.gray,
-            // placeholderText: Colors.colors.gray,P
           },
         },
-        applePay: {
-          merchantCountryCode: "US",
-        },
+        merchantCountryCode: "US",
+        applePay: true,
       });
       if (initSheet.error) {
         return Alert.alert(initSheet.error.message);
-        // showMessage({
-        //   message: "The payment could not be initilized!",
-        //   floating: true,
-        //   // position: top,
-        //   icon: "info",
-        //   backgroundColor: Colors.colors.darkDustyPurple,
-        //   color: "white",
-        // });
-        // return;
       }
       const presentSheet = await stripe.presentPaymentSheet({
         clientSecret,
       });
       if (presentSheet.error) {
-        // showMessage({
-        //   message: "The payment could not go through!",
-        //   floating: true,
-        //   // position: top,
-        //   icon: "info",
-        //   backgroundColor: Colors.colors.darkDustyPurple,
-        //   color: "white",
-        // });
-        // return;
         return Alert.alert(
           "The payment has been canceled!",
           "Please try again!",
@@ -221,6 +196,18 @@ function PayScreen({ navigation }) {
         );
       }
 
+      const resp = await addReservation(
+        name,
+        route.params.animals,
+        route.params.endDate ? route.params.endDate : "",
+        route.params.startDate,
+        checkedItems,
+        email,
+        phone,
+        (100 * route.params.animals.length * (daysDifference + 1)).toString(),
+        authCtx.uid,
+        data.paymentId
+      );
       navigation.navigate("UserReservations");
     } catch (error) {
       console.log(error);
@@ -343,7 +330,7 @@ function PayScreen({ navigation }) {
                   top: 5,
                 }}
               >
-                {100 * route.params.animals.length * (daysDifference + 1)} lei
+                {100 * route.params.animals.length * daysDifference} lei
               </Text>
             </View>
           </View>

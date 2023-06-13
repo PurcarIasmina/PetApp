@@ -18,16 +18,15 @@ export const getPermissions = async () => {
     return;
   }
 };
-export function scheduleNotificationHandler(title, body, name) {
+export async function scheduleNotificationHandler(title, body, date) {
   getPermissions();
-  Notifications.scheduleNotificationAsync({
+  await Notifications.scheduleNotificationAsync({
     content: {
       title: title,
       body: body,
-      data: {},
     },
     trigger: {
-      seconds: 20,
+      date: date,
     },
   });
 }

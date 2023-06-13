@@ -25,14 +25,14 @@ function Switcher({
   slot,
   active,
 }) {
-  console.log(status, name);
+  console.log(slot, active);
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   console.log(isSwitchOn);
   const authCtx = useContext(AuthContext);
   console.log(generatedId);
   useLayoutEffect(() => {
     setIsSwitchOn(status);
-  });
+  }, [status]);
   const onToggleSwitch = async () => {
     setIsSwitchOn(!isSwitchOn);
     if (appointmentReminder === null) {
@@ -73,6 +73,7 @@ function Switcher({
             active ? true : false,
             active ? slot : undefined
           );
+          notificationChanged(!notificationValue);
         } catch (error) {
           console.log(error);
         }
@@ -80,6 +81,7 @@ function Switcher({
         try {
           if (generatedId) {
             const resp = await deleteNotificationAppointment(generatedId);
+            notificationChanged(!notificationValue);
           }
         } catch (error) {
           console.log(error);

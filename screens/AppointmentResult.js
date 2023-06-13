@@ -72,7 +72,7 @@ function AppointmentResult({ navigation }) {
   const options = [
     { label: "Vaccine", value: "Vaccine" },
     { label: "Consultation", value: "Consultation" },
-    { label: "Disinfestation", value: "Disinfestation" },
+    { label: "Deworming", value: "Deworming" },
   ];
   function formatDate(dateString) {
     if (dateString) {

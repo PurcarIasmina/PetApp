@@ -263,11 +263,8 @@ function AddFilesScreen({ navigation }) {
         `${fileDirectory}${fileName}`
       );
 
-      // Download the file to the app's document directory
       const { uri: downloadedFileUri } =
         await downloadResumable.downloadAsync();
-
-      // Share the downloaded file
       await shareAsync(downloadedFileUri);
     } catch (error) {
       console.log("Error downloading and sharing file", error);

@@ -13,14 +13,38 @@ app.use(cors());
 
 app.post("/pay", async (req, res) => {
   try {
-    const { newPrice } = req.body;
+    const { reservationPrice } = req.body;
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: newPrice,
+      amount: reservationPrice,
       currency: "ron",
       payment_method_types: ["card"],
     });
     const clientSecret = paymentIntent.client_secret;
-    res.json({ message: "Payment initiated", clientSecret });
+    const paymentId = paymentIntent.id;
+    res.json({ message: "Payment initiated", clientSecret, paymentId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+app.post("/refund", async (req, res) => {
+  try {
+    const { paymentId } = req.body;
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+    const clientSecret = paymentIntent.client_secret;
+
+    if (!paymentIntent) {
+      return res.status(400).json({ message: "Invalid payment ID" });
+    }
+    const orderId = paymentIntent.metadata.order_id;
+    const amount = paymentIntent.amount;
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentId,
+      amount: amount,
+      metadata: { order_id: orderId },
+    });
+
+    res.json({ message: "Refund initiated", clientSecret, refund });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

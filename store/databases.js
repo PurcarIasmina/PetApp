@@ -131,20 +131,16 @@ export async function getUnreadMessagesCount(userId) {
     if (chatId.includes(userId)) {
       const otherUserId = chatId.replace(userId, "").replace("-", "");
       const messagesRef = collection(doc.ref, "messages");
-      let unreadCount = 0; // Numărul total de mesaje necitite pentru conversația curentă
+      let unreadCount = 0;
 
       const messagesQuerySnapshotPromise = await getDocs(messagesRef);
 
-      // Așteaptă finalizarea promisiunii
-
-      // Numără mesajele necitite
       messagesQuerySnapshotPromise.docs.forEach((doc) => {
         if (!doc.data().read && doc.data().sentTo === userId) {
           unreadCount++;
         }
       });
 
-      // Adaugă numărul de mesaje necitite în obiectul de numărare a mesajelor necitite pentru utilizatorul corespunzător
       if (unreadMessagesCounts[otherUserId]) {
         unreadMessagesCounts[otherUserId] += unreadCount;
       } else {
@@ -153,9 +149,36 @@ export async function getUnreadMessagesCount(userId) {
     }
   });
 
-  // Așteaptă finalizarea tuturor promisiunilor și returnează obiectul de numărare a mesajelor necitite pentru fiecare utilizator
-
   return unreadMessagesCounts;
+}
+
+export async function getUnreadMessagesForAUser(userId) {
+  const chatsRef = collection(db, "Chats");
+  const querySnapshot = await getDocs(chatsRef);
+  let totalUnreadCount = 0;
+
+  await Promise.all(
+    querySnapshot.docs.map(async (doc) => {
+      const chatId = doc.id;
+      if (chatId.includes(userId)) {
+        const otherUserId = chatId.replace(userId, "").replace("-", "");
+        const messagesRef = collection(doc.ref, "messages");
+        let unreadCount = 0;
+
+        const messagesQuerySnapshot = await getDocs(messagesRef);
+
+        messagesQuerySnapshot.docs.forEach((doc) => {
+          if (!doc.data().read && doc.data().sentTo === userId) {
+            unreadCount++;
+          }
+        });
+
+        totalUnreadCount += unreadCount;
+      }
+    })
+  );
+
+  return totalUnreadCount;
 }
 
 export async function setMessagesRead(userId, otherId) {
@@ -177,8 +200,6 @@ export async function setMessagesRead(userId, otherId) {
           messageData.sentTo === userId &&
           messageData.sentBy === otherId
         ) {
-          console.log("daa");
-
           await updateDoc(messageDoc.ref, { read: true });
         }
       }
@@ -236,7 +257,8 @@ export async function addReservation(
   email,
   phone,
   totalPayment,
-  uid
+  uid,
+  paymentId
 ) {
   const response = await axios.post(BACKEND_URL + "/reservations.json", {
     name: name,
@@ -248,6 +270,7 @@ export async function addReservation(
     pay: pay,
     totalPayment: totalPayment,
     uid: uid,
+    paymentId: paymentId,
   });
   return response;
 }
@@ -287,13 +310,54 @@ export async function getReservations(uid) {
       if (
         getFormattedDate(new Date(filtered[key].startDate)) >
         getFormattedDate(romaniaDateTime)
-      )
+      ) {
+        if (filtered[key].pay === "Now") {
+          reservationDetail["paymentId"] = filtered[key].paymentId;
+        }
         reservationsActive.push(reservationDetail);
-      else reservationsPast.push(reservationDetail);
+      } else reservationsPast.push(reservationDetail);
     }
   }
 
   return { active: reservationsActive, past: reservationsPast };
+}
+export async function getAllReservations() {
+  let reservations = [];
+  const response = await axios.get(BACKEND_URL + "/reservations.json");
+  if (response.data) {
+    const reservationsKeys = Object.keys(response.data);
+    const filtered = Object.values(response.data);
+    filtered.map((notification, index) => {
+      notification.key = reservationsKeys[index];
+    });
+
+    filtered.sort((a, b) => a.startDate > b.startDate);
+    const currentDate = new Date();
+    const timezoneOffset = 180;
+    const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+    const romaniaDateTime = new Date(romanianTime);
+    for (const key in filtered) {
+      const reservationDetail = {
+        animals: filtered[key].animals,
+        startDate: filtered[key].startDate,
+        endDate: filtered[key].endDate,
+        uid: filtered[key].uid,
+        email: filtered[key].email,
+        phone: filtered[key].phone,
+        generatedId: filtered[key].key,
+        name: filtered[key].name,
+        pay: filtered[key].pay,
+        payment: filtered[key].totalPayment,
+      };
+      // if (
+      //   getFormattedDate(new Date(filtered[key].startDate)) >
+      //   getFormattedDate(romaniaDateTime)
+      // )
+      reservations.push(reservationDetail);
+    }
+  }
+
+  return reservations;
 }
 export async function deleteAnimal(aid) {
   const response = await axios.delete(BACKEND_URL + `/animals/${aid}.json`);
@@ -345,6 +409,7 @@ export async function addAppointment(
     reason: appointmentReason,
     ownername: ownerName,
     canceled: 0,
+    done: 0,
   });
   return response;
 }
@@ -534,7 +599,7 @@ export async function cancelAppointment(appointmentId, data) {
   console.log(appointmentId);
   return response;
 }
-export async function getDoctorSlotsAppointments(did, date) {
+export async function getDoctorNotAvailableSlotsAppointments(did, date) {
   const slots = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);
   if (response.data) {
@@ -595,13 +660,14 @@ export async function getAppointments(did, date) {
         photoUrl: await getImageUrl(
           `${filtered[key].uid}/${filtered[key].aid}.jpeg`
         ),
+        done: filtered[key].done,
         generatedId: filtered[key].key,
       };
-      {
-        filtered[key].hasOwnProperty("done")
-          ? (appointmentDetail["done"] = 1)
-          : null;
-      }
+
+      filtered[key].hasOwnProperty("result")
+        ? (appointmentDetail["result"] = filtered[key].result)
+        : null;
+
       console.log(appointmentDetail);
       appointmentsDetails.push(appointmentDetail);
     }
@@ -622,8 +688,7 @@ export async function getUserStatusAppointments(uid, status) {
       appointment.key = appointmentKeys[index];
     });
 
-    let filtered;
-    console.log(status + "status");
+    let filtered = [];
     const currentDate = new Date();
     const timezoneOffset = 180;
     const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
@@ -639,9 +704,6 @@ export async function getUserStatusAppointments(uid, status) {
                 romaniaDateTime.toISOString().slice(11, 16)))
         );
       });
-      console.log(romaniaDateTime.toISOString().slice(11, 16));
-
-      console.log(romaniaDateTime);
     } else if (status === 1) {
       filtered = appointments.filter(function (appointment) {
         console.log(appointment.uid === uid);
@@ -662,7 +724,6 @@ export async function getUserStatusAppointments(uid, status) {
 
     for (const key in filtered) {
       let detail = await getAnimalDetails(filtered[key].aid);
-      console.log(detail);
       if (Object.keys(detail).length > 0) {
         const appointmentDetail = {
           did: filtered[key].did,
@@ -673,9 +734,6 @@ export async function getUserStatusAppointments(uid, status) {
           reason: filtered[key].reason,
           canceled: filtered[key].canceled,
           ownername: filtered[key].ownername,
-          photoUrl: await getImageUrl(
-            `${filtered[key].uid}/${filtered[key].aid}.jpeg`
-          ),
           generatedId: filtered[key].key,
         };
 
@@ -711,7 +769,7 @@ export async function getAnimalDoneAppointments(uid, aid) {
     filtered = appointments.filter(function (appointment) {
       return (
         appointment.uid === uid &&
-        appointment.hasOwnProperty("done") &&
+        appointment.done === 1 &&
         appointment.aid === aid
       );
     });
@@ -764,7 +822,7 @@ export function calculateAnimalPillDays(doneAppointments) {
       const daysSinceAppointment = Math.floor(
         diffInTime / (1000 * 60 * 60 * 24)
       );
-      // console.log(daysSinceAppointment + "dif");
+
       for (const keyn in consultations[key].result.pillsPlan) {
         const pill = consultations[key].result.pillsPlan[keyn];
         if (pill.pillTimes > daysSinceAppointment) {

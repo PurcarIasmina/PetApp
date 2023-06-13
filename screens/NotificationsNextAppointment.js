@@ -18,7 +18,7 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
   const [nextAppointments, setNextAppointments] = useState([]);
   const [fetching, setFetching] = useState(false);
   const [selectedDaterecieved, setSelctedDateReceived] = useState();
-  //   console.log(nextAppointments);
+  const [notificationValue, setNotificationChanged] = useState(false);
 
   console.log(markedDates, "marked dates");
   const [nextActiveAppointments, setNextActiveAppointments] = useState([]);
@@ -30,10 +30,7 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
         setFetching(true);
         let aux = [];
         aux = await getAnimalDoneAppointments(authCtx.uid, aid);
-        // console.log(aux);
         setNextAppointments(aux);
-
-        // console.log(datesFuture, "datess");
         if (aux.length > 0) setFetching(false);
         return aux;
       } catch (error) {
@@ -48,11 +45,9 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
         setFetching(true);
         let active = [];
         active = await getUserStatusAppointments(authCtx.uid, 0);
-        // console.log(active, "active");
         setNextActiveAppointments(
           active.filter((app) => app.animal.aid.localeCompare(aid) === 0)
         );
-
         setFetching(false);
       } catch (error) {
         console.log(error);
@@ -89,7 +84,7 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
       }
     }
     getNotifications();
-  }, [selectedDaterecieved]);
+  }, [selectedDaterecieved, notificationValue]);
   const markedDatesActive = datesActive.reduce((obj, date) => {
     obj[date] = { marked: true };
     return obj;
@@ -168,6 +163,8 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
                 active={false}
                 name={animalName}
                 aid={aid}
+                notificationChanged={setNotificationChanged}
+                notificationValue={notificationValue}
                 status={notificationsApp.some(
                   (app) => app.date.localeCompare(selected) === 0
                 )}
@@ -215,6 +212,8 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
                 slot={selectedAppActive.slot}
                 name={selectedAppActive.animal.nameA}
                 aid={aid}
+                notificationChanged={setNotificationChanged}
+                notificationValue={notificationValue}
                 generatedId={notificationsApp
                   .filter((app) => app.date.localeCompare(selected) === 0)
                   .map((app) => app.generatedId)}
