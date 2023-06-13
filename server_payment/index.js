@@ -30,12 +30,21 @@ app.post("/pay", async (req, res) => {
 app.post("/refund", async (req, res) => {
   try {
     const { paymentId } = req.body;
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+    const clientSecret = paymentIntent.client_secret;
 
+    if (!paymentIntent) {
+      return res.status(400).json({ message: "Invalid payment ID" });
+    }
+    const orderId = paymentIntent.metadata.order_id;
+    const amount = paymentIntent.amount;
     const refund = await stripe.refunds.create({
       payment_intent: paymentId,
+      amount: amount,
+      metadata: { order_id: orderId },
     });
 
-    res.json({ message: "Refund initiated", refund });
+    res.json({ message: "Refund initiated", clientSecret, refund });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

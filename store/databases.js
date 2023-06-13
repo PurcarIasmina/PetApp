@@ -310,9 +310,12 @@ export async function getReservations(uid) {
       if (
         getFormattedDate(new Date(filtered[key].startDate)) >
         getFormattedDate(romaniaDateTime)
-      )
+      ) {
+        if (filtered[key].pay === "Now") {
+          reservationDetail["paymentId"] = filtered[key].paymentId;
+        }
         reservationsActive.push(reservationDetail);
-      else reservationsPast.push(reservationDetail);
+      } else reservationsPast.push(reservationDetail);
     }
   }
 

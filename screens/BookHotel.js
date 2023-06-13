@@ -203,9 +203,11 @@ function BookHotel({ navigation }) {
       const resStartDate = reservation.startDate;
       const resEndDate = reservation.endDate;
 
+      console.log(resStartDate, resEndDate);
+      console.log(startDate, endDate);
       return (
         (resStartDate >= startDate && resStartDate <= endDate) ||
-        (resEndDate >= startDate && resEndDate <= endDate) ||
+        (resEndDate > startDate && resEndDate <= endDate) ||
         (resStartDate <= startDate && resEndDate >= endDate)
       );
     });

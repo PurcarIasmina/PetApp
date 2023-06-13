@@ -5,6 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Modal,
 } from "react-native";
 import { useEffect, useContext, useState } from "react";
 import { deleteReservation, getReservations } from "../store/databases";
@@ -17,6 +18,7 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import { Ionicons } from "@expo/vector-icons";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+import { Button } from "react-native-paper";
 const API_URL = "http://localhost:3000";
 function UserReservations({ navigation }) {
   navigation.setOptions({
@@ -59,13 +61,17 @@ function UserReservations({ navigation }) {
   const [deletedFinished, setDeleteFinished] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [id, setId] = useState();
+  const [paymentId, setPaymentId] = useState();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [item, setItem] = useState();
   useEffect(() => {
     async function getUserReservations() {
       setFetching(true);
       const resp = await getReservations(authCtx.uid);
       setReservations(resp);
-      console.log(reservations);
+      setDeleted(false);
       setFetching(false);
+      setDeleteFinished(false);
     }
     getUserReservations();
   }, [deletedFinished]);
@@ -74,8 +80,8 @@ function UserReservations({ navigation }) {
     async function handlerDeleteReservations() {
       if (deleted === true) {
         try {
-          setShowAlert(false);
           const resp = await deleteReservation(id);
+          setId();
           setDeleteFinished(true);
         } catch (error) {
           console.log(error);
@@ -84,11 +90,13 @@ function UserReservations({ navigation }) {
     }
     handlerDeleteReservations();
   }, [deleted]);
+
   const subscribe = async () => {
+    setModalVisible(false);
     try {
-      const response = await fetch("http://localhost:3000/pay", {
+      const response = await fetch("http://localhost:3000/refund", {
         method: "POST",
-        body: JSON.stringify({ newPrice }),
+        body: JSON.stringify({ paymentId }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -96,73 +104,20 @@ function UserReservations({ navigation }) {
 
       const data = await response.json();
 
-      console.log(data, "id");
       if (!response.ok) return Alert.alert(data.message);
-      const clientSecret = data.clientSecret;
-      const initSheet = await stripe.initPaymentSheet({
-        paymentIntentClientSecret: clientSecret,
-        appearance: {
-          font: {
-            family: "AvenirNext-Regular",
-            scale: 1.15,
+      else {
+        await deleteReservation(id);
+        setDeleteFinished(true);
+        setId();
+        setPaymentId();
+
+        return Alert.alert("Refund successful!", "You refund is processed!", [
+          {
+            text: "OK",
+            onPress: () => console.log("Cancel Ok"),
+            style: "default",
           },
-          shapes: {
-            borderRadius: 12,
-            borderWidth: 0.5,
-          },
-          primaryButton: {
-            shapes: {
-              borderRadius: 10,
-            },
-            colors: {
-              text: "#FFFFFF",
-            },
-          },
-          colors: {
-            primary: GlobalColors.colors.pink500,
-            background: "#FFFFFF",
-          },
-        },
-        merchantCountryCode: "US",
-        applePay: true,
-      });
-      if (initSheet.error) {
-        return Alert.alert(initSheet.error.message);
-      }
-      const presentSheet = await stripe.presentPaymentSheet({
-        clientSecret,
-      });
-      if (presentSheet.error) {
-        return Alert.alert(
-          "The payment has been canceled!",
-          "Please try again!",
-          [
-            {
-              text: "OK",
-              onPress: () => console.log("Cancel Pressed"),
-              style: "default",
-            },
-          ]
-        );
-      }
-      const paymentId = data.clientSecret.split("_secret");
-      const id = paymentId[0];
-      console.log(presentSheet, "id");
-      if (id) {
-        console.log(presentSheet);
-        const resp = await addReservation(
-          name,
-          route.params.animals,
-          route.params.endDate ? route.params.endDate : "",
-          route.params.startDate,
-          checkedItems,
-          email,
-          phone,
-          (100 * route.params.animals.length * (daysDifference + 1)).toString(),
-          authCtx.uid,
-          id
-        );
-        navigation.navigate("UserReservations");
+        ]);
       }
     } catch (error) {
       console.log(error);
@@ -173,7 +128,7 @@ function UserReservations({ navigation }) {
     const date = `${moment(item.startDate).format("ddd, DD.MM")} ${
       item.endDate ? `- ${moment(item.endDate).format("ddd, DD.MM")}` : ""
     }`;
-
+    setItem(item);
     return (
       <View style={styles.cardItem}>
         <View
@@ -232,7 +187,13 @@ function UserReservations({ navigation }) {
             <View style={styles.closeCircle}>
               <TouchableOpacity
                 onPress={() => {
-                  setId(item.generatedId), setShowAlert(true);
+                  if (item.pay === "Now") {
+                    setPaymentId(item.paymentId);
+                    setId(item.generatedId);
+                    setModalVisible(true);
+                  } else {
+                    setId(item.generatedId), setShowAlert(true);
+                  }
                 }}
               >
                 <Ionicons
@@ -272,8 +233,8 @@ function UserReservations({ navigation }) {
                 color: GlobalColors.colors.pastel1,
               }}
               onConfirmPressed={() => {
-                setShowAlert(false), setDeleted(true);
-                subscribe();
+                setShowAlert(false);
+                setDeleted(true);
               }}
             />
           </>
@@ -327,6 +288,118 @@ function UserReservations({ navigation }) {
             />
           </View>
         )}
+
+        {modalVisible && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text
+                  style={[
+                    styles.title,
+                    {
+                      marginTop: 0,
+                      alignSelf: "center",
+                      marginLeft: 0,
+                      marginBottom: 20,
+                      color: GlobalColors.colors.pink500,
+                      fontSize: 15,
+                    },
+                  ]}
+                >
+                  Cancel appointment
+                </Text>
+                <Text
+                  style={[
+                    styles.title,
+                    {
+                      marginTop: 0,
+                      color: GlobalColors.colors.darkGrey,
+                      fontSize: 15,
+                    },
+                  ]}
+                >
+                  Refund Payment
+                </Text>
+                <Text
+                  style={[styles.title, { fontSize: 14, marginBottom: 20 }]}
+                >
+                  Refunds take 5-10 days to appear on your payment statement.
+                </Text>
+                <View style={styles.amountRefundContainer}>
+                  <View style={styles.refundContainer}>
+                    <Text
+                      style={[
+                        styles.subtitle,
+                        { marginRight: 8, fontSize: 14, marginLeft: 0 },
+                      ]}
+                    >
+                      Refund
+                    </Text>
+
+                    <View style={styles.amountContainer}>
+                      <Text
+                        style={[
+                          styles.subtitle,
+                          { marginLeft: 0, fontSize: 12 },
+                        ]}
+                      >
+                        {item.payment} {"     "}RON
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.refundContainer}>
+                    <Text
+                      style={[
+                        styles.subtitle,
+                        { marginRight: 13, fontSize: 14, marginLeft: 0 },
+                      ]}
+                    >
+                      Period
+                    </Text>
+
+                    <View style={styles.amountContainer}>
+                      <Text
+                        style={[
+                          styles.subtitle,
+                          { marginLeft: 0, fontSize: 12 },
+                        ]}
+                      >
+                        {moment(item.startDate).format("DD.MM")} -
+                        {moment(item.endDate).format("DD.MM")}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    top: 20,
+                  }}
+                >
+                  <Button
+                    style={styles.buttonStyle}
+                    textColor={GlobalColors.colors.pink500}
+                    onPress={subscribe}
+                  >
+                    Accept refund
+                  </Button>
+                  <Button
+                    style={styles.buttonStyle}
+                    textColor={GlobalColors.colors.pink500}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    Cancel refund
+                  </Button>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )}
       </View>
     </StripeProvider>
   );
@@ -373,5 +446,57 @@ const styles = StyleSheet.create({
     size: 30,
     top: 0,
     right: 2,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    backgroundColor: "white",
+    width: "85%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    elevation: 5,
+    shadowRadius: 4,
+    margin: 20,
+    paddingVertical: 35,
+  },
+  amountContainer: {
+    borderWidth: 1,
+    borderColor: GlobalColors.colors.gray1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
+  },
+  refundContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 30,
+    marginVertical: 5,
+  },
+  amountRefundContainer: {
+    backgroundColor: GlobalColors.colors.gray0,
+    width: "100%",
+    borderTopWidth: 0.5,
+    borderBottomWidth: 0.5,
+    borderColor: GlobalColors.colors.gray1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 100,
+  },
+  buttonStyle: {
+    backgroundColor: GlobalColors.colors.gray0,
+    borderColor: GlobalColors.colors.gray1,
+    borderWidth: 1,
+    borderRadius: 30,
+    color: GlobalColors.colors.pink500,
+    paddingHorizontal: 10,
+    marginHorizontal: 10,
   },
 });

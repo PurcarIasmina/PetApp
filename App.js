@@ -601,7 +601,11 @@ function Base() {
 
     haveNotifications().then((resp) => {
       for (const key in resp) {
-        if (resp[key].date.localeCompare(getFormattedDate(actualDate)) === 0) {
+        if (
+          (resp[key].date.localeCompare(getFormattedDate(actualDate)) ===
+            actualDate.getTime()) ===
+          "08:00:00"
+        ) {
           if (resp[key].momentTime.localeCompare("Morning") === 0) {
             scheduleNotificationHandler(
               "Reminder! ☕️",
@@ -610,7 +614,10 @@ function Base() {
             );
           }
 
-          if (resp[key].momentTime.localeCompare("Lunch") === 0) {
+          if (
+            resp[key].momentTime.localeCompare("Lunch") === 0 &&
+            actualDate.getTime() === "13:00:00"
+          ) {
             scheduleNotificationHandler(
               "Reminder!🍴",
               `Administrate to ${resp[key].name} lunch medication`,
@@ -618,11 +625,14 @@ function Base() {
             );
           }
 
-          if (resp[key].momentTime.localeCompare("Evening") === 0) {
+          if (
+            resp[key].momentTime.localeCompare("Evening") === 0 &&
+            actualDate.getTime() === "23:50:00"
+          ) {
             scheduleNotificationHandler(
               "Reminder!🌛",
               `Administrate to ${resp[key].name} evening medication`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 20:00:00`)
+              new Date(`${getFormattedDate(new Date(actualDate))} 23:35:00`)
             );
           }
         }
