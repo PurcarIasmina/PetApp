@@ -83,27 +83,23 @@ function DoctorBookAppointment({ navigation }) {
     "Dec.",
   ];
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
   let currentDate = new Date();
   const timezoneOffset = 180;
   const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
-  currentDate =
-    // new Date(romanianTime).getDay() === 6 || 0
-    //   ? new Date(romanianTime).getDay() === 6
-    //     ? new Date(romanianTime) + 2
-    //     : new Date(romanianTime) + 1
-    //   :
-    new Date(romanianTime);
+  currentDate = new Date(romanianTime);
 
   const auxDate = new Date(currentDate);
   if (
     auxDate instanceof Date &&
-    (auxDate.getUTCDay() === 0 || auxDate.getUTCDay() === 6)
+    (auxDate.getUTCDay() === 6 || auxDate.getUTCDay() === 0)
   ) {
     const daysToAdd = auxDate.getUTCDay() === 0 ? 1 : 2;
     auxDate.setUTCDate(auxDate.getUTCDate() + daysToAdd);
   }
+
   const [date, setDate] = useState(new Date(auxDate));
+  console.log(date, "date");
+
   const [selectedDate, setSelectedDate] = useState(new Date(date));
   console.log(selectedDate);
   const swiper = useRef();
@@ -150,33 +146,26 @@ function DoctorBookAppointment({ navigation }) {
   }, [selectedDate]);
 
   const handleNextDay = () => {
-    const timezoneOffset = new Date().getTimezoneOffset();
-    const nextDate = moment(date).add(1, "day").add(timezoneOffset, "minutes");
+    const nextDateAux = new Date(date);
 
-    if (nextDate.isoWeekday() === 6 || nextDate.isoWeekday() === 7) {
-      const daysUntilMonday = 8 - nextDate.isoWeekday();
+    if (nextDateAux.getDay() === 5) {
+      nextDateAux.setDate(date.getUTCDate() + 3);
+    } else nextDateAux.setDate(date.getUTCDate() + 1);
 
-      if (daysUntilMonday <= 5) {
-        nextDate.add(daysUntilMonday, "days");
-      }
-    }
-
-    setDate(nextDate.toDate());
-    setSelectedDate(nextDate.toDate());
+    setDate(nextDateAux);
+    setSelectedDate(nextDateAux);
   };
 
   const handlePrevDay = () => {
-    const prevDate = moment(date)
-      .subtract(1, "day")
-      .add(timezoneOffset, "minutes");
+    const prevDateAux = new Date(date);
 
-    if (prevDate.isoWeekday() === 7) {
-      const daysUntilFriday = 2;
-      prevDate.subtract(daysUntilFriday, "days");
-    }
+    if (prevDateAux.getDay() === 1) {
+      prevDateAux.setDate(date.getDate() - 3);
+    } else prevDateAux.setDate(date.getDate() - 1);
 
-    setDate(prevDate.toDate());
-    setSelectedDate(prevDate.toDate());
+    console.log(prevDateAux, "prev");
+    setDate(prevDateAux);
+    setSelectedDate(prevDateAux);
   };
   const onDateSelect = (date) => {
     setSelectedDate(date);

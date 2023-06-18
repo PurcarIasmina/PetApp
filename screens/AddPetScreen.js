@@ -23,6 +23,7 @@ import { addAnimal, getImageUrl, storeImage } from "../store/databases";
 import { AuthContext } from "../context/auth";
 import { getFormattedDate } from "../util/date";
 import { v4 } from "uuid";
+import { Feather } from "@expo/vector-icons";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 function AddPetScreen({ navigation }) {
   const [name, setName] = useState("");
@@ -55,7 +56,25 @@ function AddPetScreen({ navigation }) {
     { label: "Male", value: "Male" },
   ];
 
-  navigation.setOptions({ headerShown: true, headerTransparent: true });
+  navigation.setOptions({
+    headerShown: true,
+    headerTransparent: true,
+    headerTintColor: photo.length > 0 ? "white" : GlobalColors.colors.pink500,
+
+    headerRight: () => (
+      <>
+        <View style={styles.editButtonContainer}>
+          <Feather
+            name={"save"}
+            color={photo.length > 0 ? "white" : GlobalColors.colors.pink500}
+            size={22}
+            onPress={saveHandler}
+            style={styles.headerIcon}
+          />
+        </View>
+      </>
+    ),
+  });
   function updateError(error, stateUpdater) {
     stateUpdater(error);
     setTimeout(() => {
@@ -241,7 +260,7 @@ function AddPetScreen({ navigation }) {
           <ImageBackground
             style={styles.image}
             imageStyle={{
-              borderRadius: 100,
+              // borderRadius: 100,
               borderColor: GlobalColors.colors.pink500,
               borderWidth: photo ? 0 : 1,
             }}
@@ -281,7 +300,18 @@ function AddPetScreen({ navigation }) {
             </View>
           </ImageBackground>
         </View>
-        <View style={styles.editContainer}>
+        <View
+          style={[
+            styles.editContainer,
+            photo.length === 0 && {
+              shadowColor: "#333333",
+              shadowOffset: { width: -1, height: -3 },
+              shadowRadius: 2,
+              shadowOpacity: 0.4,
+              elevation: 5,
+            },
+          ]}
+        >
           <View style={styles.editField}>
             <Text
               style={[
@@ -390,25 +420,13 @@ function AddPetScreen({ navigation }) {
                   : GlobalColors.colors.pink500
               }
               hasPadding
+              borderRadius={10}
               options={options}
-              style={{ left: 40 }}
               testID="gender-switch-selector"
               accessibilityLabel="gender-switch-selector"
             />
           </View>
-          <View style={{ flexDirection: "row" }}>
-            <View style={styles.editButtonContainer}>
-              <IconButton
-                left={160}
-                bottom={-30}
-                icon="save"
-                label=""
-                color="gray"
-                size={25}
-                onPress={saveHandler}
-              />
-            </View>
-          </View>
+
           <View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
           </View>
@@ -429,27 +447,38 @@ function AddPetScreen({ navigation }) {
 export default AddPetScreen;
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: GlobalColors.colors.white1,
+    backgroundColor: "white",
     height: "100%",
   },
   image: {
-    height: 180,
-    width: 180,
-    marginTop: 20,
-    paddingVertical: 10,
+    height: 400,
+    width: "100%",
+    // marginTop: 20,
+    // paddingVertical: 10,
     // marginLeft: 40,
     marginBottom: 10,
-    alignSelf: "center",
+    // alignSelf: "center",
   },
-
+  buttonsContainer: {
+    borderRadius: 50,
+    marginHorizontal: 100,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 30,
+    // paddingVertical: 20,
+    marginTop: 180,
+    backgroundColor: GlobalColors.colors.pink500,
+    height: 50,
+    marginBottom: 10,
+  },
   imageContainer: {
     alignItems: "center",
-    backgroundColor: GlobalColors.colors.white1,
-    paddingHorizontal: 20,
-    marginBottom: 40,
-    marginTop: 100,
-    marginHorizontal: 20,
-    borderRadius: 100,
+    backgroundColor: "white",
+    // paddingHorizontal: 20,
+    // marginTop: 100,
+    // marginHorizontal: 20,
+    height: 300,
+    marginBottom: 10,
   },
   name: {
     fontSize: 30,
@@ -459,7 +488,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontFamily: "Lora",
   },
-
+  infoContainer: {
+    paddingTop: 30,
+    margin: 15,
+    marginHorizontal: 0,
+    marginTop: 60,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginBottom: -10,
+    height: 280,
+    backgroundColor: "white",
+    // shadowColor: "#171717",
+    // shadowOffset: { width: -2, height: 4 },
+    // shadowOpacity: 0.2,
+    // shadowRadius: 0.1,
+    flex: "flex-start",
+    paddingHorizontal: 30,
+  },
   editButton: {
     alignSelf: "flex-start",
     marginLeft: 1,
@@ -472,57 +517,69 @@ const styles = StyleSheet.create({
     outline: "none",
   },
   editContainer: {
-    margin: 10,
+    margin: 15,
+    paddingHorizontal: 40,
+    paddingTop: 30,
+    top: 20,
     marginBottom: -60,
-    marginHorizontal: 20,
-    padding: 10,
-
-    borderRadius: 40,
-    height: 430,
-    backgroundColor: GlobalColors.colors.gray0,
-    shadowColor: "#171717",
-    shadowOffset: { width: -2, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    alignContent: "center",
-    justifyContent: "center",
-    top: 30,
+    marginHorizontal: 0,
+    // borderRadius: 40,
+    height: 400,
+    backgroundColor: "white",
+    borderRadius: 20,
+    // shadowColor: "#171717",
+    // shadowOffset: { width: 0, height: 0 },
+    // shadowOpacity: 0.2,
+    // shadowRadius: 4,
+    // alignContent: "center",
+    // paddingHorizontal: 20,
   },
   editField: {
     flexDirection: "column",
-    marginHorizontal: 40,
     marginVertical: 5,
     alignContent: "center",
     justifyContent: "center",
   },
   field: {
-    borderBottomColor: GlobalColors.colors.pink500,
-    borderBottomWidth: 0.5,
-    height: 35,
-    paddingVertical: 5,
+    width: "100%",
+    // borderBottomColor: GlobalColors.colors.pink500,
+    // borderBottomWidth: 0.5,
+    backgroundColor: GlobalColors.colors.gray0,
+    borderRadius: 10,
+    alignItems: "center",
+    paddingHorizontal: 10,
+    height: 40,
+    paddingVertical: 8,
     color: "gray",
     fontWeight: "bold",
-    alignContent: "center",
+    marginBottom: 10,
     fontSize: 15,
+
+    shadowColor: GlobalColors.colors.gray1,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 0.1,
   },
   fieldName: {
     fontFamily: "Garet-Book",
     color: GlobalColors.colors.pink500,
-    fontWeight: "700",
+    fontWeight: "900",
+    fontSize: 15,
+    marginLeft: 3,
+    marginBottom: 2,
   },
   iconContainer: {
     marginTop: 300,
     marginRight: 200,
   },
   editButtonContainer: {
-    alignContent: "center",
-    flexDirection: "row-reverse",
-    justifyContent: "center",
-    padding: 10,
+    position: "absolute",
+    right: 8,
+    bottom: 8,
   },
   panel: {
     padding: 20,
-    backgroundColor: GlobalColors.colors.white1,
+    backgroundColor: "white",
     paddingTop: 40,
     // borderTopLeftRadius: 20,
     // borderTopRightRadius: 20,
@@ -532,7 +589,7 @@ const styles = StyleSheet.create({
     // shadowOpacity: 0.4,
   },
   header: {
-    backgroundColor: GlobalColors.colors.white1,
+    backgroundColor: "white",
     shadowColor: "#333333",
     shadowOffset: { width: -1, height: -3 },
     shadowRadius: 2,
@@ -546,13 +603,13 @@ const styles = StyleSheet.create({
   panelHeader: {
     // alignItems: 'center',
     marginLeft: 20,
-    backgroundColor: GlobalColors.colors.white1,
+    backgroundColor: "white",
   },
   panelHandle: {
     width: 40,
     height: 4,
     borderRadius: 4,
-    backgroundColor: GlobalColors.colors.white1,
+    backgroundColor: "white",
     marginBottom: 10,
   },
   //   imageContainer: {
@@ -582,16 +639,17 @@ const styles = StyleSheet.create({
   },
   bottomOn: {
     opacity: 0.1,
+    borderRadius: 10,
   },
   editDateField: {
     flexDirection: "row",
-    marginHorizontal: 40,
+
     marginVertical: 5,
   },
   genderField: {
-    marginHorizontal: 100,
+    // marginHorizontal: 100,
     marginVertical: 10,
-    left: -40,
+    // left: -40,
   },
   inputInvalid: {
     color: "#8b0000",
@@ -611,11 +669,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     fontFamily: "Garet-Book",
+    alignSelf: "center",
+    marginBottom: 20,
   },
   error: {
     color: "#8b0000",
     alignSelf: "center",
     fontWeight: "bold",
-    top: 30,
+    fontSize: 18,
+    marginTop: 32,
+  },
+  editButton: {
+    alignSelf: "center",
+    top: 5,
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: "Garet-Book",
+    color: GlobalColors.colors.pink500,
+    top: -20,
+  },
+  headerIcon: {
+    right: 5,
+    bottom: 2,
   },
 });

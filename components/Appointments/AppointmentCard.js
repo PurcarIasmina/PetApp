@@ -467,7 +467,9 @@ function AppointmentCard({ appointment }) {
                         <td>${pill.doseName}</td>
                         <td>${pill.doseQuantity}  ${
                           pill.doseQuantity == 1 ? "dose" : "doses"
-                        } / Lot: ${pill.doseNumber}
+                        } / Lot: ${pill.doseNumber}/ Administration: ${
+                          pill.administration
+                        }
                         </td>
                        
                        

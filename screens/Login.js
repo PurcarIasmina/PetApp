@@ -25,7 +25,6 @@ import { AuthContext } from "../context/auth";
 import HomeScreenUser from "./HomeScreenUser";
 import * as SplashScreen from "expo-splash-screen";
 import { registerForPushNotificationsAsync } from "../notifications/notifications";
-import { ChatContext } from "../context/ChatContext";
 
 function doctorValidation(value) {
   const reg = /@doctor\.petapp\.ro/;
@@ -38,14 +37,10 @@ function Login({ navigation }) {
   });
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const authCtx = useContext(AuthContext);
-  const chatCtx = useContext(ChatContext);
   async function loginHandler({ email, password }) {
     setIsAuthenticating(true);
     try {
       const { token, id, name } = await login(email, password);
-      const resp = await getUnreadMessagesCount(id);
-      console.log(resp, "resp");
-      chatCtx.messages(resp);
       authCtx.authenticate(token);
       authCtx.userDetails(name, id);
       if (doctorValidation(email)) authCtx.checkIsDoctor("doctor");

@@ -12,14 +12,20 @@ function InfoLine({ name, info }) {
 export default InfoLine;
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderColor: GlobalColors.colors.pastel1,
+    borderColor: GlobalColors.colors.gray0,
+    borderRadius: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     height: 40,
+    backgroundColor: GlobalColors.colors.gray0,
+    alignItems: "center",
+    marginTop: 10,
+    shadowColor: GlobalColors.colors.gray1,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 0.3,
   },
   name: {
-    marginTop: 20,
     paddingLeft: 30,
     marginLeft: 10,
     fontSize: 15,
@@ -27,7 +33,6 @@ const styles = StyleSheet.create({
     color: GlobalColors.colors.pink500,
   },
   info: {
-    marginTop: 20,
     paddingHorizontal: 50,
     fontSize: 15,
     color: "gray",

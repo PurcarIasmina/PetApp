@@ -121,6 +121,52 @@ export async function getMessagesWithUsers(userId) {
 
   return conversations;
 }
+
+export function startMessageListener(userId, callback) {
+  const chatsRef = collection(db, "Chats");
+  const querySnapshotPromise = getDocs(chatsRef);
+  let total = 0;
+  const unsubscribePromises = [];
+
+  querySnapshotPromise.then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      const chatId = doc.id;
+      if (chatId.includes(userId)) {
+        const otherUserId = chatId.replace(userId, "").replace("-", "");
+        const messagesRef = collection(doc.ref, "messages");
+
+        const messageQuery = query(
+          messagesRef,
+          where("sentTo", "==", userId),
+          where("read", "==", false)
+        );
+
+        const messagesUnsubscribe = onSnapshot(
+          messageQuery,
+          (messageQuerySnapshot) => {
+            let unreadCount = 0;
+            messageQuerySnapshot.forEach((doc) => {
+              unreadCount++;
+            });
+            total += unreadCount;
+            console.log(total, "total");
+            callback(total);
+          }
+        );
+        unsubscribePromises.push(messagesUnsubscribe);
+      }
+    });
+  });
+
+  return () => {
+    unsubscribePromises.forEach((unsubscribe) => unsubscribe());
+  };
+}
+
+export function calculateTotalUnreadMessages(userId, callback) {
+  const unsubscribe = startMessageListener(userId, callback);
+  return unsubscribe;
+}
 export async function getUnreadMessagesCount(userId) {
   const chatsRef = collection(db, "Chats");
   const querySnapshot = await getDocs(chatsRef);
@@ -414,7 +460,15 @@ export async function addAppointment(
   return response;
 }
 
-export async function addNotification(uid, aid, momentTime, pill, date, name) {
+export async function addNotification(
+  uid,
+  aid,
+  momentTime,
+  pill,
+  date,
+  name,
+  notificationId
+) {
   const response = await axios.post(BACKEND_URL + `/notifications.json`, {
     aid: aid,
     uid: uid,
@@ -422,6 +476,7 @@ export async function addNotification(uid, aid, momentTime, pill, date, name) {
     date: date,
     pill: pill,
     name: name,
+    notificationId: notificationId,
   });
   return response;
 }
@@ -431,7 +486,8 @@ export async function addNotificationAppointment(
   date,
   name,
   active,
-  slot
+  slot,
+  notifications
 ) {
   const response = await axios.post(
     BACKEND_URL + `/notificationsAppointment.json`,
@@ -442,6 +498,7 @@ export async function addNotificationAppointment(
       name: name,
       active: active,
       slot: slot,
+      notifications: notifications,
     }
   );
   return response;
@@ -482,6 +539,7 @@ export async function getNotifications(uid, aid) {
         momentTime: filtered[key].momentTime,
         generatedId: filtered[key].key,
         name: filtered[key].name,
+        notificationId: filtered[key].notificationId,
       };
       notificationsDetails.push(notificationDetail);
     }
@@ -512,6 +570,7 @@ export async function getNotificationsAppointment(uid, aid) {
         active: filtered[key].active,
         generatedId: filtered[key].key,
         name: filtered[key].name,
+        notificationId: filtered[key].notifications,
       };
       notificationsDetails.push(notificationDetail);
     }

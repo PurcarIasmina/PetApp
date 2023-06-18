@@ -171,6 +171,9 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
                 generatedId={notificationsApp
                   .filter((app) => app.date.localeCompare(selected) === 0)
                   .map((app) => app.generatedId)}
+                notificationId={notificationsApp
+                  .filter((app) => app.date.localeCompare(selected) === 0)
+                  .map((app) => app.notificationId)}
                 setSelctedDateReceived={setSelctedDateReceived}
               />
             </View>

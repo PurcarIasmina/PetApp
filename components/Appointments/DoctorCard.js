@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   docItem: {
     width: "44%",
     height: 200,
-    backgroundColor: "white",
+    backgroundColor: GlobalColors.colors.gray0,
     borderWidth: 1,
     borderColor: GlobalColors.colors.white1,
     borderRadius: 10,
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginVertical: 10,
     flexGrow: 1,
-    shadowColor: GlobalColors.colors.mint1,
+    shadowColor: GlobalColors.colors.gray10,
     shadowOffset: { width: -1, height: -3 },
     shadowRadius: 2,
     shadowOpacity: 0.4,

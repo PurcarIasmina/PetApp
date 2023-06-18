@@ -80,11 +80,11 @@ function HomeScreenUser({ navigation }) {
             borderRadius: 110,
             borderColor: GlobalColors.colors.pink1,
             marginHorizontal: 50,
-            borderWidth: 1,
+            // borderWidth: 1,
             height: 220,
             width: 220,
             alignSelf: "center",
-            backgroundColor: "white",
+            // backgroundColor: "white",
           }}
         >
           <Image
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   header: {
-    color: GlobalColors.colors.pink1,
+    color: GlobalColors.colors.pink500,
     alignSelf: "center",
     fontFamily: "Garet-Book",
     fontSize: 19,
@@ -136,9 +136,14 @@ const styles = StyleSheet.create({
   headerContainer: {
     borderRadius: 30,
     height: 40,
-    backgroundColor: GlobalColors.colors.pink10,
+    backgroundColor: GlobalColors.colors.gray0,
     marginHorizontal: 40,
     marginVertical: 10,
+    shadowColor: GlobalColors.colors.gray10,
+    shadowOffset: { width: -1, height: -3 },
+    shadowRadius: 2,
+    shadowOpacity: 0.4,
+    elevation: 5,
   },
   petsContaienr: {
     marginTop: 100,

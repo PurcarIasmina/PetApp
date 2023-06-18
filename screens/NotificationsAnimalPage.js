@@ -23,6 +23,7 @@ import NotificationsNextAppointemnt from "./NotificationsNextAppointment";
 import { getUserStatusAppointments } from "../store/databases";
 import { calendarFormat } from "moment";
 import Feather from "react-native-vector-icons/Feather";
+
 function NotificationsAnimalPage({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -274,6 +275,7 @@ function NotificationsAnimalPage({ navigation }) {
 
     setFetching(false);
   }
+
   const renderItem = (item, index, momenTime) => (
     <View style={styles.pillCard}>
       <View style={styles.pillNameContainer}>
@@ -290,6 +292,12 @@ function NotificationsAnimalPage({ navigation }) {
         <Text style={styles.countPill}>
           How many: {item.pillCount} {item.pillCount > 1 ? `pills` : `pill`}{" "}
         </Text>
+        {item.additionalInfo.length > 0 && (
+          <View style={styles.infoContainer}>
+            <Text style={styles.countPill}>{item.additionalInfo}!</Text>
+          </View>
+        )}
+
         <View style={{ position: "absolute", top: -2, left: 140 }}>
           <Switcher
             aid={aid}
@@ -318,15 +326,23 @@ function NotificationsAnimalPage({ navigation }) {
                   ).generatedId
                 : null
             }
+            notificationId={
+              notificationsForSelectedDay.find(
+                (notification) =>
+                  notification.pill.localeCompare(item.pillName) === 0 &&
+                  notification.momentTime.localeCompare(momenTime) === 0
+              )
+                ? notificationsForSelectedDay.find(
+                    (notification) =>
+                      notification.pill.localeCompare(item.pillName) === 0 &&
+                      notification.momentTime.localeCompare(momenTime) === 0
+                  ).notificationId
+                : null
+            }
             setSelctedDateReceived={setSelctedDateReceived}
           />
         </View>
       </View>
-      {/* {item.additionalInfo.length > 0 && (
-        <View>
-          <Text> {item.additionalInfo}</Text>
-        </View>
-      )} */}
     </View>
   );
   if (fetching) return <LoadingOverlay message={"Loading..."} />;
@@ -502,5 +518,11 @@ const styles = StyleSheet.create({
   countPill: {
     fontFamily: "Garet-Book",
     color: GlobalColors.colors.darkGrey,
+  },
+  infoContainer: {
+    position: "absolute",
+    top: 50,
+    left: 0,
+    flexDirection: "row",
   },
 });

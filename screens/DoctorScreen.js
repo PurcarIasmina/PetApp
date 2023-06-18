@@ -31,31 +31,6 @@ Notifications.setNotificationHandler({
   }),
 });
 function DoctorScreen({ navigation }) {
-  // const getPermissions = async () => {
-  //   const { status } = await Notifications.requestPermissionsAsync();
-
-  //   if (status !== "granted") {
-  //     // permisiunea nu a fost acordată, deci notificările nu vor funcționa
-  //     return;
-  //   }
-  // };
-
-  // function scheduleNotificationHandler(doctorId, slot, date) {
-  //   console.log("am fost");
-  //   getPermissions();
-  //   Notifications.scheduleNotificationAsync({
-  //     content: {
-  //       title: "Upload consultation result!",
-  //       body: "Alooo",
-  //       data: {
-  //         doctorId: doctorId,
-  //       },
-  //     },
-  //     trigger: {
-  //       seconds: 5,
-  //     },
-  //   });
-  // }
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -74,7 +49,15 @@ function DoctorScreen({ navigation }) {
   const timezoneOffset = 180;
   const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
   currentDate = new Date(romanianTime);
-  const [date, setDate] = useState(new Date(currentDate));
+  const auxDate = new Date(currentDate);
+  if (
+    auxDate instanceof Date &&
+    (auxDate.getUTCDay() === 6 || auxDate.getUTCDay() === 0)
+  ) {
+    const daysToAdd = auxDate.getUTCDay() === 0 ? 1 : 2;
+    auxDate.setUTCDate(auxDate.getUTCDate() + daysToAdd);
+  }
+  const [date, setDate] = useState(new Date(auxDate));
   const [selectedDate, setSelectedDate] = useState(new Date(date));
   const [appointments, setAppointments] = useState([]);
   const [fetching, setFetching] = useState(false);
@@ -100,30 +83,26 @@ function DoctorScreen({ navigation }) {
   const formattedMonth = monthNames[date.getUTCMonth()];
 
   const handleNextDay = () => {
-    const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+    const nextDateAux = new Date(date);
 
-    if (nextDate.getUTCDay() === 0 || nextDate.getUTCDay() === 6) {
-      const daysUntilMonday = 8 - nextDate.getUTCDay();
+    if (nextDateAux.getDay() === 5) {
+      nextDateAux.setDate(date.getUTCDate() + 3);
+    } else nextDateAux.setDate(date.getUTCDate() + 1);
 
-      if (daysUntilMonday <= 5) {
-        nextDate.setDate(nextDate.getUTCDate() + daysUntilMonday);
-      }
-    }
-
-    setDate(nextDate);
-    setSelectedDate(nextDate);
+    setDate(nextDateAux);
+    setSelectedDate(nextDateAux);
   };
 
   const handlePrevDay = () => {
-    const prevDate = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+    const prevDateAux = new Date(date);
 
-    if (date.getUTCDay() === 1) {
-      const daysUntilFriday = 2;
-      prevDate.setDate(prevDate.getUTCDate() - daysUntilFriday);
-    }
+    if (prevDateAux.getDay() === 1) {
+      prevDateAux.setDate(date.getDate() - 3);
+    } else prevDateAux.setDate(date.getDate() - 1);
 
-    setDate(prevDate);
-    setSelectedDate(prevDate);
+    console.log(prevDateAux, "prev");
+    setDate(prevDateAux);
+    setSelectedDate(prevDateAux);
   };
 
   const onDateSelect = (date) => {
@@ -232,7 +211,8 @@ function DoctorScreen({ navigation }) {
           ></Ionicons>
         </TouchableOpacity>
         <Text style={styles.day}>
-          {date.getUTCDate()} {formattedMonth} {date.getUTCFullYear()}
+          {selectedDate.getUTCDate()} {formattedMonth}{" "}
+          {selectedDate.getUTCFullYear()}
         </Text>
         <TouchableOpacity onPress={handleNextDay}>
           <Ionicons
@@ -248,7 +228,11 @@ function DoctorScreen({ navigation }) {
           {appointments.length > 0
             ? appointments.length === 1
               ? `You ${
-                  getFormattedDate(selectedDate) < getFormattedDate(currentDate)
+                  getFormattedDate(selectedDate) <
+                    getFormattedDate(currentDate) ||
+                  (getFormattedDate(selectedDate) ===
+                    getFormattedDate(currentDate) &&
+                    currentDate.getUTCHours() >= 18)
                     ? `had`
                     : `have`
                 } ${appointments.length} appointment ${

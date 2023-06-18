@@ -296,10 +296,10 @@ function PayScreen({ navigation }) {
           </View>
         </View>
         <View style={{ marginTop: 20, marginBottom: 20 }}>
-          <Text style={styles.title}>Total to pay (100 lei/day)</Text>
+          <Text style={styles.title}>Total to pay (100 lei/night)</Text>
           <View style={{ top: 10, marginHorizontal: 5 }}>
             <Text style={styles.subtitle}>
-              Number of days:{" "}
+              Number of nights:{" "}
               <Text
                 style={{ color: GlobalColors.colors.blue500, fontSize: 15 }}
               >

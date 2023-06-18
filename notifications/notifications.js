@@ -20,7 +20,7 @@ export const getPermissions = async () => {
 };
 export async function scheduleNotificationHandler(title, body, date) {
   getPermissions();
-  await Notifications.scheduleNotificationAsync({
+  const id = await Notifications.scheduleNotificationAsync({
     content: {
       title: title,
       body: body,
@@ -29,8 +29,12 @@ export async function scheduleNotificationHandler(title, body, date) {
       date: date,
     },
   });
+  console.log(id, "notificare");
+  return id;
 }
-
+export async function cancelNotification(notificationId) {
+  await Notifications.cancelScheduledNotificationAsync(notificationId);
+}
 export async function registerForPushNotificationsAsync() {
   let token;
 

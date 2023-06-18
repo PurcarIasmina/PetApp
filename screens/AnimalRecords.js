@@ -187,7 +187,7 @@ function AnimalRecords({ navigation }) {
         >
           <HeaderButtonAppointment
             pressed={status === 2 ? "pressed" : null}
-            status={"Disinfestations"}
+            status={"Dewormings"}
             count={dewormings.length}
             textSize={11.6}
           />

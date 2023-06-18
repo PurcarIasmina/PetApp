@@ -35,15 +35,16 @@ function IconButton({
         {tip && tipR && (
           <View
             style={{
-              backgroundColor: "white",
+              backgroundColor: GlobalColors.colors.pink500,
               marginTop: 70,
-              height: 50,
-              width: 125,
+              height: 22,
+              width: 140,
+              paddingHorizontal: 5,
               borderRadius: 10,
               justifyContent: "center",
               alignItems: "center",
               position: "absolute",
-              top: "50%",
+              top: "20%",
               left: "50%",
               transform: [{ translateX: -62 }, { translateY: -25 }],
             }}
@@ -51,7 +52,7 @@ function IconButton({
             <Text
               style={{
                 fontFamily: "Garet-Book",
-                color: GlobalColors.colors.pink500,
+                color: GlobalColors.colors.gray0,
               }}
             >
               {tipText}

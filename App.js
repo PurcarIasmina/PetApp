@@ -55,6 +55,8 @@ import {
   getUserNotifications,
   getUnreadMessagesCount,
   getUnreadMessagesForAUser,
+  startMessageListener,
+  calculateTotalUnreadMessages,
 } from "./store/databases";
 import NotificationsAnimalPage from "./screens/NotificationsAnimalPage";
 import { getFormattedDate } from "./util/date";
@@ -70,7 +72,6 @@ import BookHotel from "./screens/BookHotel";
 import PayScreen from "./screens/PayScreen";
 import UserReservations from "./screens/UserReservations";
 import { LogBox } from "react-native";
-import ChatProvider, { ChatContext } from "./context/ChatContext";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -144,6 +145,14 @@ function AuthenticatedDrawerDoctor() {
   //   }
   // }, [uncount]);
 
+  useLayoutEffect(() => {
+    function handleUnreadMessagesCount(val) {
+      console.log(val);
+      setCount(val);
+    }
+    console.log("dadada");
+    startMessageListener(authCtx.uid, handleUnreadMessagesCount);
+  });
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} />}
@@ -277,7 +286,7 @@ function AuthenticatedDrawerDoctor() {
 
 function AuthenticatedDrawerUser() {
   // const [uncount, setUncount] = useState({});
-  let aux = 0;
+
   const [count, setCount] = useState(0);
   const authCtx = useContext(AuthContext);
   // const [oldCount, setoldCount] = useState(0);
@@ -303,15 +312,15 @@ function AuthenticatedDrawerUser() {
   //     let resp = {};
   //     resp = await getUnreadMessagesCount(authCtx.uid);
   //     console.log(resp, "resp");
-  //     setUncount(resp);
-  //     setoldCount(resp);
+  //     // setUncount(resp);
+  //     // setoldCount(resp);
   //   }
 
-  //   const interval = setInterval(() => {
-  //     getUnread();
-  //   }, 1000);
+  //   // const interval = setInterval(() => {
+  //   getUnread();
+  //   // }, 1000);
 
-  //   return () => clearInterval(interval);
+  //   // return () => clearInterval(interval);
   // }, []);
   // useEffect(() => {
   //   if (oldCount !== uncount) {
@@ -325,7 +334,14 @@ function AuthenticatedDrawerUser() {
   //     setCount(total);
   //   }
   // }, [uncount]);
-
+  useLayoutEffect(() => {
+    function handleUnreadMessagesCount(val) {
+      console.log(val, "user", authCtx.uid);
+      setCount(val);
+    }
+    console.log("dadada", authCtx.uid);
+    startMessageListener(authCtx.uid, handleUnreadMessagesCount);
+  });
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} />}
@@ -550,15 +566,15 @@ function NavigationOption() {
 function Base() {
   const [isTryingLogin, setIsTryingLogin] = useState(true);
   const authCtx = useContext(AuthContext);
-  const [notifications, setNotifications] = useState([]);
-  const [notificationsAppointment, setNotificationsAppointment] = useState([]);
-  const currentDate = new Date();
-  const timezoneOffset = 180;
-  const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
-  const [actualDate, setActualDate] = useState(new Date(romanianTime));
-  const [minutes, setMinutes] = useState(actualDate.getUTCMinutes());
-  const notificationListener = useRef();
-  const responseListener = useRef();
+  // const [notifications, setNotifications] = useState([]);
+  // const [notificationsAppointment, setNotificationsAppointment] = useState([]);
+  // const currentDate = new Date();
+  // const timezoneOffset = 180;
+  // const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+  // const [actualDate, setActualDate] = useState(new Date(romanianTime));
+  // const [minutes, setMinutes] = useState(actualDate.getUTCMinutes());
+  // const notificationListener = useRef();
+  // const responseListener = useRef();
 
   useEffect(() => {
     async function fetchToken() {
@@ -569,132 +585,132 @@ function Base() {
       setIsTryingLogin(false);
     }
   }, []);
-  useEffect(() => {
-    async function haveNotifications() {
-      try {
-        let resp = [];
-        resp = await getUserNotifications(authCtx.uid);
+  // useEffect(() => {
+  //   async function haveNotifications() {
+  //     try {
+  //       let resp = [];
+  //       resp = await getUserNotifications(authCtx.uid);
 
-        setNotifications(resp);
-        return resp;
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    async function haveNotificationsForAppointments() {
-      try {
-        let resp = [];
-        resp = await getUserAppointmentsNotifications(authCtx.uid);
-        setNotificationsAppointment(resp);
-        return resp;
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    function updateDate() {
-      setActualDate(new Date(romanianTime));
-    }
+  //       setNotifications(resp);
+  //       return resp;
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+  //   async function haveNotificationsForAppointments() {
+  //     try {
+  //       let resp = [];
+  //       resp = await getUserAppointmentsNotifications(authCtx.uid);
+  //       setNotificationsAppointment(resp);
+  //       return resp;
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+  //   function updateDate() {
+  //     setActualDate(new Date(romanianTime));
+  //   }
 
-    const interval = setInterval(() => {
-      updateDate();
-    }, 60000);
+  //   const interval = setInterval(() => {
+  //     updateDate();
+  //   }, 60000);
 
-    haveNotifications().then((resp) => {
-      for (const key in resp) {
-        if (
-          (resp[key].date.localeCompare(getFormattedDate(actualDate)) ===
-            actualDate.getTime()) ===
-          "08:00:00"
-        ) {
-          if (resp[key].momentTime.localeCompare("Morning") === 0) {
-            scheduleNotificationHandler(
-              "Reminder! ☕️",
-              `Administrate to ${resp[key].name} morning medication`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 08:00:00`)
-            );
-          }
+  //   haveNotifications().then((resp) => {
+  //     for (const key in resp) {
+  //       if (
+  //         (resp[key].date.localeCompare(getFormattedDate(actualDate)) ===
+  //           actualDate.getTime()) ===
+  //         "08:00:00"
+  //       ) {
+  //         if (resp[key].momentTime.localeCompare("Morning") === 0) {
+  //           scheduleNotificationHandler(
+  //             "Reminder! ☕️",
+  //             `Administrate to ${resp[key].name} morning medication`,
+  //             new Date(`${getFormattedDate(new Date(actualDate))} 08:00:00`)
+  //           );
+  //         }
 
-          if (
-            resp[key].momentTime.localeCompare("Lunch") === 0 &&
-            actualDate.getTime() === "13:00:00"
-          ) {
-            scheduleNotificationHandler(
-              "Reminder!🍴",
-              `Administrate to ${resp[key].name} lunch medication`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 13:00:00`)
-            );
-          }
+  //         if (
+  //           resp[key].momentTime.localeCompare("Lunch") === 0 &&
+  //           actualDate.getTime() === "13:00:00"
+  //         ) {
+  //           scheduleNotificationHandler(
+  //             "Reminder!🍴",
+  //             `Administrate to ${resp[key].name} lunch medication`,
+  //             new Date(`${getFormattedDate(new Date(actualDate))} 13:00:00`)
+  //           );
+  //         }
 
-          if (
-            resp[key].momentTime.localeCompare("Evening") === 0 &&
-            actualDate.getTime() === "23:50:00"
-          ) {
-            scheduleNotificationHandler(
-              "Reminder!🌛",
-              `Administrate to ${resp[key].name} evening medication`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 23:35:00`)
-            );
-          }
-        }
-      }
+  //         if (
+  //           resp[key].momentTime.localeCompare("Evening") === 0 &&
+  //           actualDate.getTime() === "23:50:00"
+  //         ) {
+  //           scheduleNotificationHandler(
+  //             "Reminder!🌛",
+  //             `Administrate to ${resp[key].name} evening medication`,
+  //             new Date(`${getFormattedDate(new Date(actualDate))} 23:35:00`)
+  //           );
+  //         }
+  //       }
+  //     }
 
-      responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {});
-      return () => {
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-        Notifications.removeNotificationSubscription(responseListener.current);
-      };
-    });
-    haveNotificationsForAppointments().then((resp) => {
-      for (const key in resp) {
-        const dateApp = moment(resp[key].date, "YYYY-MM-DD");
-        const actualDateMoment = moment(
-          getFormattedDate(actualDate),
-          "YYYY-MM-DD"
-        );
-        const diffInDays = dateApp.diff(actualDateMoment, "days");
-        if (diffInDays === 7 || diffInDays === 1) {
-          if (resp[key].active === true) {
-            scheduleNotificationHandler(
-              "Reminder! 🕒",
-              `You have an appointment for ${resp[key].name} on ${new Date(
-                resp[key].date
-              ).toLocaleDateString("en", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 21:53:00`)
-            );
-          } else {
-            scheduleNotificationHandler(
-              "Reminder! 🕒",
-              `Your vet recommends an appointment for ${
-                resp[key].name
-              } on ${new Date(resp[key].date).toLocaleDateString("en", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}`,
-              new Date(`${getFormattedDate(new Date(actualDate))} 19:30:00`)
-            );
-          }
-        }
-      }
+  //     responseListener.current =
+  //       Notifications.addNotificationResponseReceivedListener((response) => {});
+  //     return () => {
+  //       Notifications.removeNotificationSubscription(
+  //         notificationListener.current
+  //       );
+  //       Notifications.removeNotificationSubscription(responseListener.current);
+  //     };
+  //   });
+  //   haveNotificationsForAppointments().then((resp) => {
+  //     for (const key in resp) {
+  //       const dateApp = moment(resp[key].date, "YYYY-MM-DD");
+  //       const actualDateMoment = moment(
+  //         getFormattedDate(actualDate),
+  //         "YYYY-MM-DD"
+  //       );
+  //       const diffInDays = dateApp.diff(actualDateMoment, "days");
+  //       if (diffInDays === 7 || diffInDays === 1) {
+  //         if (resp[key].active === true) {
+  //           scheduleNotificationHandler(
+  //             "Reminder! 🕒",
+  //             `You have an appointment for ${resp[key].name} on ${new Date(
+  //               resp[key].date
+  //             ).toLocaleDateString("en", {
+  //               year: "numeric",
+  //               month: "long",
+  //               day: "numeric",
+  //             })}`,
+  //             new Date(`${getFormattedDate(new Date(actualDate))} 21:53:00`)
+  //           );
+  //         } else {
+  //           scheduleNotificationHandler(
+  //             "Reminder! 🕒",
+  //             `Your vet recommends an appointment for ${
+  //               resp[key].name
+  //             } on ${new Date(resp[key].date).toLocaleDateString("en", {
+  //               year: "numeric",
+  //               month: "long",
+  //               day: "numeric",
+  //             })}`,
+  //             new Date(`${getFormattedDate(new Date(actualDate))} 19:30:00`)
+  //           );
+  //         }
+  //       }
+  //     }
 
-      responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {});
-      return () => {
-        Notifications.removeNotificationSubscription(
-          notificationListener.current
-        );
-        Notifications.removeNotificationSubscription(responseListener.current);
-      };
-    });
-    return () => clearInterval(interval);
-  }, [actualDate]);
+  //     responseListener.current =
+  //       Notifications.addNotificationResponseReceivedListener((response) => {});
+  //     return () => {
+  //       Notifications.removeNotificationSubscription(
+  //         notificationListener.current
+  //       );
+  //       Notifications.removeNotificationSubscription(responseListener.current);
+  //     };
+  //   });
+  //   return () => clearInterval(interval);
+  // }, [actualDate]);
   const onLayoutRootView = useCallback(async () => {
     if (isTryingLogin) {
       await SplashScreen.hideAsync();
@@ -710,9 +726,7 @@ export default function App() {
       <StatusBar style="light" />
 
       <AuthContextProvider>
-        <ChatProvider>
-          <Base />
-        </ChatProvider>
+        <Base />
       </AuthContextProvider>
     </>
   );
