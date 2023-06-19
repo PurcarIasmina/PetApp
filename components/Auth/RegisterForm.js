@@ -10,6 +10,8 @@ import { useRef, useEffect, useState } from "react";
 import ButtonCustom from "../UI/ButtonCustom";
 import { useNavigation } from "@react-navigation/native";
 import { GlobalColors } from "../../constants/colors";
+import { checkEmailExists } from "../../store/databases";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function emailValidation(value) {
   const reg = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -48,6 +50,11 @@ function RegisterForm({ onAuthenticate }) {
   function handlerOnChangeConfPassword(value) {
     setConfUserPassword(value);
   }
+  async function checkEmailExistsFunction(email) {
+    const resp = await checkEmailExists(email);
+    console.log(resp, "resp");
+    return resp;
+  }
   function handlerValidation() {
     if (
       !userName.trim() ||
@@ -67,8 +74,15 @@ function RegisterForm({ onAuthenticate }) {
     }
     if (!emailValidation(userEmail)) {
       setEmailInvalid(true);
+
       return updateError("Invalid email!", setError);
     }
+    if (checkEmailExistsFunction(userEmail)) {
+      setEmailInvalid(true);
+      console.log("dada");
+      return updateError("Email already used!", setError);
+    }
+
     if (!userPassword.trim() || userPassword.length < 8) {
       setPasswordInvalid(true);
       return updateError("Password must have at least 8 characters!", setError);

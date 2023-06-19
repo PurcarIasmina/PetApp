@@ -51,7 +51,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-// const db = getFirestore(app);
 const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 });
@@ -69,7 +68,12 @@ export async function createUser(name, email, password) {
   addToFiresbase(name, email, response.data.localId);
   return token;
 }
-
+export async function checkEmailExists(email) {
+  const docRef = collection(db, "users");
+  const querySnap = query(docRef, where("email", "==", email));
+  const userExists = await getDocs(querySnap);
+  return !userExists.empty;
+}
 export async function addMessage(chatid, usermsg) {
   const chatRef = doc(db, "Chats", chatid);
   await setDoc(chatRef, {}, { merge: true });
@@ -736,6 +740,57 @@ export async function getAppointments(did, date) {
   return appointmentsDetails;
 }
 
+export async function getNotCompletedAppointments(did) {
+  const appointmentsDetails = [];
+  const response = await axios.get(BACKEND_URL + `/appointments.json`);
+  const appointmentKeys = Object.keys(response.data);
+  const appointments = Object.values(response.data);
+  appointments.map((appointment, index) => {
+    appointment.key = appointmentKeys[index];
+  });
+  const currentDate = new Date();
+  const timezoneOffset = 180;
+  const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
+  const romaniaDateTime = new Date(romanianTime);
+  const filtered = appointments.filter(function (appointment) {
+    return (
+      appointment.did === did &&
+      appointment.canceled === 0 &&
+      appointment.done === 0 &&
+      (appointment.date < getFormattedDate(romaniaDateTime) ||
+        (appointment.date === getFormattedDate(romaniaDateTime) &&
+          appointment.slot.slice(6, 11) <
+            romaniaDateTime.toISOString().slice(11, 16)))
+    );
+  });
+  console.log(filtered, "filtered");
+  for (const key in filtered) {
+    let detail = await getAnimalDetails(filtered[key].aid);
+    console.log(detail);
+    if (Object.keys(detail).length > 0) {
+      const appointmentDetail = {
+        did: filtered[key].did,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        slot: filtered[key].slot,
+        animal: detail,
+        reason: filtered[key].reason,
+        ownername: filtered[key].ownername,
+        photoUrl: await getImageUrl(
+          `${filtered[key].uid}/${filtered[key].aid}.jpeg`
+        ),
+        done: filtered[key].done,
+        generatedId: filtered[key].key,
+      };
+
+      appointmentsDetails.push(appointmentDetail);
+    }
+  }
+
+  appointmentsDetails.sort((ap1, ap2) => ap1.slot.localeCompare(ap2.slot));
+  return appointmentsDetails;
+}
+
 export async function getUserStatusAppointments(uid, status) {
   let appointmentsDetails = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);
@@ -1008,7 +1063,7 @@ export async function getDoctorsList() {
       const docs = userData.docs;
       for (let i = 0; i < docs.length; i++) {
         const data = docs[i].data();
-        if (emailRegex.test(data.email)) {
+        if (emailRegex.test(data.email) && data.telephone) {
           const doctor = {
             name: data.name,
             fullname: data.fullname,

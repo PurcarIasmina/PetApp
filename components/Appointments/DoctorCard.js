@@ -16,7 +16,8 @@ function DoctorCard({ doctor, left }) {
     description: doctor.description,
     did: doctor.did,
   });
-  console.log(left);
+  console.log(doctor.datebirth);
+
   function pressHandler() {
     navigation.navigate("BookAppointment", { details });
   }

@@ -506,6 +506,7 @@ function AppointmentCard({ appointment }) {
 
     await shareAsync(file.uri);
   };
+  console.log(appointment.slot.slice(0, 5));
   return (
     <View>
       <View style={styles.elementContainer}>
@@ -545,9 +546,10 @@ function AppointmentCard({ appointment }) {
           >
             {appointment.date} {appointment.slot}
           </Text>
+
           {(actualDate > appointment.date ||
             (actualDate === appointment.date &&
-              actualTime > appointment.slot)) && (
+              actualTime > appointment.slot.slice(0, 5))) && (
             <View style={styles.uploadContainer}>
               {appointment.done === 0 && (
                 <TouchableOpacity

@@ -58,6 +58,10 @@ function AppointmentResult({ navigation }) {
   const optionsDate = { day: "numeric", month: "long", year: "numeric" };
 
   const [date, setDate] = useState(route.params.date ? route.params.date : "");
+  const [reminder, setReminder] = useState(
+    route.params.reminder ? route.params.reminder : false
+  );
+
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   let currentDate = new Date();
   const timezoneOffset = 180;
@@ -109,7 +113,8 @@ function AppointmentResult({ navigation }) {
             appointmentDoses: doses.length > 0 ? doses : undefined,
           },
         });
-        navigation.navigate("DoctorScreen");
+        if (!reminder) navigation.navigate("DoctorScreen");
+        else navigation.navigate("DoctorReminders");
       } catch (error) {
         console.log(error);
       }

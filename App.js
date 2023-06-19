@@ -72,6 +72,7 @@ import BookHotel from "./screens/BookHotel";
 import PayScreen from "./screens/PayScreen";
 import UserReservations from "./screens/UserReservations";
 import { LogBox } from "react-native";
+import DoctorReminders from "./screens/DoctorReminders";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -106,56 +107,21 @@ function AuthenticationStack() {
   );
 }
 function AuthenticatedDrawerDoctor() {
-  // const [uncount, setUncount] = useState({});
   const [count, setCount] = useState(0);
   const authCtx = useContext(AuthContext);
-  // const { unreadMessages, markMessageAsRead, incrementUnreadMessages } =
-  //   useContext(ChatContext);
-  // const chatCtx = useContext(ChatContext);
-  // console.log(chatCtx.unreadMessages, "unread");
-  // const total = Object.values(chatCtx.unreadMessages).reduce(
-  //   (acc, val) => acc + val,
-  //   0
-  // );
-  // console.log(total);
-  // const [oldCount, setoldCount] = useState(0);
+  const [open, setOpen] = useState(false);
 
-  // useEffect(() => {
-  //   async function getUnread() {
-  //     const resp = await getUnreadMessagesForAUser(authCtx.uid);
-  //     setCount(resp);
-  //   }
-
-  //   const interval = setInterval(() => {
-  //     getUnread();
-  //   }, 1000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
-  // useEffect(() => {
-  //   if (oldCount !== uncount) {
-  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
-  //     setoldCount(uncount);
-
-  //     setCount(total);
-  //   } else {
-  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
-
-  //     setCount(total);
-  //   }
-  // }, [uncount]);
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     function handleUnreadMessagesCount(val) {
       console.log(val);
       setCount(val);
     }
     console.log("dadada");
     startMessageListener(authCtx.uid, handleUnreadMessagesCount);
-  });
+  }, [open]);
   return (
     <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawer {...props} />}
+      drawerContent={(props) => <CustomDrawer {...props} setOpen={setOpen} />}
       screenOptions={{
         drawerLabelStyle: {
           marginLeft: -23,
@@ -236,6 +202,18 @@ function AuthenticatedDrawerDoctor() {
         }}
       />
       <Drawer.Screen
+        name="DoctorReminders"
+        component={DoctorReminders}
+        options={{
+          title: "Reminders",
+          headerTitle: "",
+          drawerIcon: ({ color }) => (
+            <Ionicons color={color} size={20} name={"notifications-outline"} />
+          ),
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
         name="ChatScreen"
         component={ChatScreen}
         options={{
@@ -285,66 +263,24 @@ function AuthenticatedDrawerDoctor() {
 }
 
 function AuthenticatedDrawerUser() {
-  // const [uncount, setUncount] = useState({});
-
+  const [uncount, setUncount] = useState();
+  const [open, setOpen] = useState(false);
+  const [closed, setClosed] = useState(false);
   const [count, setCount] = useState(0);
   const authCtx = useContext(AuthContext);
-  // const [oldCount, setoldCount] = useState(0);
-  // const { unreadMessages, markMessageAsRead, incrementUnreadMessages } =
-  //   useContext(ChatContext);
-  // const unreadCount = unreadMessages[authCtx.uid] || 0;
-  // useLayoutEffect(() => {
-  //   async function getUnread() {
-  //     const resp = await getUnreadMessagesForAUser(authCtx.uid);
-  //     setCount(resp);
-  //   }
 
-  //   const interval = setInterval(() => {
-  //     getUnread();
-  //   }, 1000);
-
-  //   return () => clearInterval(interval);
-  // });
-  // console.log(authCtx.uid);
-  // console.log(unreadMessages, "unread");
-  // useEffect(() => {
-  //   async function getUnread() {
-  //     let resp = {};
-  //     resp = await getUnreadMessagesCount(authCtx.uid);
-  //     console.log(resp, "resp");
-  //     // setUncount(resp);
-  //     // setoldCount(resp);
-  //   }
-
-  //   // const interval = setInterval(() => {
-  //   getUnread();
-  //   // }, 1000);
-
-  //   // return () => clearInterval(interval);
-  // }, []);
-  // useEffect(() => {
-  //   if (oldCount !== uncount) {
-  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
-  //     setoldCount(uncount);
-
-  //     setCount(total);
-  //   } else {
-  //     let total = Object.values(oldCount).reduce((acc, val) => acc + val, 0);
-
-  //     setCount(total);
-  //   }
-  // }, [uncount]);
   useLayoutEffect(() => {
     function handleUnreadMessagesCount(val) {
-      console.log(val, "user", authCtx.uid);
       setCount(val);
+      console.log(count);
     }
-    console.log("dadada", authCtx.uid);
+
     startMessageListener(authCtx.uid, handleUnreadMessagesCount);
-  });
+  }, [open]);
+
   return (
     <Drawer.Navigator
-      drawerContent={(props) => <CustomDrawer {...props} />}
+      drawerContent={(props) => <CustomDrawer {...props} setOpen={setOpen} />}
       screenOptions={{
         drawerLabelStyle: {
           marginLeft: -23,
@@ -576,7 +512,7 @@ function Base() {
   // const notificationListener = useRef();
   // const responseListener = useRef();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     async function fetchToken() {
       const storedToken = await AsyncStorage.getItem("token");
       if (storedToken) {

@@ -6,23 +6,26 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
-  Platform,
+  Modal,
 } from "react-native";
 import { AuthContext } from "../context/auth";
 import { useContext, useCallback } from "react";
 import { GlobalColors } from "../constants/colors";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
+import { Calendar, CalendarTheme } from "react-native-calendars";
 import moment from "moment";
 import AppointmentCard from "../components/Appointments/AppointmentCard";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { getAppointments } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-import { getFormattedDate } from "../util/date";
+import { convertDate, getFormattedDate } from "../util/date";
 import * as Notifications from "expo-notifications";
+
 import * as Permissions from "expo-permissions";
 import AppointmentResult from "./AppointmentResult";
+import { setMonth } from "date-fns";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: false,
@@ -31,13 +34,24 @@ Notifications.setNotificationHandler({
   }),
 });
 function DoctorScreen({ navigation }) {
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      headerTransparent: true,
-    }),
-      [navigation];
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  navigation.setOptions({
+    headerShown: true,
+    headerTransparent: true,
+    headerRight: () => (
+      <View>
+        <Feather
+          name="calendar"
+          color={GlobalColors.colors.pink500}
+          onPress={() => setShowDatePicker(true)}
+          size={20}
+          style={styles.headerIcon}
+        />
+      </View>
+    ),
   });
+
   const [fonts] = useFonts({
     Lora: require("../constants/fonts/Lora-VariableFont_wght.ttf"),
     "Garet-Book": require("../constants/fonts/Garet-Book.ttf"),
@@ -45,6 +59,7 @@ function DoctorScreen({ navigation }) {
   });
 
   const authCtx = useContext(AuthContext);
+
   let currentDate = new Date();
   const timezoneOffset = 180;
   const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
@@ -59,9 +74,11 @@ function DoctorScreen({ navigation }) {
   }
   const [date, setDate] = useState(new Date(auxDate));
   const [selectedDate, setSelectedDate] = useState(new Date(date));
+  const [selectedMonth, setSelectedMonth] = useState(auxDate.getUTCMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(auxDate.getUTCFullYear());
+
   const [appointments, setAppointments] = useState([]);
   const [fetching, setFetching] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
 
   const monthNames = [
     "Jan.",
@@ -78,6 +95,53 @@ function DoctorScreen({ navigation }) {
     "Dec.",
   ];
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const calendarTheme = {
+    backgroundColor: GlobalColors.colors.gray0,
+    calendarBackground: GlobalColors.colors.gray0,
+    textSectionTitleColor: "#b6c1cd",
+    textSectionTitleDisabledColor: "#d9e1e8",
+    selectedDayBackgroundColor: GlobalColors.colors.pink500,
+    selectedDayTextColor: GlobalColors.colors.gray0,
+    todayTextColor: GlobalColors.colors.pink500,
+    dayTextColor: GlobalColors.colors.pink500,
+    textDisabledColor: GlobalColors.colors.darkGrey,
+    dotColor: GlobalColors.colors.pink500,
+    selectedDotColor: GlobalColors.colors.pink500,
+    arrowColor: GlobalColors.colors.pink500,
+    disabledArrowColor: "#d9e1e8",
+    monthTextColor: GlobalColors.colors.pink500,
+    indicatorColor: GlobalColors.pink500,
+    textDayFontFamily: "Garet-Book",
+    textMonthFontFamily: "Garet-Book",
+    textDayHeaderFontFamily: "Garet-Book",
+    textDayFontSize: 16,
+    textMonthFontSize: 16,
+    textDayHeaderFontSize: 16,
+  };
+  const getWeekendDaysInMonth = (year, month) => {
+    const startDate = new Date(Date.UTC(year, month - 1, 1));
+    const endDate = new Date(Date.UTC(year, month, 0));
+    let weekendDays = {};
+    console.log(startDate, endDate);
+    for (
+      let dateAux = startDate;
+      dateAux <= endDate;
+      dateAux.setUTCDate(dateAux.getUTCDate() + 1)
+    ) {
+      const dayOfWeek = dateAux.getUTCDay();
+
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        const dateString = getFormattedDate(dateAux);
+        console.log("daa");
+        weekendDays[dateString] = { disabled: true, disableTouchEvent: true };
+      }
+    }
+    return weekendDays;
+  };
+  const [markedDates, setMarkedDates] = useState(
+    getWeekendDaysInMonth(auxDate.getUTCFullYear(), auxDate.getUTCMonth())
+  );
+  markedDates[getFormattedDate(selectedDate)] = { selected: true };
 
   const swiper = useRef();
   const formattedMonth = monthNames[date.getUTCMonth()];
@@ -149,11 +213,16 @@ function DoctorScreen({ navigation }) {
     }
     getDoctorsAppointments();
   }, [selectedDate]);
-  const onLayoutRootView = useCallback(async () => {
-    if (fonts) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fonts]);
+
+  useEffect(() => {
+    setMarkedDates(getWeekendDaysInMonth(selectedYear, selectedMonth));
+    console.log(markedDates);
+  }, [selectedMonth]);
+  // const onLayoutRootView = useCallback(async () => {
+  //   if (fonts) {
+  //     await SplashScreen.hideAsync();
+  //   }
+  // }, [fonts]);
 
   if (!fonts) {
     return null;
@@ -163,11 +232,10 @@ function DoctorScreen({ navigation }) {
   const renderDate = (date, index) => {
     const isWeekend = date.getUTCDay() === 0 || date.getUTCDay() === 6;
 
-    const onPressHandler = isWeekend ? undefined : () => onDateSelect(date);
     return (
       <TouchableOpacity
         onPress={() => onDateSelect(date)}
-        onLayout={onLayoutRootView}
+        // onLayout={onLayoutRootView}
         disabled={isWeekend}
       >
         <View
@@ -295,6 +363,46 @@ function DoctorScreen({ navigation }) {
           </View>
         </View>
       </SafeAreaView>
+      <Modal animationType="slide" transparent={true} visible={showDatePicker}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(!showDatePicker)}
+            >
+              <Ionicons
+                name="close-circle-outline"
+                color={GlobalColors.colors.pink500}
+                size={30}
+                style={{ left: -150, top: -20 }}
+              />
+            </TouchableOpacity>
+            <View style={{ width: "100%" }}>
+              <Calendar
+                onDayPress={(date) => {
+                  markedDates[getFormattedDate(selectedDate)] = {
+                    selected: false,
+                  };
+                  setDate(new Date(date.dateString)),
+                    setSelectedDate(new Date(date.dateString));
+                  markedDates[date] = { selected: true };
+
+                  setShowDatePicker(false);
+                  setSelectedMonth(date.month);
+                  setSelectedYear(date.year);
+                }}
+                theme={calendarTheme}
+                onMonthChange={(date) => {
+                  console.log(date),
+                    setSelectedMonth(date.month),
+                    setSelectedYear(date.year);
+                }}
+                markedDates={markedDates}
+                current={selectedDate}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -396,5 +504,28 @@ const styles = StyleSheet.create({
     marginTop: 200,
     // position: "relative",
     borderRadius: 20,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: GlobalColors.colors.gray0,
+    borderRadius: 20,
+    width: "90%",
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    elevation: 5,
+    shadowRadius: 4,
+  },
+  headerIcon: {
+    right: 15,
+    bottom: 2,
   },
 });

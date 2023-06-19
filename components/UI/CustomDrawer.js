@@ -15,12 +15,14 @@ import {
   useStat,
   useCallback,
 } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-import { lessThan } from "react-native-reanimated";
-import { getUnreadMessagesCount } from "../../store/databases";
 
 function CustomDrawer(props) {
   const authCtx = useContext(AuthContext);
+  const isDrawerOpen = useDrawerStatus() === "open";
+  const isDrawerClosed = useDrawerStatus() === "closed";
+  useEffect(() => {
+    props.setOpen(isDrawerOpen);
+  }, [isDrawerOpen]);
   let name;
   if (authCtx.isDoctor === false) name = `Hello, ${authCtx.name}`;
   else name = `Hello, Doctor ${authCtx.name}`;

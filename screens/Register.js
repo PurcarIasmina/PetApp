@@ -20,7 +20,6 @@ import * as SplashScreen from "expo-splash-screen";
 
 function Register({ navigation }) {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-
   const [fonts] = useFonts({
     Lora: require("../constants/fonts/Lora-VariableFont_wght.ttf"),
     "Garet-Book": require("../constants/fonts/Garet-Book.ttf"),

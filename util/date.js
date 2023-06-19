@@ -15,14 +15,19 @@ export function getAge(birthday) {
 
   return { years: years, months: months, days: days };
 }
-function convertDate(date) {
+export function convertDate(date) {
   const parts = date.split("/");
-  return parts[2] + "-" + parts[1] + "-" + parts[0];
+  return parts[0] + "-" + parts[1] + "-" + parts[2];
+}
+export function convertAgeDate(date) {
+  const parts = date.split("/");
+  return parts[2] + "-" + parts[1] + "-" + parts[1];
 }
 export function getAgeYear(birthday) {
-  const birthDate = new Date(convertDate(birthday));
+  const birthDate = new Date(convertAgeDate(birthday));
   const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
+  let age = today.getUTCFullYear() - birthDate.getFullYear();
+  console.log(age);
   const currentMonth = today.getMonth() + 1;
   const birthdayMonth = birthDate.getMonth() + 1;
   if (birthdayMonth > currentMonth) age--;
