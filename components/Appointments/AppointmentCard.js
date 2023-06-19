@@ -549,7 +549,7 @@ function AppointmentCard({ appointment }) {
 
           {(actualDate > appointment.date ||
             (actualDate === appointment.date &&
-              actualTime > appointment.slot.slice(0, 5))) && (
+              actualTime >= appointment.slot)) && (
             <View style={styles.uploadContainer}>
               {appointment.done === 0 && (
                 <TouchableOpacity

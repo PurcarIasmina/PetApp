@@ -8,31 +8,61 @@ import DoctorEditCard from "../components/Appointments/DoctorEditCard";
 import { getDoctorDetails } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { useRoute } from "@react-navigation/native";
+import { BlurView } from "expo-blur";
 
 function DoctorProfile({ navigation }) {
   navigation.setOptions({
     headerShown: true,
     headerTransparent: true,
     headerRight: () => (
-      <TouchableOpacity
-        style={{ marginRight: 10, marginTop: 1, marginLeft: -7 }}
-        onPress={() => {
-          navigation.navigate("DoctorEditProfile", {
-            fullname: fullname,
-            gender: gender,
-            description: description,
-            birthday: birthday,
-            telephone: telephone,
-            photo: photo,
-          });
+      <View
+        style={{
+          flexDirection: "row",
+          // justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        <FontAwesome
-          name="edit"
-          size={22}
-          color={GlobalColors.colors.pink500}
-        />
-      </TouchableOpacity>
+        <Text
+          style={{
+            fontSize: 20,
+            fontFamily: "Garet-Book",
+            color: GlobalColors.colors.pink500,
+            // marginTop: error ? 80 : 90,
+            // marginRight: 160,
+            position: "absolute",
+            right: 140,
+          }}
+        >
+          Your profile
+          <FontAwesome
+            name="stethoscope"
+            size={30}
+            color={GlobalColors.colors.pink500}
+          />
+        </Text>
+        <TouchableOpacity
+          style={{ marginRight: 10, marginTop: 1, marginLeft: -7 }}
+          onPress={() => {
+            navigation.navigate("DoctorEditProfile", {
+              fullname: fullname,
+              gender: gender,
+              description: description,
+              birthday: birthday,
+              telephone: telephone,
+              photo: photo,
+            });
+          }}
+        >
+          <FontAwesome
+            name="edit"
+            size={22}
+            color={GlobalColors.colors.pink500}
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    headerBackground: () => (
+      <BlurView tint={"dark"} intensity={20} style={StyleSheet.absoluteFill} />
     ),
   });
   const route = useRoute();
@@ -85,7 +115,7 @@ function DoctorProfile({ navigation }) {
       <View style={styles.imageContainer}>
         <ImageBackground
           style={styles.imageStyle}
-          source={require("../images/userpage.png")}
+          source={photo.length > 0 ? { uri: photo } : null}
         ></ImageBackground>
       </View>
       <View style={styles.userPictureContainer}>
@@ -150,11 +180,11 @@ const styles = StyleSheet.create({
   imageContainer: {
     height: 300,
     width: "100%",
-    marginTop: 50,
     borderColor: GlobalColors.colors.pink500,
   },
   imageStyle: {
     height: 400,
+    opacity: 0.4,
   },
   userPictureContainer: {
     height: 200,
@@ -173,10 +203,11 @@ const styles = StyleSheet.create({
   infoContainer: {
     marginTop: -9,
     alignSelf: "center",
-    backgroundColor: GlobalColors.colors.white1,
+    // backgroundColor: GlobalColors.colors.white1,
     height: 290,
     width: "80%",
     borderRadius: 30,
+    top: 40,
   },
   detail: {
     fontFamily: "Garet-Book",
@@ -189,15 +220,28 @@ const styles = StyleSheet.create({
     left: -10,
   },
   detailContainer: {
-    backgroundColor: "white",
+    backgroundColor: GlobalColors.colors.gray0,
     padding: 20,
-    marginHorizontal: 15,
-    borderRadius: 20,
+
+    borderRadius: 10,
     height: 110,
+    shadowColor: GlobalColors.colors.gray1,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 0.3,
+    elevation: 5,
   },
   row: {
     flexDirection: "row",
     paddingHorizontal: 20,
+    backgroundColor: GlobalColors.colors.gray0,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: GlobalColors.colors.gray1,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 0.3,
+    elevation: 5,
   },
   icon: {
     marginTop: 10,

@@ -18,19 +18,49 @@ import { editUser } from "../../store/databases";
 import { storeImage } from "../../store/databases";
 import { useRoute } from "@react-navigation/native";
 import LoadingOverlay from "../UI/LoadingOverlay";
+import { BlurView } from "expo-blur";
 function DoctorEditCard({ navigation }) {
   const route = useRoute();
   navigation.setOptions({
     headerShown: true,
     headerTransparent: true,
     headerRight: () => (
-      <TouchableOpacity style={{ marginRight: 20 }} onPress={saveHandler}>
-        <FontAwesome
-          name="save"
-          size={21}
-          color={GlobalColors.colors.pink500}
-        />
-      </TouchableOpacity>
+      <View
+        style={{
+          flexDirection: "row",
+          // justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            fontFamily: "Garet-Book",
+            color: GlobalColors.colors.pink500,
+            // marginTop: error ? 80 : 90,
+            // marginRight: 160,
+            position: "absolute",
+            right: 140,
+          }}
+        >
+          Your profile
+          <FontAwesome
+            name="stethoscope"
+            size={30}
+            color={GlobalColors.colors.pink500}
+          />
+        </Text>
+        <TouchableOpacity style={{ marginRight: 20 }} onPress={saveHandler}>
+          <FontAwesome
+            name="save"
+            size={21}
+            color={GlobalColors.colors.pink500}
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    headerBackground: () => (
+      <BlurView tint={"dark"} intensity={20} style={StyleSheet.absoluteFill} />
     ),
   });
   const [pickedImagePath, setPickedImagePath] = useState("");
@@ -115,7 +145,7 @@ function DoctorEditCard({ navigation }) {
           <Ionicons
             name="close-circle"
             size={40}
-            color={GlobalColors.colors.pink10}
+            color={GlobalColors.colors.pink500}
           />
         </TouchableOpacity>
       </View>
@@ -127,13 +157,13 @@ function DoctorEditCard({ navigation }) {
         <Text style={styles.title}>UPLOAD A PHOTO OF YOU</Text>
         <ButtonCustom
           onPress={takePhotoHandler}
-          color={GlobalColors.colors.pink10}
+          color={GlobalColors.colors.pink500}
         >
           Take Photo
         </ButtonCustom>
         <ButtonCustom
           onPress={galleryPhotoHandler}
-          color={GlobalColors.colors.pink10}
+          color={GlobalColors.colors.pink500}
         >
           Choose from library
         </ButtonCustom>
@@ -240,140 +270,93 @@ function DoctorEditCard({ navigation }) {
     <View
       style={{
         height: "100%",
-        backgroundColor: GlobalColors.colors.pink10,
+        top: -40,
       }}
     >
-      <Text
-        style={{
-          fontSize: 30,
-          alignSelf: "center",
-          fontFamily: "Garet-Book",
-          color: "white",
-          marginTop: error ? 80 : 90,
-          marginRight: 10,
-        }}
-      >
-        Your profile
-        <FontAwesome
-          name="stethoscope"
-          size={30}
-          color={GlobalColors.colors.pink500}
-          style={{ left: 10 }}
-        />
-      </Text>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={[styles.infoContainer, bottom && styles.bottomOn]}>
-        <ImageBackground
-          style={styles.imageStyle}
-          imageStyle={{ borderRadius: 75 }}
-          source={photo.length > 0 ? { uri: photo } : null}
+        <View style={styles.imageContainer}>
+          <ImageBackground
+            style={styles.imageStyle}
+            source={photo.length > 0 ? { uri: photo } : null}
+          ></ImageBackground>
+        </View>
+        <View style={styles.userPictureContainer}>
+          <ImageBackground
+            source={photo.length > 0 ? { uri: photo } : null}
+            style={[
+              styles.userPicture,
+              photo.length === 0 && {
+                borderColor: GlobalColors.colors.gray1,
+                borderWidth: 1,
+                borderRadius: 115,
+              },
+            ]}
+            imageStyle={{ borderRadius: 115 }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                bs.current.snapTo(0), setBottom(true);
+              }}
+            >
+              <Ionicons
+                size={50}
+                color={
+                  !invalid.photoInvalid
+                    ? GlobalColors.colors.gray1
+                    : GlobalColors.colors.darkGrey
+                }
+                name="camera-outline"
+                style={styles.icon}
+              ></Ionicons>
+            </TouchableOpacity>
+          </ImageBackground>
+        </View>
+        <View
+          style={[
+            styles.genderContainer,
+            invalid.genderInvalid && {
+              backgroundColor: GlobalColors.colors.gray1,
+            },
+          ]}
         >
           <TouchableOpacity
-            onPress={() => {
-              bs.current.snapTo(0), setBottom(true);
-            }}
+            style={gender === "Male" ? styles.selected : styles.notSelected}
+            onPress={handleMalePress}
           >
-            <Ionicons
-              size={50}
-              color={!invalid.photoInvalid ? GlobalColors.colors.pink1 : "red"}
-              name="camera-outline"
-              style={styles.icon}
-            ></Ionicons>
+            <FontAwesome
+              name="mars"
+              size={20}
+              color={gender === "Male" ? GlobalColors.colors.darkGrey : "white"}
+            />
           </TouchableOpacity>
-        </ImageBackground>
-        <View style={{ marginTop: 20, marginLeft: 40 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              marginLeft: -80,
-              backgroundColor: GlobalColors.colors.pink10,
-              borderColor: invalid.genderInvalid ? "red" : "transparent",
-              borderWidth: 1,
-              opacity: 0.7,
-              borderRadius: 30,
-              width: "34%",
-              alignSelf: "center",
-            }}
+          <TouchableOpacity
+            style={gender === "Female" ? styles.selected : styles.notSelected}
+            onPress={handleFemalePress}
           >
-            <TouchableOpacity
-              style={gender === "Male" ? styles.selected : styles.notSelected}
-              onPress={handleMalePress}
+            <FontAwesome
+              name="venus"
+              size={20}
+              color={
+                gender === "Female" ? GlobalColors.colors.darkGrey : "white"
+              }
+            />
+          </TouchableOpacity>
+        </View>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <View style={styles.inputsContainer}>
+          <View>
+            <Text style={styles.titleInput}>Enter your full name</Text>
+            <View
+              style={[
+                styles.inputFieldContainer,
+                invalid.fullnameInvalid && styles.inputInvalid,
+              ]}
             >
-              <FontAwesome
-                name="mars"
-                size={35}
-                color={
-                  gender === "Male" ? GlobalColors.colors.darkGrey : "white"
-                }
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={gender === "Female" ? styles.selected : styles.notSelected}
-              onPress={handleFemalePress}
-            >
-              <FontAwesome
-                name="venus"
-                size={35}
-                color={
-                  gender === "Female" ? GlobalColors.colors.darkGrey : "white"
-                }
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputsContainer}>
-            <View style={{ marginTop: -18 }}>
-              <Text style={styles.titleInput}>Enter your full name</Text>
               <TextInput
                 placeholder="Full name..."
                 value={fullname}
                 onChangeText={handleFullNameChange}
-                placeholderTextColor={GlobalColors.colors.pink500}
-                style={[
-                  styles.inputField,
-                  invalid.fullnameInvalid && styles.inputInvalid,
-                ]}
-                color={GlobalColors.colors.pink500}
-              />
-            </View>
-            <Text style={styles.titleInput}>Enter your birthday date</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                backgroundColor: "white",
-                borderRadius: 8,
-                borderColor: invalid.birthdayInvalid
-                  ? "red"
-                  : GlobalColors.colors.pink500,
-                width: "90%",
-                borderWidth: 1,
-                marginLeft: 10,
-                padding: 5,
-              }}
-            >
-              <View style={{ flexDirection: "row", marginLeft: 10, top: 3 }}>
-                <FontAwesome
-                  name="calendar"
-                  size={13}
-                  style={{ marginLeft: -3 }}
-                  color={GlobalColors.colors.pink500}
-                />
-                <FontAwesome
-                  name="pencil"
-                  size={11}
-                  style={{ marginLeft: -8, top: 5 }}
-                  color={GlobalColors.colors.pink500}
-                />
-              </View>
-
-              <TextInput
-                placeholder="DD/MM/YYYY"
-                value={birthday}
-                onChangeText={handleChange}
-                keyboardType="numeric"
-                maxLength={10}
-                color={GlobalColors.colors.pink500}
                 placeholderTextColor={GlobalColors.colors.pink500}
                 style={[
                   {
@@ -382,86 +365,99 @@ function DoctorEditCard({ navigation }) {
                     fontSize: 15,
                     fontFamily: "Garet-Book",
                   },
-                  ,
-                ]}
-              />
-            </View>
-            <View>
-              <Text style={styles.titleInput}>Enter your telephone number</Text>
-              <TextInput
-                keyboardType="numeric"
-                placeholder="Telephone number..."
-                placeholderTextColor={GlobalColors.colors.pink500}
-                style={[
-                  {
-                    backgroundColor: "white",
-                    borderRadius: 8,
-                    borderColor: GlobalColors.colors.pink500,
-                    width: "90%",
-                    borderWidth: 1,
-                    marginLeft: 10,
-                    padding: 5,
-                    paddingHorizontal: 10,
-                    fontSize: 15,
-                    fontFamily: "Garet-Book",
-                  },
-                  invalid.telephoneInvalid && styles.inputInvalid,
                 ]}
                 color={GlobalColors.colors.pink500}
-                onChangeText={(text) => setTelephone(text)}
-                value={telephone}
+              />
+            </View>
+          </View>
+          <Text style={styles.titleInput}>Enter your birthday date</Text>
+          <View
+            style={[
+              styles.inputFieldContainer,
+              invalid.birthdayInvalid && styles.inputInvalid,
+            ]}
+          >
+            <View style={{ flexDirection: "row", marginLeft: 10, top: 3 }}>
+              <FontAwesome
+                name="calendar"
+                size={13}
+                style={{ marginLeft: -3 }}
+                color={GlobalColors.colors.pink500}
+              />
+              <FontAwesome
+                name="pencil"
+                size={11}
+                style={{ marginLeft: -8, top: 5 }}
+                color={GlobalColors.colors.pink500}
               />
             </View>
 
             <TextInput
-              style={[
-                styles.Descriptioninput,
-                invalid.descriptionInvalid && styles.inputInvalid,
-              ]}
-              multiline={true}
-              placeholder="Short description about yourself..."
+              placeholder="DD/MM/YYYY"
+              value={birthday}
+              onChangeText={handleChange}
+              keyboardType="numeric"
+              maxLength={10}
+              color={GlobalColors.colors.pink500}
               placeholderTextColor={GlobalColors.colors.pink500}
-              maxLength={1000}
-              value={description}
-              onChangeText={(text) => setDescription(text)}
+              style={styles.textInputStyle}
             />
           </View>
+
+          <Text style={styles.titleInput}>Enter your telephone number</Text>
+          <View
+            style={[
+              styles.inputFieldContainer,
+              invalid.telephoneInvalid && styles.inputInvalid,
+            ]}
+          >
+            <TextInput
+              keyboardType="numeric"
+              placeholder="Telephone number..."
+              placeholderTextColor={GlobalColors.colors.pink500}
+              style={styles.textInputStyle}
+              color={GlobalColors.colors.pink500}
+              onChangeText={(text) => setTelephone(text)}
+              value={telephone}
+            />
+          </View>
+
+          <TextInput
+            style={[
+              styles.Descriptioninput,
+              invalid.descriptionInvalid && styles.inputInvalid,
+            ]}
+            multiline={true}
+            placeholder="Short description about yourself..."
+            placeholderTextColor={GlobalColors.colors.pink500}
+            maxLength={1000}
+            value={description}
+            onChangeText={(text) => setDescription(text)}
+          />
         </View>
-        <BottomSheet
-          ref={bs}
-          snapPoints={[330, -80]}
-          renderContent={renderInner}
-          renderHeader={renderHeader}
-          initialSnap={1}
-          callbackNode={fall}
-          enabledGestureInteraction={true}
-        />
       </View>
+      <BottomSheet
+        ref={bs}
+        snapPoints={[300, -80]}
+        renderContent={renderInner}
+        renderHeader={renderHeader}
+        initialSnap={1}
+        callbackNode={fall}
+        enabledGestureInteraction={true}
+      />
     </View>
   );
 }
 export default DoctorEditCard;
 const styles = StyleSheet.create({
   infoContainer: {
-    borderTopLeftRadius: 70,
-    borderTopRightRadius: 160,
     flex: 1,
     backgroundColor: "white",
     top: 40,
   },
-  imageStyle: {
-    width: 150,
-    height: 150,
-    borderRadius: 750,
-    borderWidth: 0.5,
-    borderColor: GlobalColors.colors.pink1,
-    backgroundColor: GlobalColors.colors.pink10,
-    marginTop: 30,
-    marginLeft: 118,
-  },
+
   icon: {
     alignSelf: "center",
-    marginTop: 50,
   },
   header: {
     backgroundColor: "white",
@@ -471,7 +467,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     elevation: 5,
     paddingTop: 10,
-
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -493,7 +488,7 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     fontSize: 20,
     paddingVertical: 20,
-    color: GlobalColors.colors.pink10,
+    color: GlobalColors.colors.pink500,
   },
   exitButton: {
     marginLeft: 10,
@@ -508,20 +503,22 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   Descriptioninput: {
-    height: 100,
+    height: 80,
     textAlignVertical: "top",
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: GlobalColors.colors.pink500,
     color: GlobalColors.colors.pink500,
     fontFamily: "Garet-Book",
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 10,
     marginTop: 30,
-    width: "90%",
+    width: "100%",
     alignSelf: "center",
-    backgroundColor: "white",
-    left: -5,
+    backgroundColor: GlobalColors.colors.gray0,
+    shadowColor: GlobalColors.colors.gray1,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 0.3,
+    elevation: 5,
   },
   selected: {
     borderRadius: 50,
@@ -532,34 +529,22 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   inputsContainer: {
-    backgroundColor: GlobalColors.colors.pink10,
-    height: 380,
-    padding: 20,
-    width: "90%",
+    backgroundColor: "white",
+    paddingHorizontal: 30,
+    width: "100%",
     alignSelf: "center",
-    marginVertical: 20,
     borderRadius: 30,
-    opacity: 0.8,
-    marginLeft: -45,
+    top: 10,
   },
   titleInput: {
-    padding: 10,
+    marginBottom: 10,
+    marginTop: 5,
     fontFamily: "Garet-Book",
     color: GlobalColors.colors.pink500,
     fontSize: 15,
+    left: 4,
   },
-  inputField: {
-    fontSize: 15,
-    marginLeft: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: GlobalColors.colors.pink500,
-    height: 30,
-    width: "90%",
-    backgroundColor: "white",
-    paddingHorizontal: 10,
-    fontFamily: "Garet-Book",
-  },
+
   profileContainer: {
     backgroundColor: GlobalColors.colors.pink1,
     height: 250,
@@ -569,12 +554,71 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   inputInvalid: {
-    borderColor: "red",
-    color: "red",
+    borderColor: GlobalColors.colors.gray1,
+    borderWidth: 1,
   },
   error: {
     textAlign: "center",
-    color: "red",
+    color: GlobalColors.colors.pink500,
     fontWeight: "bold",
+
+    fontSize: 17,
+  },
+  inputFieldContainer: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 10,
+    paddingVertical: 10,
+
+    backgroundColor: GlobalColors.colors.gray0,
+
+    shadowColor: GlobalColors.colors.gray1,
+    shadowOffset: { width: -2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 0.3,
+    elevation: 5,
+    marginBottom: 10,
+  },
+  textInputStyle: {
+    color: GlobalColors.colors.pink500,
+    marginLeft: 7,
+    fontSize: 15,
+    fontFamily: "Garet-Book",
+  },
+  imageContainer: {
+    height: 250,
+    width: "100%",
+    borderColor: GlobalColors.colors.pink500,
+  },
+  imageStyle: {
+    height: 350,
+    opacity: 0.4,
+  },
+  userPictureContainer: {
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+    top: -50,
+    borderEndWidth: 0.7,
+    borderColor: GlobalColors.colors.pink500,
+  },
+
+  userPicture: {
+    height: 230,
+    width: 230,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  genderContainer: {
+    backgroundColor: GlobalColors.colors.pink500,
+    width: "40%",
+    flexDirection: "row",
+    height: 40,
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    top: -20,
   },
 });

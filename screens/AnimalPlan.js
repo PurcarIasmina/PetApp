@@ -264,6 +264,7 @@ function AnimalPlan({ navigation }) {
               selectedOption: route.params.selectedOption,
               date: route.params.date,
               diagnostic: route.params.diagnostic,
+              reminder: route.params.reminder,
             })
           }
         >

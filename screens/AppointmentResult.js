@@ -86,7 +86,7 @@ function AppointmentResult({ navigation }) {
     } else return "";
   }
   const [isFocus, setIsFocus] = useState(false);
-  console.log(Object(pills));
+  console.log(reminder);
   async function saveHandler() {
     if (
       (selectedOption === "Consultation" &&
@@ -113,7 +113,7 @@ function AppointmentResult({ navigation }) {
             appointmentDoses: doses.length > 0 ? doses : undefined,
           },
         });
-        if (!reminder) navigation.navigate("DoctorScreen");
+        if (reminder === false) navigation.navigate("DoctorScreen");
         else navigation.navigate("DoctorReminders");
       } catch (error) {
         console.log(error);
@@ -206,18 +206,7 @@ function AppointmentResult({ navigation }) {
             </Text>
           </View>
         </View>
-        {/* <Text style={[styles.textStyle, { marginVertical: 20 }]}>
-          Owner details
-        </Text>
-        <View style={styles.cellStyle}>
-          <Ionicons
-            name="person-circle-sharp"
-            style={styles.icon}
-            size={16}
-            color={GlobalColors.colors.pink500}
-          />
-          <Text style={styles.textStyle}>{appointment.ownername}</Text>
-        </View> */}
+
         <View>
           <Text style={[styles.textStyle, { marginTop: 30 }]}>
             Complete the following formular
@@ -293,6 +282,7 @@ function AppointmentResult({ navigation }) {
                       selectedOption: selectedOption,
                       date: date,
                       doses: doses,
+                      reminder: reminder,
                     });
                   }}
                 >
@@ -387,6 +377,7 @@ function AppointmentResult({ navigation }) {
                           date: date,
                           diagnostic: diagnostic,
                           pills: pills,
+                          reminder: reminder,
                         })
                       }
                     >

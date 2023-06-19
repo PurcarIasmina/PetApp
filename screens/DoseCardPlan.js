@@ -192,6 +192,7 @@ function DoseCardPlan({ navigation }) {
               appointment: route.params.appointment,
               selectedOption: route.params.selectedOption,
               date: route.params.date,
+              reminder: route.params.reminder,
             })
           }
         >
