@@ -73,6 +73,7 @@ import PayScreen from "./screens/PayScreen";
 import UserReservations from "./screens/UserReservations";
 import { LogBox } from "react-native";
 import DoctorReminders from "./screens/DoctorReminders";
+import DoctorHistory from "./screens/DoctorHistory";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -209,6 +210,18 @@ function AuthenticatedDrawerDoctor() {
           headerTitle: "",
           drawerIcon: ({ color }) => (
             <Ionicons color={color} size={20} name={"notifications-outline"} />
+          ),
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="DoctorHistory"
+        component={DoctorHistory}
+        options={{
+          title: "Appointments",
+          headerTitle: "",
+          drawerIcon: ({ color }) => (
+            <Ionicons color={color} size={20} name={"documents-outline"} />
           ),
           unmountOnBlur: true,
         }}

@@ -313,7 +313,11 @@ function DoctorScreen({ navigation }) {
                   appointments.length
                 } appointments today`
             : `You ${
-                getFormattedDate(selectedDate) < getFormattedDate(currentDate)
+                getFormattedDate(selectedDate) <
+                  getFormattedDate(currentDate) ||
+                (getFormattedDate(selectedDate) ===
+                  getFormattedDate(currentDate) &&
+                  currentDate.getUTCHours() >= 18)
                   ? `had`
                   : `have`
               } no appointments ${

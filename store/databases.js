@@ -735,11 +735,53 @@ export async function getAppointments(did, date) {
       appointmentsDetails.push(appointmentDetail);
     }
   }
-  // console.log(appointmentsDetails);
   appointmentsDetails.sort((ap1, ap2) => ap1.slot.localeCompare(ap2.slot));
   return appointmentsDetails;
 }
 
+export async function getDoctorAllAppointments(did) {
+  const appointmentsDetails = [];
+  const response = await axios.get(BACKEND_URL + `/appointments.json`);
+  const appointmentKeys = Object.keys(response.data);
+  const appointments = Object.values(response.data);
+  appointments.map((appointment, index) => {
+    appointment.key = appointmentKeys[index];
+  });
+
+  const filtered = appointments.filter(function (appointment) {
+    return (
+      appointment.did === did &&
+      appointment.done === 1 &&
+      appointment.canceled === 0
+    );
+  });
+
+  for (const key in filtered) {
+    let detail = await getAnimalDetails(filtered[key].aid);
+    console.log(detail);
+    if (Object.keys(detail).length > 0) {
+      const appointmentDetail = {
+        did: filtered[key].did,
+        date: filtered[key].date,
+        uid: filtered[key].uid,
+        slot: filtered[key].slot,
+        animal: detail,
+        reason: filtered[key].reason,
+        ownername: filtered[key].ownername,
+        photoUrl: await getImageUrl(
+          `${filtered[key].uid}/${filtered[key].aid}.jpeg`
+        ),
+        done: filtered[key].done,
+        generatedId: filtered[key].key,
+        result: filtered[key].result,
+      };
+
+      appointmentsDetails.push(appointmentDetail);
+    }
+  }
+  appointmentsDetails.sort((ap1, ap2) => ap1.slot.localeCompare(ap2.slot) < 0);
+  return appointmentsDetails;
+}
 export async function getNotCompletedAppointments(did) {
   const appointmentsDetails = [];
   const response = await axios.get(BACKEND_URL + `/appointments.json`);

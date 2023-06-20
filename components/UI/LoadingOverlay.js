@@ -1,10 +1,11 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { GlobalColors } from "../../constants/colors";
 
 function LoadingOverlay({ message }) {
   return (
     <View style={styles.rootContainer}>
       <Text style={styles.message}>{message}</Text>
-      <ActivityIndicator size="large" />
+      <ActivityIndicator color={GlobalColors.colors.pink500} size="large" />
     </View>
   );
 }
@@ -22,5 +23,6 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 16,
     marginBottom: 12,
+    color: GlobalColors.colors.pink500,
   },
 });

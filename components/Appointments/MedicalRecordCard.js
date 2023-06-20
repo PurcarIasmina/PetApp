@@ -208,7 +208,7 @@ function MedicalRecordCard({ appointment, status }) {
 				</tr>
 
 				<tr class="heading">
-					<td>Patient Details</td>
+					<td>Animal Details</td>
 
 					<td></td>
 				</tr>
@@ -439,7 +439,7 @@ function MedicalRecordCard({ appointment, status }) {
 				</tr>
 
 				<tr class="heading">
-					<td>Patient Details</td>
+					<td>Animal Details</td>
 
 					<td></td>
 				</tr>
