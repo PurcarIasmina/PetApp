@@ -90,10 +90,10 @@ function AddPetScreen({ navigation }) {
   }
   function handlerValidation() {
     if (
-      !name.trim() ||
-      !owner.trim() ||
-      !breed.trim() ||
-      !color.trim() ||
+      name.trim() === "" ||
+      owner.trim() === "" ||
+      breed.trim() === "" ||
+      color.trim() === "" ||
       !photo ||
       !datebirth
     ) {
@@ -125,7 +125,6 @@ function AddPetScreen({ navigation }) {
         );
         if (resp) {
           const imagePath = `${authCtx.uid}/${resp.aid}.jpeg`;
-          console.log(resp.token);
           const respPhoto = await storeImage(photo, imagePath);
 
           if (respPhoto) {

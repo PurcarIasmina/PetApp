@@ -29,7 +29,6 @@ export async function scheduleNotificationHandler(title, body, date) {
       date: date,
     },
   });
-  console.log(id, "notificare");
   return id;
 }
 export async function cancelNotification(notificationId) {
