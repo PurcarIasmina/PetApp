@@ -10,7 +10,11 @@ import {
   SectionList,
 } from "react-native";
 import { AuthContext } from "../context/auth";
-import { getDoctorAllAppointments, getUserDetails } from "../store/databases";
+import {
+  getDoctorAllAppointments,
+  getDoctorDetails,
+  getUserDetails,
+} from "../store/databases";
 import AppointmentHistoryCard from "../components/Appointments/AppointmentHistoryCard";
 import { GlobalColors } from "../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,7 +55,7 @@ function DoctorHistory({ navigation }) {
     async function getDocNm() {
       try {
         setFetching(true);
-        const resp = await getUserDetails(authCtx.uid);
+        const resp = await getDoctorDetails(authCtx.uid);
         setDocDetails(resp);
 
         setFetching(false);

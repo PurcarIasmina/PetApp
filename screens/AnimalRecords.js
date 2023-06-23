@@ -256,21 +256,29 @@ function AnimalRecords({ navigation }) {
             </Text>
           </View>
         )}
-        <FlatList
-          data={
-            status === 0 ? consultations : status === 1 ? vaccines : dewormings
-          }
-          renderItem={({ item, index }) => {
-            if (selectedYear) {
-              if (item.date.split("-")[0].localeCompare(selectedYear) === 0) {
+        <ScrollView
+          style={{ flexGrow: 1, overflow: "scroll", maxHeight: 700 }}
+          bounces={false}
+          showsVerticalScrollIndicator
+        >
+          {(data =
+            status === 0
+              ? consultations
+              : status === 1
+              ? vaccines
+              : dewormings) &&
+            data.map((item) => {
+              if (selectedYear) {
+                if (item.date.split("-")[0].localeCompare(selectedYear) === 0) {
+                  return (
+                    <MedicalRecordCard status={status} appointment={item} />
+                  );
+                }
+              } else {
                 return <MedicalRecordCard status={status} appointment={item} />;
               }
-            } else {
-              return <MedicalRecordCard status={status} appointment={item} />;
-            }
-          }}
-          key={(item) => item.generatedId}
-        />
+            })}
+        </ScrollView>
       </View>
     </View>
   );

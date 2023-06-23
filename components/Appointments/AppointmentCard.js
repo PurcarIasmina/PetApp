@@ -9,7 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { printToFileAsync } from "expo-print";
 import { shareAsync } from "expo-sharing";
-import { getUserDetails } from "../../store/databases";
+import { getDoctorDetails, getUserDetails } from "../../store/databases";
 function AppointmentCard({ appointment }) {
   console.log(appointment);
   const actualTime = getRomanianTime().toISOString().slice(11, 16);
@@ -21,7 +21,7 @@ function AppointmentCard({ appointment }) {
   useEffect(() => {
     async function getDocNm() {
       try {
-        const resp = await getUserDetails(appointment.did);
+        const resp = await getDoctorDetails(appointment.did);
         setDocDetails(resp);
       } catch (error) {
         console.log(error);
@@ -172,7 +172,7 @@ function AppointmentCard({ appointment }) {
 								
 								<td>
 									Healthy PetApp<br />
-									Doctor ${docDetails.name}<br />
+									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>
 							</tr>
@@ -403,7 +403,7 @@ function AppointmentCard({ appointment }) {
 								
 								<td>
 									Healthy PetApp<br />
-									Doctor ${docDetails.name}<br />
+									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>
 							</tr>

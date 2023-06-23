@@ -30,7 +30,7 @@ function DoctorCard({ doctor, left }) {
       onPress={pressHandler}
     >
       <Image source={{ uri: details.photo }} style={styles.docImg}></Image>
-      <Text style={styles.docName}>Dr. {details.name}</Text>
+      <Text style={styles.docName}>Dr. {details.fullname}</Text>
       <View
         style={{ flexDirection: "row", justifyContent: "center", marginTop: 4 }}
       >

@@ -110,6 +110,7 @@ function Switcher({
           reminderDate1.setDate(appointmentDate.getDate() - 7);
           const reminderDate2 = new Date(appointmentDate);
           reminderDate2.setDate(appointmentDate.getDate() - 1);
+          console.log(diffInDays);
           if (active) {
             if (diffInDays >= 7)
               notificationId1 = await scheduleNotificationHandler(
@@ -211,8 +212,9 @@ function Switcher({
   const selectDate = new Date(date);
   if (appointmentReminder === null) {
     console.log(actualDate.getUTCHours());
-    if (actualDate.getUTCDate() > selectDate.getUTCDate()) disabled = true;
-    if (actualDate.getUTCDate() === selectDate.getUTCDate()) {
+    if (getFormattedDate(actualDate) > getFormattedDate(selectDate))
+      disabled = true;
+    if (getFormattedDate(actualDate) === getFormattedDate(selectDate)) {
       if (
         momentTime === "Morning" &&
         actualDate.getUTCHours() >= 8 &&
@@ -233,8 +235,11 @@ function Switcher({
         disabled = true;
     }
   } else {
-    if (actualDate.getUTCDate() > selectDate.getUTCDate()) disabled = true;
+    if (getFormattedDate(actualDate) > getFormattedDate(selectDate))
+      disabled = true;
   }
+
+  console.log(actualDate.getDate(), selectDate.getUTCDate());
   return (
     <Switch
       value={isSwitchOn}

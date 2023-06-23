@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Linking,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import {
@@ -306,7 +307,7 @@ function DoctorBookAppointment({ navigation }) {
           <View>
             <Text></Text>
             <Text style={[styles.name, { left: -23 }]}>
-              Dr.{docDetails.name}
+              Dr.{docDetails.fullname}
             </Text>
             <View style={{ flexDirection: "row" }}>
               <FontAwesome
@@ -318,7 +319,14 @@ function DoctorBookAppointment({ navigation }) {
               <Text style={styles.age}>{getAgeYear(docDetails.birthday)}y</Text>
             </View>
             <Text style={styles.telephone}>
-              For emergency: {docDetails.telephone}
+              For emergency:{" "}
+              <Text
+                onPress={() => {
+                  Linking.openURL(`tel:${docDetails.telephone}`);
+                }}
+              >
+                {docDetails.telephone}
+              </Text>
             </Text>
           </View>
         </View>
@@ -460,7 +468,7 @@ function DoctorBookAppointment({ navigation }) {
                 }}
               >
                 <Text style={styles.infoAppointment}>
-                  Dr. {docDetails.name}
+                  Dr. {docDetails.fullname}
                 </Text>
               </View>
             </View>
@@ -531,7 +539,7 @@ function DoctorBookAppointment({ navigation }) {
                 onChangeText={(value) => {
                   setAppointmentReason(value);
                 }}
-              ></TextInput>
+              />
             </View>
             <View style={styles.inputContainer}>
               <TextInput
@@ -542,7 +550,7 @@ function DoctorBookAppointment({ navigation }) {
                 onChangeText={(value) => {
                   setOwnerName(value);
                 }}
-              ></TextInput>
+              />
             </View>
             <Button
               textColor={GlobalColors.colors.pink500}
@@ -613,7 +621,8 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     shadowOpacity: 0.4,
     borderRadius: 20,
-    padding: 10,
+    paddingTop: 10,
+    paddingHorizontal: 5,
   },
   description: {
     fontFamily: "Garet-Book",
@@ -792,10 +801,11 @@ const styles = StyleSheet.create({
     marginRight: 30,
     borderColor: GlobalColors.colors.pink500,
     marginVertical: 10,
+    paddingHorizontal: 5,
   },
   input: {
     flex: 1,
-    paddingLeft: 5,
+    paddingHorizontal: 6,
     paddingVertical: 0,
     color: GlobalColors.colors.pink500,
     fontFamily: "Garet-Book",

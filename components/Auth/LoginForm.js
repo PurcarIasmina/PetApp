@@ -33,7 +33,8 @@ function LoginForm({ onLogin }) {
   }
 
   function handlerValidation() {
-    if (!userEmail.trim() || !userPassword.trim()) {
+    console.log(userEmail.trim() === "");
+    if (userEmail.trim() === "" || userPassword.trim() === "") {
       setEmailInvalid(true);
       setPasswordInvalid(true);
       return updateError("All fields are required!", setError);
@@ -43,7 +44,7 @@ function LoginForm({ onLogin }) {
       setEmailInvalid(true);
       return updateError("Invalid email!", setError);
     }
-    if (!userPassword.trim() || userPassword.length < 8) {
+    if (userPassword.trim() === "" || userPassword.length < 8) {
       setPasswordInvalid(true);
       return updateError("Password must have at least 8 characters!", setError);
     }

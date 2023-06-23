@@ -207,27 +207,27 @@ function DoctorEditCard({ navigation }) {
 
   function handlerValidation() {
     let ok = 0;
-    if (!fullname.trim()) {
+    if (fullname.trim() === "") {
       invalid.fullnameInvalid = true;
       ok = 1;
     }
-    if (!telephone.trim()) {
+    if (telephone.trim() === "") {
       invalid.telephoneInvalid = true;
       ok = 1;
     }
-    if (!gender.trim()) {
+    if (gender.trim() === "") {
       invalid.genderInvalid = true;
       ok = 1;
     }
-    if (!birthday.trim()) {
+    if (birthday.trim() === "") {
       invalid.birthdayInvalid = true;
       ok = 1;
     }
-    if (!description.trim()) {
+    if (description.trim() === "") {
       invalid.descriptionInvalid = true;
       ok = 1;
     }
-    if (!photo.trim()) {
+    if (photo.trim() === "") {
       invalid.photoInvalid = true;
       ok = 1;
     }

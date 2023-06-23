@@ -27,10 +27,10 @@ function MedicalRecordCard({ appointment, status }) {
   const [fetching, setFetching] = useState(false);
   const [animalDetails, setAnimalDetails] = useState({});
   useEffect(() => {
-    async function getDocNm() {
+    async function getDocDetails() {
       try {
         setFetching(true);
-        const resp = await getUserDetails(appointment.did);
+        const resp = await getDoctorDetails(appointment.did);
         setDocDetails(resp);
 
         setFetching(false);
@@ -38,7 +38,7 @@ function MedicalRecordCard({ appointment, status }) {
         console.log(error);
       }
     }
-    getDocNm();
+    getDocDetails();
   }, []);
   useEffect(() => {
     async function getAnimalDetail() {
@@ -199,7 +199,7 @@ function MedicalRecordCard({ appointment, status }) {
 								
 								<td>
 									Healthy PetApp<br />
-									Doctor ${docDetails.name}<br />
+									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>
 							</tr>
@@ -430,7 +430,7 @@ function MedicalRecordCard({ appointment, status }) {
 								
 								<td>
 									Healthy PetApp<br />
-									Doctor ${docDetails.name}<br />
+									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>
 							</tr>
@@ -567,7 +567,7 @@ function MedicalRecordCard({ appointment, status }) {
             style={{ marginTop: 2, paddingHorizontal: 7, marginRight: 8 }}
           />
           <Text style={[styles.diagnostic, { fontSize: 16 }]}>
-            {docDetails.name}
+            {docDetails.fullname}
           </Text>
         </View>
         {appointment.result.nextAppointment.length > 0 && (

@@ -154,7 +154,7 @@ function AppointmentHistoryCard({ appointment, docDetails }) {
                                   
                                   <td>
                                       Healthy PetApp<br />
-                                      Doctor ${docDetails.name}<br />
+                                      Doctor ${docDetails.fullname}<br />
                                       ${docDetails.email}
                                   </td>
                               </tr>
@@ -390,7 +390,7 @@ function AppointmentHistoryCard({ appointment, docDetails }) {
                                   
                                   <td>
                                       Healthy PetApp<br />
-                                      Doctor ${docDetails.name}<br />
+                                      Doctor ${docDetails.fullname}<br />
                                       ${docDetails.email}
                                   </td>
                               </tr>

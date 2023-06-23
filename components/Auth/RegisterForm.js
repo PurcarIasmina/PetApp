@@ -57,10 +57,10 @@ function RegisterForm({ onAuthenticate }) {
   }
   function handlerValidation() {
     if (
-      !userName.trim() ||
-      !userEmail.trim() ||
-      !userPassword.trim() ||
-      !userConfPassword.trim()
+      userName.trim() === "" ||
+      userEmail.trim() === "" ||
+      userPassword.trim() === "" ||
+      userConfPassword.trim() === ""
     ) {
       setNameInvalid(true);
       setEmailInvalid(true);
@@ -68,7 +68,7 @@ function RegisterForm({ onAuthenticate }) {
       setConfPasswordInvalid(true);
       return updateError("All fields are required!", setError);
     }
-    if (!userName.trim() || userName.length < 5) {
+    if (userName.trim() === "" || userName.length < 5) {
       setNameInvalid(true);
       return updateError("Invalid name, minimum 5 characters!", setError);
     }
@@ -83,7 +83,7 @@ function RegisterForm({ onAuthenticate }) {
       return updateError("Email already used!", setError);
     }
 
-    if (!userPassword.trim() || userPassword.length < 8) {
+    if (userPassword.trim() === "" || userPassword.length < 8) {
       setPasswordInvalid(true);
       return updateError("Password must have at least 8 characters!", setError);
     }

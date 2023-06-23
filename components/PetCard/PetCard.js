@@ -251,10 +251,10 @@ function PetCard({
   }
   function handlerValidation() {
     if (
-      !namee.trim() ||
-      !ownerr.trim() ||
-      !breedd.trim() ||
-      !colorr.trim() ||
+      namee.trim() === "" ||
+      ownerr.trim() === "" ||
+      breedd.trim() === "" ||
+      colorr.trim() === "" ||
       !photoo ||
       !datebirthh
     ) {

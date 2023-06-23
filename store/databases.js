@@ -846,9 +846,13 @@ export async function getUserStatusAppointments(uid, status) {
 
     let filtered = [];
     const currentDate = new Date();
+    currentDate.setUTCHours(currentDate.getUTCHours()) *
+      currentDate.getTimezoneOffset();
+
     const timezoneOffset = 180;
     const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
     const romaniaDateTime = new Date(romanianTime);
+    console.log(romaniaDateTime);
     if (status === 0) {
       filtered = appointments.filter(function (appointment) {
         return (
@@ -1149,6 +1153,7 @@ export async function getDoctorDetails(id) {
           description: obj.description,
           datebirth: obj.datebirth,
           did: obj.uid,
+          email: obj.email,
           photo: await getImageUrl(`doctor/${id}.jpeg`),
         };
       }

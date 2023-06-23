@@ -92,7 +92,7 @@ function PayScreen({ navigation }) {
     setPhone(value);
   };
   function handlerValidation() {
-    if (!name.trim() || !email.trim() || !phone.trim()) {
+    if (name.trim() === "" || email.trim() === "" || phone.trim() === "") {
       setNameInvalid(true);
       setEmailInvalid(true);
       setPhoneInvalid(true);
@@ -303,7 +303,7 @@ function PayScreen({ navigation }) {
               <Text
                 style={{ color: GlobalColors.colors.blue500, fontSize: 15 }}
               >
-                {daysDifference + 1}
+                {daysDifference}
               </Text>
             </Text>
             <Text style={styles.subtitle}>
