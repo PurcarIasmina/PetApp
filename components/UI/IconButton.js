@@ -2,7 +2,6 @@ import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { GlobalColors } from "../../constants/colors";
 import { useFonts } from "expo-font";
-import { Tooltip } from "react-native-paper";
 import { useState } from "react";
 function IconButton({
   icon,

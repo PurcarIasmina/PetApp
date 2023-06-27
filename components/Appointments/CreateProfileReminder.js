@@ -1,7 +1,6 @@
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { StylePropType } from "react-native-gifted-chat";
 import { GlobalColors } from "../../constants/colors";
-import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 function CreateProfileReminder() {
   const navigation = useNavigation();

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -9,30 +9,18 @@ import {
   Modal,
 } from "react-native";
 import { AuthContext } from "../context/auth";
-import { useContext, useCallback } from "react";
+import { useContext } from "react";
 import { GlobalColors } from "../constants/colors";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import Swiper from "react-native-swiper";
-import { Calendar, CalendarTheme } from "react-native-calendars";
+import { Calendar } from "react-native-calendars";
 import moment from "moment";
 import AppointmentCard from "../components/Appointments/AppointmentCard";
-import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { getAppointments } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-import { convertDate, getFormattedDate } from "../util/date";
-import * as Notifications from "expo-notifications";
+import { getFormattedDate } from "../util/date";
 
-import * as Permissions from "expo-permissions";
-import AppointmentResult from "./AppointmentResult";
-import { setMonth } from "date-fns";
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowAlert: true,
-  }),
-});
 function DoctorScreen({ navigation }) {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -152,7 +140,9 @@ function DoctorScreen({ navigation }) {
     if (nextDateAux.getDay() === 5) {
       nextDateAux.setDate(date.getUTCDate() + 3);
     } else nextDateAux.setDate(date.getUTCDate() + 1);
-
+    Object.keys(markedDates).forEach(
+      (obj) => (markedDates[obj]["selected"] = false)
+    );
     setDate(nextDateAux);
     setSelectedDate(nextDateAux);
   };
@@ -164,7 +154,9 @@ function DoctorScreen({ navigation }) {
       prevDateAux.setDate(date.getDate() - 3);
     } else prevDateAux.setDate(date.getDate() - 1);
 
-    console.log(prevDateAux, "prev");
+    Object.keys(markedDates).forEach(
+      (obj) => (markedDates[obj]["selected"] = false)
+    );
     setDate(prevDateAux);
     setSelectedDate(prevDateAux);
   };
@@ -216,13 +208,7 @@ function DoctorScreen({ navigation }) {
 
   useEffect(() => {
     setMarkedDates(getWeekendDaysInMonth(selectedYear, selectedMonth));
-    console.log(markedDates);
   }, [selectedMonth]);
-  // const onLayoutRootView = useCallback(async () => {
-  //   if (fonts) {
-  //     await SplashScreen.hideAsync();
-  //   }
-  // }, [fonts]);
 
   if (!fonts) {
     return null;
@@ -233,11 +219,7 @@ function DoctorScreen({ navigation }) {
     const isWeekend = date.getUTCDay() === 0 || date.getUTCDay() === 6;
 
     return (
-      <TouchableOpacity
-        onPress={() => onDateSelect(date)}
-        // onLayout={onLayoutRootView}
-        disabled={isWeekend}
-      >
+      <TouchableOpacity onPress={() => onDateSelect(date)} disabled={isWeekend}>
         <View
           style={[
             date.toLocaleDateString() === selectedDate.toLocaleDateString()
@@ -388,7 +370,7 @@ function DoctorScreen({ navigation }) {
                   };
                   setDate(new Date(date.dateString)),
                     setSelectedDate(new Date(date.dateString));
-                  markedDates[date] = { selected: true };
+                  markedDates[selectedDate] = { selected: true };
 
                   setShowDatePicker(false);
                   setSelectedMonth(date.month);
@@ -506,7 +488,6 @@ const styles = StyleSheet.create({
 
     flex: 1,
     marginTop: 200,
-    // position: "relative",
     borderRadius: 20,
   },
   centeredView: {

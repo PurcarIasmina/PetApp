@@ -1,13 +1,12 @@
 import { Switch } from "react-native-paper";
-import { useState, useContext, useEffect, useLayoutEffect } from "react";
+import { useState, useContext, useLayoutEffect } from "react";
 import { GlobalColors } from "../../constants/colors";
 import {
   cancelNotification,
   scheduleNotificationHandler,
-  sendPushNotificationHandler,
 } from "../../notifications/notifications";
 import { AuthContext } from "../../context/auth";
-import { getTime } from "date-fns";
+
 import {
   addNotification,
   deleteNotification,
@@ -56,7 +55,7 @@ function Switcher({
             notificationId = await scheduleNotificationHandler(
               "Reminder!🌛",
               `Administrate to ${name} evening medication`,
-              new Date(`${getFormattedDate(new Date(date))} 20:00:00`)
+              new Date(`${getFormattedDate(new Date(date))} 18:53:00`)
             );
           } else if (momentTime === "Morning") {
             notificationId = await scheduleNotificationHandler(

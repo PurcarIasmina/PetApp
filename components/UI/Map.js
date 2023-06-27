@@ -1,8 +1,8 @@
-import { useCallback, useLayoutEffect, useState, useEffect } from "react";
-import { Alert, StyleSheet, View, Text, Image } from "react-native";
+import { useState, useEffect } from "react";
+import { StyleSheet, View, Text, Image } from "react-native";
 import MapView, { Marker, Callout } from "react-native-maps";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Button } from "react-native-paper";
+
 import * as Location from "expo-location";
 import { GlobalColors } from "../../constants/colors";
 
@@ -47,7 +47,6 @@ function Map() {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       }}
-      //   onPress={(event) => setLocation(event.nativeEvent.coordinate)}
       showsUserLocation={true}
       showsTraffic={true}
       zoomEnabled={true}
@@ -111,7 +110,7 @@ const styles = StyleSheet.create({
     width: 160,
     height: 80,
   },
-  // Arrow below the bubble
+
   arrow: {
     backgroundColor: "transparent",
     borderColor: "transparent",
@@ -127,9 +126,7 @@ const styles = StyleSheet.create({
     borderWidth: 16,
     alignSelf: "center",
     marginTop: -0.5,
-    // marginBottom: -15
   },
-  // Character name
   name: {
     fontSize: 16,
 
@@ -137,7 +134,6 @@ const styles = StyleSheet.create({
     top: 10,
     color: GlobalColors.colors.blue500,
   },
-  // Character image
   image: {
     width: "100%",
     height: 80,

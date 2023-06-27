@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { View, StyleSheet, Image, Text, Pressable } from "react-native";
+import { View, StyleSheet, Image, Text } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../../constants/colors";
 import { useNavigation } from "@react-navigation/native";
@@ -53,12 +53,7 @@ function PetElement({ animal, setDeleting }) {
     return <LoadingOverlay message="Loading..." />;
   }
   return (
-    <Swipeable
-      renderRightActions={renderRightActions}
-      // onSwipeableOpen={() => closeRow(index)}
-      // ref={(ref) => (row[index] = ref)}
-      rightOpenValue={-100}
-    >
+    <Swipeable renderRightActions={renderRightActions} rightOpenValue={-100}>
       <TouchableOpacity onPress={onPressHandler}>
         <View style={styles.elementContainer}>
           <View

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { GlobalColors } from "../../constants/colors";
 import { getFormattedDate } from "../../util/date";
-function SwiperDays({ pills, handlerGetPills, notifications, date }) {
+function SwiperDays({ pills, handlerGetPills, date }) {
   const [days, setDays] = useState([]);
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const currentDate = new Date();

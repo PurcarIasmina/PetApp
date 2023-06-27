@@ -17,7 +17,7 @@ import moment from "moment";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { Ionicons } from "@expo/vector-icons";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { Button } from "react-native-paper";
 const API_URL = "http://localhost:3000";
 function UserReservations({ navigation }) {
@@ -437,7 +437,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   closeCircle: {
-    // marginLeft: Dimensions.get("screen").width / 3,
     position: "absolute",
     left: 340,
   },

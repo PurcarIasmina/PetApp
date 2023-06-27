@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet, FlatList, Dimensions } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { TouchableRipple } from "react-native-paper";
-
 import { useRoute } from "@react-navigation/native";
 import { useEffect, useState, useContext, useLayoutEffect } from "react";
 import { getAnimalDoneAppointments } from "../store/databases";
@@ -289,10 +288,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
-  listContainer: {
-    // justifyContent: "center",
-    // alignItems: "center",
-  },
+
   headerButtons: {
     flexDirection: "row",
   },

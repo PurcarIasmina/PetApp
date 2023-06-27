@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   Image,
-  ScrollView,
   SafeAreaView,
   TouchableOpacity,
   FlatList,
@@ -11,14 +10,7 @@ import {
   Linking,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useContext,
-  useLayoutEffect,
-} from "react";
+import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { GlobalColors } from "../constants/colors";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { getAgeYear, getFormattedDate, getAge } from "../util/date";
@@ -58,7 +50,6 @@ function DoctorBookAppointment({ navigation }) {
   });
   const authCtx = useContext(AuthContext);
   const [id, setId] = useState([]);
-  const [fetching, setFetching] = useState(false);
   const [navailableSlots, setNAvailableSlots] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [confirmModal, setConfirmModal] = useState(false);
@@ -650,7 +641,6 @@ const styles = StyleSheet.create({
     fontFamily: "Garet-Book",
   },
   datespicker: {
-    // flex: 1,
     maxHeight: 100,
     paddingVertical: 12,
     flexDirection: "row",
@@ -729,7 +719,6 @@ const styles = StyleSheet.create({
 
     flex: 1,
     marginTop: 200,
-    // position: "relative",
     borderRadius: 20,
   },
   animalsContainer: {
@@ -757,7 +746,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   itemsContainer: {
-    // backgroundColor: "white",
     flexDirection: "row",
     width: "80%",
     marginHorizontal: 10,

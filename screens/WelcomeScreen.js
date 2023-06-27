@@ -1,4 +1,4 @@
-import { Text, Image, View, StyleSheet, Dimensions } from "react-native";
+import { Image, View, StyleSheet } from "react-native";
 import Button from "../components/UI/ButtonCustom";
 import { GlobalColors } from "../constants/colors";
 

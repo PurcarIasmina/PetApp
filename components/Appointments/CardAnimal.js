@@ -2,7 +2,6 @@ import { useState } from "react";
 import { View, StyleSheet, Text, Image } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../../constants/colors";
-import { getAge } from "../../util/date";
 
 function AnimalCard({ animal, setCount, setId }) {
   const [pressed, setPressed] = useState(false);

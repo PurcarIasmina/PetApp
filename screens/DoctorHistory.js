@@ -1,20 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import {
-  FlatList,
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  SectionList,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, ScrollView } from "react-native";
 import { AuthContext } from "../context/auth";
-import {
-  getDoctorAllAppointments,
-  getDoctorDetails,
-  getUserDetails,
-} from "../store/databases";
+import { getDoctorAllAppointments, getDoctorDetails } from "../store/databases";
 import AppointmentHistoryCard from "../components/Appointments/AppointmentHistoryCard";
 import { GlobalColors } from "../constants/colors";
 import { Ionicons } from "@expo/vector-icons";

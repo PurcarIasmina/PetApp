@@ -1,5 +1,5 @@
-import { Text, View, StyleSheet, Dimensions, Button } from "react-native";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { Text, View, StyleSheet, Dimensions } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import PetElement from "../components/PetCard/PetElement";
 import { LinearGradient } from "expo-linear-gradient";
 import { GlobalColors } from "../constants/colors";
@@ -60,19 +60,6 @@ function UserAnimalsScreen({ navigation }) {
     }
   }, [deleting]);
 
-  //    const getAnimals = async ()=>{
-  //     try{
-  //     setAnimalsFetching(true)
-  //     const animalss = await getUsersAnimals(authCtx.uid)
-  //     setAnimals(animalss)
-
-  //     }catch(error)
-  //     {
-  //         console.log(error)
-  //     }
-  //     setAnimalsFetching(false)
-
-  // }
   if (animalsFetching) {
     return <LoadingOverlay message="Loading your pet friends" />;
   }

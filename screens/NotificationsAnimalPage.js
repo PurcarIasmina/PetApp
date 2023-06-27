@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { useContext, useEffect, useState, useLayoutEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/auth";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import {
@@ -20,8 +20,7 @@ import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIc
 import Switcher from "../components/UI/Switcher";
 import { getFormattedDate } from "../util/date";
 import NotificationsNextAppointemnt from "./NotificationsNextAppointment";
-import { getUserStatusAppointments } from "../store/databases";
-import { calendarFormat } from "moment";
+
 import Feather from "react-native-vector-icons/Feather";
 
 function NotificationsAnimalPage({ navigation }) {
@@ -212,45 +211,6 @@ function NotificationsAnimalPage({ navigation }) {
       </TouchableOpacity>
     ),
   });
-
-  //   useEffect(() => {
-  //     async function getNotificationss() {
-  //       try {
-  //         setFetching(true);
-  //         let auxvect = [];
-  //         auxvect = await getNotifications(authCtx.uid, aid);
-  //         setNotificationsForSelectedDay(
-  //           auxvect.filter(
-  //             (notification) =>
-  //               notification.date.localeCompare(selectedDaterecieved) === 0
-  //           )
-  //         );
-  //         setSelctedDateReceived(selectedDaterecieved);
-  //         setNotifications(auxvect);
-  //         setFetching(false);
-  //         console.log(notifications);
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     }
-  //     getNotificationss();
-  //   }, [notificationChanged]);
-  //   useEffect(() => {
-  //     async function getNextPlannedApp() {
-  //       try {
-  //         setFetching(true);
-  //         let active = [];
-  //         active = await getUserStatusAppointments(authCtx.uid, 0);
-  //         console.log(active);
-  //         setNextActiveAppointments(active);
-  //         console.log(nextActiveAppointments, "active");
-  //         setFetching(false);
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     }
-  //     getNextPlannedApp();
-  //   }, []);
 
   function getPills(selectedDate) {
     setFetching(true);

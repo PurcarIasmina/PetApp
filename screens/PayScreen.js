@@ -1,24 +1,8 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, TextInput, Alert } from "react-native";
 import { Button } from "react-native-paper";
-import { Calendar, CalendarTheme } from "react-native-calendars";
 import { useState, useContext } from "react";
 import { GlobalColors } from "../constants/colors";
-import { useEffect } from "react";
-import { getFormattedDate } from "../util/date";
-import Feather from "react-native-vector-icons/Feather";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import moment from "moment";
-import { Ionicons } from "@expo/vector-icons";
-import Icon from "react-native-vector-icons/FontAwesome5";
 import Checkbox from "expo-checkbox";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../context/auth";

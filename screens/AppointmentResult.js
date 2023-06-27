@@ -3,12 +3,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
   TextInput,
   Modal,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { useEffect, useState, useReducer } from "react";
+import { useState, useReducer } from "react";
 import { GlobalColors } from "../constants/colors";
 import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
@@ -54,8 +53,6 @@ function AppointmentResult({ navigation }) {
   const [doses, setDoses] = useState(
     route.params.doses ? route.params.doses : []
   );
-  console.log(pills);
-  const optionsDate = { day: "numeric", month: "long", year: "numeric" };
 
   const [date, setDate] = useState(route.params.date ? route.params.date : "");
   const [reminder, setReminder] = useState(
@@ -326,7 +323,6 @@ function AppointmentResult({ navigation }) {
                 <View style={styles.inputContainer}>
                   <TextInput
                     style={[styles.textStyle]}
-                    // multiline={true}
                     placeholder="Enter diagnostic"
                     placeholderTextColor={GlobalColors.colors.darkPurple}
                     placeholderStyle={styles.placeholderStyle}
@@ -518,8 +514,6 @@ const styles = StyleSheet.create({
     height: 500,
     top: 150,
     borderRadius: 20,
-    // marginHorizontal: 30,
-    // alignItems: "center",
     borderWidth: 1,
     borderTopLeftRadius: 70,
     borderTopRightRadius: 70,
@@ -540,7 +534,6 @@ const styles = StyleSheet.create({
     width: 150,
     justifyContent: "center",
     alignItems: "center",
-    // position: "relative",
     borderRadius: 10,
     marginLeft: -10,
     marginTop: -5,

@@ -10,34 +10,19 @@ import {
   GiftedChat,
   Bubble,
   Send,
-  Avatar,
   Composer,
-  Box,
   Day,
 } from "react-native-gifted-chat";
-import {
-  useState,
-  useEffect,
-  useContext,
-  useLayoutEffect,
-  useCallback,
-} from "react";
+import { useState, useEffect, useContext, useLayoutEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../context/auth";
 import { GlobalColors } from "../constants/colors";
 import {
   addMessage,
-  addToFiresbaseChatConversation,
-  getConversationsByDoctor,
-  getDoctorConversationsByName,
-  getImageUrl,
   getMessagesFunction,
-  getUserName,
   setMessagesRead,
   storeAndGetUrl,
-  storeImage,
 } from "../store/databases";
-import { serverTimestamp } from "firebase/firestore";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as ImagePicker from "expo-image-picker";
@@ -72,19 +57,11 @@ function ChatScreen({ navigation }) {
       elevation: 0,
 
       shadowOpacity: 1,
-      // shadowRadius: 4,
-      // shadowColor: "#000",
-      // shadowOffset: {
-      //   height: 2,
-      //   width: 0,
-
-      // },
     },
     headerLeft: () => (
       <View
         style={{
           flexDirection: "row",
-          // backgroundColor: GlobalColors.colors.pink500,
         }}
       >
         <TouchableOpacity
@@ -130,39 +107,7 @@ function ChatScreen({ navigation }) {
       </View>
     ),
   });
-  // useLayoutEffect(() => {
-  //   function getMessages() {
-  //     try {
-  //       let resp = getConversationsByDoctor(
-  //         setMessages,
-  //         authCtx.uid,
-  //         route.params.receiverId
-  //       );
 
-  //       setIsLoading(false);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  //   getMessages();
-
-  //   // } else {
-  //   //   console.log("da");
-  //   //   async function getMessagesByDoc2() {
-  //   //     try {
-  //   //       let resp = [];
-  //   //       resp = await getDoctorConversationsByName(setMessages, authCtx.uid);
-
-  //   //       console.log(resp, "doctor");
-  //   //       setIsLoading(false);
-  //   //       console.log(messages, "messages");
-  //   //     } catch (error) {
-  //   //       console.log(error);
-  //   //     }
-  //   //   }
-  //   //   getMessagesByDoc2();
-  //   // }
-  // }, []);
   function getAllMessages() {
     getMessagesFunction(chatid)
       .then((msg) => {
@@ -252,16 +197,11 @@ function ChatScreen({ navigation }) {
     await addMessage(chatid, usermsg);
   };
   const renderAvatar = (props) => {
-    // if (authCtx.doctor) {
-    //   return <Avatar {...props} />;
-    // }
-    // console.log(route.params.name);
     const initials = route.params.name[0].toUpperCase();
 
     return (
       <View style={styles.avatar}>
         <Text style={styles.initials}>{initials}</Text>
-        {/* <Text>{route.params.name}</Text> */}
       </View>
     );
   };
@@ -284,8 +224,6 @@ function ChatScreen({ navigation }) {
             avatar: "",
           }}
           keyboardShouldPersistTaps={"always"}
-          // keyboardVerticalOffset={80}
-
           keyboardDismissMode="on-drag"
           renderChatFooter={() => <View style={{ height: 45 }}></View>}
           renderAvatar={renderAvatar}
@@ -304,7 +242,6 @@ function ChatScreen({ navigation }) {
               placeholderTextColor={GlobalColors.colors.pink500}
               placeholder=""
               textInputStyle={{
-                // fontFamily: "Garet-Book",
                 color: GlobalColors.colors.pink500,
               }}
             />
@@ -337,11 +274,9 @@ function ChatScreen({ navigation }) {
                   textStyle={{
                     left: {
                       color: GlobalColors.colors.pink500,
-                      // fontFamily: "Garet-Book",
                     },
                     right: {
                       color: GlobalColors.colors.gray0,
-                      // fontFamily: "Garet-Book",
                     },
                   }}
                   timeTextStyle={{
@@ -352,13 +287,7 @@ function ChatScreen({ navigation }) {
               </View>
             );
           }}
-          // renderMessageImage={(props) => (
-          //   <Image {...props} style={{ width: 200, height: 200 }} />
-          // )}
           alwaysShowSend={true}
-          // renderMessageImage={(props) => {
-          //   <Image {...props} />;
-          // }}
           renderSend={(props) => {
             return (
               <View

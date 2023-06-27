@@ -1,15 +1,8 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  Dimensions,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { GlobalColors } from "../../constants/colors";
 import {
   cancelAppointment,
   getAnimalDetails,
-  getDoctorDetails,
   getUserName,
 } from "../../store/databases";
 import { useEffect, useState } from "react";
@@ -201,7 +194,6 @@ const styles = StyleSheet.create({
     marginBottom: 7,
   },
   closeCircle: {
-    // marginLeft: Dimensions.get("screen").width / 3,
     position: "absolute",
     left: 400,
   },

@@ -1,22 +1,15 @@
 import { Text, Image, StyleSheet, View } from "react-native";
 import { useContext, useCallback, useEffect, useState } from "react";
 import { AuthContext } from "../context/auth";
-import { Header } from "react-native/Libraries/NewAppScreen";
 import { Headline } from "react-native-paper";
 import { GlobalColors } from "../constants/colors";
 import { useLayoutEffect } from "react";
-import {
-  FlatList,
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
+import { FlatList } from "react-native-gesture-handler";
 import DoctorCard from "../components/Appointments/DoctorCard";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { getDoctorsList } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-import { GestureHandlerScrollView } from "react-native-gesture-handler";
-import { scheduleNotificationHandler } from "../notifications/notifications";
 
 function HomeScreenUser({ navigation }) {
   const authCtx = useContext(AuthContext);
@@ -80,11 +73,9 @@ function HomeScreenUser({ navigation }) {
             borderRadius: 110,
             borderColor: GlobalColors.colors.pink1,
             marginHorizontal: 50,
-            // borderWidth: 1,
             height: 220,
             width: 220,
             alignSelf: "center",
-            // backgroundColor: "white",
           }}
         >
           <Image
@@ -149,7 +140,6 @@ const styles = StyleSheet.create({
     marginTop: 100,
   },
   docContainer: {
-    // justifyContent: "center",
     top: 20,
     alignItems: "center",
     flex: 1,

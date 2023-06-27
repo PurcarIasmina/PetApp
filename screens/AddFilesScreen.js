@@ -4,26 +4,15 @@ import {
   Text,
   FlatList,
   Image,
-  ActivityIndicator,
   Linking,
   TouchableOpacity,
 } from "react-native";
-import { Button, TouchableRipple } from "react-native-paper";
+import { TouchableRipple } from "react-native-paper";
 import * as DocumentPicker from "expo-document-picker";
 import { GlobalColors } from "../constants/colors";
-import { ProgressBar } from "react-native-paper";
-import { Ionicons } from "@expo/vector-icons";
-import { FloatingAction } from "react-native-floating-action";
 import { shareAsync } from "expo-sharing";
-import { printToFileAsync } from "expo-print";
 
-import {
-  useContext,
-  useEffect,
-  useState,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   getAnimalDocuments,
   uploadDocument,
@@ -109,7 +98,6 @@ function AddFilesScreen({ navigation }) {
     ),
   });
 
-  const [uploading, setUploading] = useState(false);
   const [progress, setUploadProgress] = useState(0);
   const authCtx = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
@@ -170,27 +158,7 @@ function AddFilesScreen({ navigation }) {
       }, 10000);
     }
   }, [document]);
-  let newDocument = {};
-  const actions = [
-    {
-      text: "Button 1",
-      icon: <MaterialCommunityIcon name="camera" size={24} color="#fff" />,
-      name: "btn1",
-      position: 1,
-    },
-    {
-      text: "Button 2",
-      icon: <MaterialCommunityIcon name="pencil" size={24} color="#fff" />,
-      name: "btn2",
-      position: 2,
-    },
-    {
-      text: "Button 3",
-      icon: <MaterialCommunityIcon name="folder" size={24} color="#fff" />,
-      name: "btn3",
-      position: 3,
-    },
-  ];
+
   const selectDoc = async () => {
     try {
       setLoading(true);
@@ -229,14 +197,6 @@ function AddFilesScreen({ navigation }) {
     } finally {
       setDone(!done);
     }
-  };
-  const floatingActionStyle = {
-    floatingIcon: {
-      width: 60,
-      height: 60,
-    },
-    iconWidth: 60,
-    iconHeight: 60,
   };
 
   const openFile = async (document) => {
@@ -300,24 +260,6 @@ function AddFilesScreen({ navigation }) {
             },
           ]}
         >
-          {/* <FloatingAction
-            actions={actions}
-            color="#2ecc71"
-            onPressItem={(name) => {
-              console.log(`Pressed item with name: ${name}`);
-            }}
-            floatingIcon={
-              <MaterialCommunityIcon
-                name="message-text-outline"
-                size={24}
-                color="#fff"
-              />
-            }
-            floatingActionStyle={floatingActionStyle}
-            distanceToEdge={10}
-            overrideWithAction={true}
-            floatingButtonStyle={{ width: 50, height: 50 }}
-          /> */}
           <Text style={styles.title}>
             Upload files/documents for {route.params.name}{" "}
           </Text>
@@ -329,17 +271,6 @@ function AddFilesScreen({ navigation }) {
             />
           </TouchableRipple>
         </View>
-        {/* {loading > 0 && (
-          <Circle
-            size={50}
-            progress={progress}
-            accessibilityViewIsModal={true}
-            showsText={true}
-            formatText={() => `${progress}%`}
-            color={"#2ecc71"}
-            style={{ top: -20 }}
-          />
-        )} */}
       </View>
       {documents.length === 0 && (
         <View
@@ -365,7 +296,6 @@ function AddFilesScreen({ navigation }) {
         data={documents}
         renderItem={({ item, index }) => (
           <>
-            {/* {console.log(index, item.name)} */}
             <View
               style={{
                 flexDirection: "row",
@@ -489,8 +419,6 @@ const styles = StyleSheet.create({
     fontFamily: "Garet-Book",
     color: GlobalColors.colors.pink500,
     size: 18,
-    // textAlign: "center",
-    // marginTop: 40,
   },
   imageContainer: {
     width: 100,

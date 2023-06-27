@@ -4,12 +4,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Pressable,
 } from "react-native";
 import { GlobalColors } from "../constants/colors";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { useState } from "react";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Button } from "react-native-paper";
 import { useRoute } from "@react-navigation/native";
 import Checkbox from "expo-checkbox";

@@ -1,11 +1,8 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import Map from "../components/UI/Map";
 import { GlobalColors } from "../constants/colors";
-import { BlurView } from "expo-blur";
 import Feather from "react-native-vector-icons/Feather";
-import ButtonCustom from "../components/UI/ButtonCustom";
 import { Button } from "react-native-paper";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
 function PetHotel({ navigation }) {
   navigation.setOptions({
     headerShown: true,

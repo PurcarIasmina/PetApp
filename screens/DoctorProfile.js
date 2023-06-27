@@ -2,9 +2,8 @@ import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { View, Image, ImageBackground, StyleSheet, Text } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../constants/colors";
-import { useContext, useState, createRef, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/auth";
-import DoctorEditCard from "../components/Appointments/DoctorEditCard";
 import { getDoctorDetails } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { useRoute } from "@react-navigation/native";
@@ -18,7 +17,7 @@ function DoctorProfile({ navigation }) {
       <View
         style={{
           flexDirection: "row",
-          // justifyContent: "center",
+
           alignItems: "center",
         }}
       >
@@ -27,8 +26,7 @@ function DoctorProfile({ navigation }) {
             fontSize: 20,
             fontFamily: "Garet-Book",
             color: GlobalColors.colors.pink500,
-            // marginTop: error ? 80 : 90,
-            // marginRight: 160,
+
             position: "absolute",
             right: 140,
           }}
@@ -203,7 +201,6 @@ const styles = StyleSheet.create({
   infoContainer: {
     marginTop: -9,
     alignSelf: "center",
-    // backgroundColor: GlobalColors.colors.white1,
     height: 290,
     width: "80%",
     borderRadius: 30,

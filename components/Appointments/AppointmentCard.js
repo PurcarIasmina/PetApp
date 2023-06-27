@@ -3,13 +3,12 @@ import { GlobalColors } from "../../constants/colors";
 import { getAge, getRomanianTime } from "../../util/date";
 import { useEffect, useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { TouchableRipple } from "react-native-paper";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { printToFileAsync } from "expo-print";
 import { shareAsync } from "expo-sharing";
-import { getDoctorDetails, getUserDetails } from "../../store/databases";
+import { getDoctorDetails } from "../../store/databases";
 function AppointmentCard({ appointment }) {
   console.log(appointment);
   const actualTime = getRomanianTime().toISOString().slice(11, 16);
@@ -171,7 +170,7 @@ function AppointmentCard({ appointment }) {
 							<tr>
 								
 								<td>
-									Healthy PetApp<br />
+									Healthy Pet App<br />
 									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>
@@ -402,7 +401,7 @@ function AppointmentCard({ appointment }) {
 							<tr>
 								
 								<td>
-									Healthy PetApp<br />
+									Healthy Pet App<br />
 									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>

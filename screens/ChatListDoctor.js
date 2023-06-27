@@ -1,12 +1,9 @@
-import { View, StyleSheet, FlatList, Text, Image } from "react-native";
+import { View, StyleSheet, FlatList, Text } from "react-native";
 import { useState, useEffect, useContext, useLayoutEffect } from "react";
 import {
-  getDoctorsList,
-  getImageUrl,
   getMessagesWithUsers,
   getUnreadMessagesCount,
   getUserDetails,
-  getUsersWithConversations,
   setMessagesRead,
 } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
@@ -15,7 +12,6 @@ import { GlobalColors } from "../constants/colors";
 import { AuthContext } from "../context/auth";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import { useRoute } from "@react-navigation/native";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 function ChatListDoctor({ navigation }) {
   navigation.setOptions({
     headerShown: true,
@@ -129,7 +125,6 @@ function ChatListDoctor({ navigation }) {
             <View style={styles.cardBody}>
               <Text style={styles.cardTitle}>{details[index].name}</Text>
 
-              {/* <Text>{item.unreadCount}</Text> */}
               <View style={styles.cardEmail}>
                 <FeatherIcon
                   color={GlobalColors.colors.gray10}
@@ -189,8 +184,6 @@ function ChatListDoctor({ navigation }) {
           </View>
         )}
         keyExtractor={(item) => item.did}
-
-        // contentContainerStyle={styles.list}
       />
     </View>
   );
@@ -210,7 +203,6 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   docContainer: {
-    // justifyContent: "center",
     flex: 1,
     backgroundColor: GlobalColors.colors.gray0,
     padding: 20,
@@ -245,7 +237,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    // borderWidth: 0.5,
     borderRadius: 20,
     padding: 10,
     borderColor: GlobalColors.colors.gray10,

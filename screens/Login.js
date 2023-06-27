@@ -8,23 +8,14 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import Input from "../components/Auth/Input";
-import ButtonCustom from "../components/UI/ButtonCustom";
 import { GlobalColors } from "../constants/colors";
 import { useFonts } from "expo-font";
 import LoginForm from "../components/Auth/LoginForm";
-import {
-  addToken,
-  getUnreadMessagesCount,
-  getUserName,
-  login,
-} from "../store/databases";
+import { login } from "../store/databases";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
-import { useState, useContext, useCallback, useRef, useEffect } from "react";
+import { useState, useContext, useCallback } from "react";
 import { AuthContext } from "../context/auth";
-import HomeScreenUser from "./HomeScreenUser";
 import * as SplashScreen from "expo-splash-screen";
-import { registerForPushNotificationsAsync } from "../notifications/notifications";
 
 function doctorValidation(value) {
   const reg = /@doctor\.petapp\.ro/;
@@ -145,14 +136,12 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   formContainer: {
-    // flex:1.5,
     backgroundColor: "white",
     bottom: 22,
     borderTopStartRadius: 60,
     borderTopEndRadius: 60,
   },
   formContainer: {
-    // flex:1.5,
     backgroundColor: "white",
     bottom: 22,
     borderTopStartRadius: 60,

@@ -3,18 +3,12 @@ import { GlobalColors } from "../../constants/colors";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useEffect, useState } from "react";
-import {
-  getDoctorDetails,
-  getUserName,
-  getAnimalDetails,
-  getUserDetails,
-} from "../../store/databases";
+import { getDoctorDetails, getAnimalDetails } from "../../store/databases";
 import LoadingOverlay from "../UI/LoadingOverlay";
 import { ScrollView } from "react-native-gesture-handler";
 import Feather from "react-native-vector-icons/Feather";
 import { printToFileAsync } from "expo-print";
 import { shareAsync } from "expo-sharing";
-import { getFormattedDate } from "../../util/date";
 function formatDate(dateString) {
   if (dateString) {
     const dateObj = new Date(dateString);
@@ -32,7 +26,6 @@ function MedicalRecordCard({ appointment, status }) {
         setFetching(true);
         const resp = await getDoctorDetails(appointment.did);
         setDocDetails(resp);
-
         setFetching(false);
       } catch (error) {
         console.log(error);
@@ -44,7 +37,6 @@ function MedicalRecordCard({ appointment, status }) {
     async function getAnimalDetail() {
       try {
         setFetching(true);
-
         const resp = await getAnimalDetails(appointment.aid);
         console.log(resp);
         setAnimalDetails(resp);
@@ -198,7 +190,7 @@ function MedicalRecordCard({ appointment, status }) {
 							<tr>
 								
 								<td>
-									Healthy PetApp<br />
+									Healthy Pet App<br />
 									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>
@@ -429,7 +421,7 @@ function MedicalRecordCard({ appointment, status }) {
 							<tr>
 								
 								<td>
-									Healthy PetApp<br />
+									Healthy Pet App<br />
 									Doctor ${docDetails.fullname}<br />
 									${docDetails.email}
 								</td>

@@ -8,13 +8,7 @@ import { View, StyleSheet, Image, Text } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../../constants/colors";
 import { AuthContext } from "../../context/auth";
-import {
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useStat,
-  useCallback,
-} from "react";
+import { useContext, useEffect } from "react";
 
 function CustomDrawer(props) {
   const authCtx = useContext(AuthContext);

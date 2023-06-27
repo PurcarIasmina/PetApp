@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Button } from "react-native-paper";
-import { Calendar, CalendarTheme } from "react-native-calendars";
+import { Calendar } from "react-native-calendars";
 import { useState } from "react";
 import { GlobalColors } from "../constants/colors";
 import { useEffect } from "react";
@@ -18,8 +18,7 @@ import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIc
 import moment from "moment";
 import { Ionicons } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import UserAnimalsScreen from "./UserAnimalsScreen";
-import { getAllReservations, getNumberReservations } from "../store/databases";
+import { getAllReservations } from "../store/databases";
 
 function BookHotel({ navigation }) {
   navigation.setOptions({

@@ -1,11 +1,10 @@
 import { View, StyleSheet, Text, Image } from "react-native";
 import { GlobalColors } from "../../constants/colors";
 import { printToFileAsync } from "expo-print";
-import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { shareAsync } from "expo-sharing";
-import Icon from "react-native-vector-icons/FontAwesome";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { color } from "react-native-reanimated";
+
 function AppointmentHistoryCard({ appointment, docDetails }) {
   let html = ``;
   if (appointment.result.doctorReason === "Consultation") {
@@ -153,7 +152,7 @@ function AppointmentHistoryCard({ appointment, docDetails }) {
                               <tr>
                                   
                                   <td>
-                                      Healthy PetApp<br />
+                                      Healthy Pet App<br />
                                       Doctor ${docDetails.fullname}<br />
                                       ${docDetails.email}
                                   </td>
@@ -389,7 +388,7 @@ function AppointmentHistoryCard({ appointment, docDetails }) {
                               <tr>
                                   
                                   <td>
-                                      Healthy PetApp<br />
+                                      Healthy Pet App<br />
                                       Doctor ${docDetails.fullname}<br />
                                       ${docDetails.email}
                                   </td>
@@ -497,25 +496,12 @@ function AppointmentHistoryCard({ appointment, docDetails }) {
         <Image style={styles.image} source={require("../../images/pdf.png")} />
       </TouchableOpacity>
       <View style={styles.infoContainer}>
-        {/* <Text
-          style={[styles.infoStyle, { color: GlobalColors.colors.pink500 }]}
-        >
-          {appointment.result.doctorReason}
-        </Text> */}
         <Text
           style={[styles.infoStyle, { color: GlobalColors.colors.pink500 }]}
         >
           {new Date(appointment.date).toDateString()}, {appointment.slot}
         </Text>
-        {/* <View style={styles.iconInfoInput}>
-          <Ionicons
-            name="time-outline"
-            size={15}
-            color={GlobalColors.colors.darkGrey}
-            style={styles.iconInfo}
-          />
-          <Text style={styles.infoStyle}>{appointment.slot}</Text>
-        </View> */}
+
         <View style={styles.iconInfoInput}>
           <Ionicons
             name="paw-outline"
@@ -542,16 +528,7 @@ export default AppointmentHistoryCard;
 const styles = StyleSheet.create({
   card: {
     height: 120,
-    // backgroundColor: GlobalColors.colors.gray0,
-    // marginVertical: 10,
-    // borderRadius: 10,
     marginHorizontal: 10,
-    // marginHorizontal: 20,
-    // shadowColor: GlobalColors.colors.gray1,
-    // shadowOffset: { width: -2, height: 2 },
-    // shadowOpacity: 0.3,
-    // shadowRadius: 0.3,
-    // elevation: 5,
     borderBottomWidth: 1,
     borderColor: GlobalColors.colors.gray10,
     flexDirection: "row",

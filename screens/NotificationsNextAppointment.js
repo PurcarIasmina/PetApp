@@ -1,5 +1,5 @@
 import { View, StyleSheet, Text } from "react-native";
-import { Calendar, CalendarTheme } from "react-native-calendars";
+import { Calendar } from "react-native-calendars";
 import { GlobalColors } from "../constants/colors";
 import { useEffect, useState, useContext } from "react";
 import Switcher from "../components/UI/Switcher";
@@ -9,7 +9,6 @@ import {
   getAnimalDoneAppointments,
   getNotificationsAppointment,
 } from "../store/databases";
-import { getFormattedDate } from "../util/date";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 function NotificationsNextAppointemnt({ aid, animalName }) {
   const authCtx = useContext(AuthContext);
@@ -19,8 +18,6 @@ function NotificationsNextAppointemnt({ aid, animalName }) {
   const [fetching, setFetching] = useState(false);
   const [selectedDaterecieved, setSelctedDateReceived] = useState();
   const [notificationValue, setNotificationChanged] = useState(false);
-
-  console.log(markedDates, "marked dates");
   const [nextActiveAppointments, setNextActiveAppointments] = useState([]);
   const [datesActive, setDatesActive] = useState([]);
   const [datesFuture, setDatesFuture] = useState([]);

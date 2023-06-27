@@ -5,7 +5,6 @@ import LoadingOverlay from "../components/UI/LoadingOverlay";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { GlobalColors } from "../constants/colors";
 import FeatherIcon from "react-native-vector-icons/Feather";
-import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../context/auth";
 function ChatScreenList({ navigation }) {
   navigation.setOptions({
@@ -21,7 +20,6 @@ function ChatScreenList({ navigation }) {
   });
   const [doctors, setDoctors] = useState([]);
   const [fetching, setFetching] = useState(false);
-  const route = useRoute();
   useEffect(() => {
     async function getDoctors() {
       try {
@@ -123,8 +121,6 @@ function ChatScreenList({ navigation }) {
           </View>
         )}
         keyExtractor={(item) => item.did}
-
-        // contentContainerStyle={styles.list}
       />
     </View>
   );
@@ -144,7 +140,6 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   docContainer: {
-    // justifyContent: "center",
     flex: 1,
     backgroundColor: GlobalColors.colors.gray0,
     padding: 20,
@@ -178,7 +173,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    // borderWidth: 0.5,
     borderRadius: 20,
     padding: 10,
     borderColor: GlobalColors.colors.gray10,

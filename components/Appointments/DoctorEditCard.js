@@ -28,7 +28,6 @@ function DoctorEditCard({ navigation }) {
       <View
         style={{
           flexDirection: "row",
-          // justifyContent: "center",
           alignItems: "center",
         }}
       >
@@ -37,8 +36,6 @@ function DoctorEditCard({ navigation }) {
             fontSize: 20,
             fontFamily: "Garet-Book",
             color: GlobalColors.colors.pink500,
-            // marginTop: error ? 80 : 90,
-            // marginRight: 160,
             position: "absolute",
             right: 140,
           }}

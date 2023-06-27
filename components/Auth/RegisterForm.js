@@ -1,17 +1,10 @@
-import {
-  View,
-  StyleSheet,
-  Alert,
-  Text,
-  KeyboardAvoidingView,
-} from "react-native";
+import { View, StyleSheet, Text, KeyboardAvoidingView } from "react-native";
 import Input from "./Input";
-import { useRef, useEffect, useState } from "react";
+import { useState } from "react";
 import ButtonCustom from "../UI/ButtonCustom";
 import { useNavigation } from "@react-navigation/native";
 import { GlobalColors } from "../../constants/colors";
 import { checkEmailExists } from "../../store/databases";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function emailValidation(value) {
   const reg = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -77,7 +70,7 @@ function RegisterForm({ onAuthenticate }) {
 
       return updateError("Invalid email!", setError);
     }
-    if (checkEmailExistsFunction(userEmail)) {
+    if (checkEmailExistsFunction(userEmail) === true) {
       setEmailInvalid(true);
       console.log("dada");
       return updateError("Email already used!", setError);

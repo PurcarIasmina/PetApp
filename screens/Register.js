@@ -8,8 +8,6 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import Input from "../components/Auth/Input";
-import ButtonCustom from "../components/UI/ButtonCustom";
 import { GlobalColors } from "../constants/colors";
 import { useFonts } from "expo-font";
 import { useState, useCallback } from "react";
@@ -29,8 +27,6 @@ function Register({ navigation }) {
     setIsAuthenticating(true);
     try {
       const token = await createUser(name, email, password);
-      console.log(name);
-      // authCtx.authenticate(token);
     } catch (error) {
       Alert.alert(
         "Authentication failed!",
@@ -114,7 +110,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   formContainer: {
-    // flex:1.5,
     backgroundColor: "white",
     bottom: 22,
     borderTopStartRadius: 60,

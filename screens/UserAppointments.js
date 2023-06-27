@@ -1,9 +1,8 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import HeaderButtonAppointment from "../components/UI/HeaderButtonAppointment";
-import { useState, useEffect, useContext, useLayoutEffect } from "react";
+import { useState, useContext, useLayoutEffect } from "react";
 import { TouchableRipple } from "react-native-paper";
 import { getUserStatusAppointments } from "../store/databases";
-
 import { AuthContext } from "../context/auth";
 import AppointmentStatus from "../components/Appointments/AppointmentStatus";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,7 +23,6 @@ function UserAppointments() {
         setFetching(true);
         const active = await getUserStatusAppointments(authCtx.uid, 0);
         setActiveAppointments(active);
-        console.log(active);
         setFetching(false);
       } catch (error) {
         console.log(error);

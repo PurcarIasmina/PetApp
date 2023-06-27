@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, KeyboardAvoidingView } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import Input from "./Input";
 import ButtonCustom from "../UI/ButtonCustom";
 import { useNavigation } from "@react-navigation/native";

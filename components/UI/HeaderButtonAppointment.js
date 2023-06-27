@@ -1,6 +1,5 @@
-import { View, StyleSheet, TouchableWithoutFeedback, Text } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { GlobalColors } from "../../constants/colors";
-import { useState } from "react";
 import { Dimensions } from "react-native";
 function HeaderButtonAppointment({ status, count, pressed, textSize }) {
   return (

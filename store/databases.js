@@ -1,14 +1,11 @@
 import axios from "axios";
-import { setStatusBarBackgroundColor } from "expo-status-bar";
-import { useRoute } from "@react-navigation/native";
-import { registerForPushNotificationsAsync } from "../notifications/notifications";
+
 import { initializeApp, firebase } from "firebase/app";
 
 import {
   doc,
   setDoc,
   updateDoc,
-  getFirestore,
   initializeFirestore,
   getDocs,
   getDoc,
@@ -17,26 +14,18 @@ import {
   where,
   orderBy,
   onSnapshot,
-  serverTimestamp,
-  metadata,
-  addDoc,
-  limit,
-  get,
 } from "firebase/firestore";
 import {
   getStorage,
   ref,
-  put,
   uploadBytes,
   getDownloadURL,
-  updateMetadata,
   deleteObject,
   uploadBytesResumable,
   listAll,
 } from "firebase/storage";
 import uuid from "react-native-uuid";
 import { getFormattedDate } from "../util/date";
-import { captureRef, captureScreen } from "react-native-view-shot";
 
 const BACKEND_URL =
   "https://petapp-1a4cd-default-rtdb.europe-west1.firebasedatabase.app";
@@ -399,10 +388,7 @@ export async function getAllReservations() {
         pay: filtered[key].pay,
         payment: filtered[key].totalPayment,
       };
-      // if (
-      //   getFormattedDate(new Date(filtered[key].startDate)) >
-      //   getFormattedDate(romaniaDateTime)
-      // )
+
       reservations.push(reservationDetail);
     }
   }
@@ -420,26 +406,6 @@ export async function deleteReservation(generatedId) {
   );
   return response;
 }
-// export async function addToken(uid) {
-//   const expoToken = await registerForPushNotificationsAsync();
-//   const resp = await axios.put(BACKEND_URL + `/tokens/${uid}.json`, {
-//     uid: uid,
-//     tokenExpo: expoToken,
-//   });
-// }
-
-// export async function getTokens() {
-//   const tokens = [];
-//   const response = await axios.get(BACKEND_URL + `/tokens.json`);
-//   for (const key in response.data) {
-//     const TokenObj = {
-//       uid: response.data[key].uid,
-//       token: response.data[key].tokenExpo,
-//     };
-//     tokens.push(TokenObj);
-//   }
-//   return tokens;
-// }
 
 export async function addAppointment(
   did,
@@ -621,7 +587,7 @@ export async function getUserAppointmentsNotifications(uid) {
     BACKEND_URL + `/notificationsAppointment.json`
   );
   let notificationsDetails = [];
-  // console.log(response);
+
   if (response.data) {
     const notificationsKeys = Object.keys(response.data);
     const notifications = Object.values(response.data);
@@ -631,7 +597,7 @@ export async function getUserAppointmentsNotifications(uid) {
     const filtered = notifications.filter(function (notification) {
       return notification.uid === uid;
     });
-    console.log(filtered);
+
     for (const key in filtered) {
       const animalsResponse = await axios.get(BACKEND_URL + `/animals.json`);
       const animals = Object.values(animalsResponse.data);
@@ -659,7 +625,7 @@ export async function cancelAppointment(appointmentId, data) {
     BACKEND_URL + `/appointments/${appointmentId}.json`,
     data
   );
-  console.log(appointmentId);
+
   return response;
 }
 export async function getDoctorNotAvailableSlotsAppointments(did, date) {
@@ -675,7 +641,7 @@ export async function getDoctorNotAvailableSlotsAppointments(did, date) {
         appointment.canceled === 0
       );
     });
-    console.log(filtered);
+
     for (const key in filtered) {
       let detail = await getAnimalDetails(filtered[key].aid);
       if (Object.keys(detail).length > 0) {
@@ -684,7 +650,6 @@ export async function getDoctorNotAvailableSlotsAppointments(did, date) {
         slots.push(slot);
       }
     }
-    console.log(slots);
   }
   return slots;
 }
@@ -697,7 +662,7 @@ export async function getAppointments(did, date) {
   appointments.map((appointment, index) => {
     appointment.key = appointmentKeys[index];
   });
-  // console.log(appointments);
+
   const filtered = appointments.filter(function (appointment) {
     return (
       appointment.did === did &&
@@ -808,7 +773,6 @@ export async function getNotCompletedAppointments(did) {
   console.log(filtered, "filtered");
   for (const key in filtered) {
     let detail = await getAnimalDetails(filtered[key].aid);
-    console.log(detail);
     if (Object.keys(detail).length > 0) {
       const appointmentDetail = {
         did: filtered[key].did,

@@ -1,7 +1,6 @@
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { StylePropType } from "react-native-gifted-chat";
+import { View, StyleSheet, Text } from "react-native";
 import { GlobalColors } from "../../constants/colors";
-import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 function NotCompletedResultCard({ appointment }) {
   const navigation = useNavigation();

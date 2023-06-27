@@ -1,20 +1,17 @@
 import {
   Text,
-  ScrollView,
   View,
   StyleSheet,
   ImageBackground,
   TextInput,
   TouchableOpacity,
-  Button,
 } from "react-native";
 import { GlobalColors } from "../constants/colors";
-import { useState, useEffect, createRef, useContext } from "react";
+import { useState, createRef, useContext } from "react";
 import * as ImagePicker from "expo-image-picker";
 import Animated from "react-native-reanimated";
 import BottomSheet from "reanimated-bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
-import IconButton from "../components/UI/IconButton";
 import ButtonCustom from "../components/UI/ButtonCustom";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
@@ -22,7 +19,6 @@ import SwitchSelector from "react-native-switch-selector";
 import { addAnimal, getImageUrl, storeImage } from "../store/databases";
 import { AuthContext } from "../context/auth";
 import { getFormattedDate } from "../util/date";
-import { v4 } from "uuid";
 import { Feather } from "@expo/vector-icons";
 import LoadingOverlay from "../components/UI/LoadingOverlay";
 function AddPetScreen({ navigation }) {
@@ -259,7 +255,6 @@ function AddPetScreen({ navigation }) {
           <ImageBackground
             style={styles.image}
             imageStyle={{
-              // borderRadius: 100,
               borderColor: GlobalColors.colors.pink500,
               borderWidth: photo ? 0 : 1,
             }}
@@ -452,11 +447,7 @@ const styles = StyleSheet.create({
   image: {
     height: 400,
     width: "100%",
-    // marginTop: 20,
-    // paddingVertical: 10,
-    // marginLeft: 40,
     marginBottom: 10,
-    // alignSelf: "center",
   },
   buttonsContainer: {
     borderRadius: 50,
@@ -464,7 +455,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 30,
-    // paddingVertical: 20,
     marginTop: 180,
     backgroundColor: GlobalColors.colors.pink500,
     height: 50,
@@ -473,9 +463,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: "center",
     backgroundColor: "white",
-    // paddingHorizontal: 20,
-    // marginTop: 100,
-    // marginHorizontal: 20,
     height: 300,
     marginBottom: 10,
   },
@@ -497,10 +484,6 @@ const styles = StyleSheet.create({
     marginBottom: -10,
     height: 280,
     backgroundColor: "white",
-    // shadowColor: "#171717",
-    // shadowOffset: { width: -2, height: 4 },
-    // shadowOpacity: 0.2,
-    // shadowRadius: 0.1,
     flex: "flex-start",
     paddingHorizontal: 30,
   },
@@ -522,16 +505,9 @@ const styles = StyleSheet.create({
     top: 20,
     marginBottom: -60,
     marginHorizontal: 0,
-    // borderRadius: 40,
     height: 400,
     backgroundColor: "white",
     borderRadius: 20,
-    // shadowColor: "#171717",
-    // shadowOffset: { width: 0, height: 0 },
-    // shadowOpacity: 0.2,
-    // shadowRadius: 4,
-    // alignContent: "center",
-    // paddingHorizontal: 20,
   },
   editField: {
     flexDirection: "column",
@@ -541,8 +517,6 @@ const styles = StyleSheet.create({
   },
   field: {
     width: "100%",
-    // borderBottomColor: GlobalColors.colors.pink500,
-    // borderBottomWidth: 0.5,
     backgroundColor: GlobalColors.colors.gray0,
     borderRadius: 10,
     alignItems: "center",
@@ -580,12 +554,6 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "white",
     paddingTop: 40,
-    // borderTopLeftRadius: 20,
-    // borderTopRightRadius: 20,
-    // shadowColor: '#000000',
-    // shadowOffset: {width: 0, height: 0},
-    // shadowRadius: 5,
-    // shadowOpacity: 0.4,
   },
   header: {
     backgroundColor: "white",
@@ -593,14 +561,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: -1, height: -3 },
     shadowRadius: 2,
     shadowOpacity: 0.4,
-    // elevation: 5,
     paddingTop: 10,
 
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   panelHeader: {
-    // alignItems: 'center',
     marginLeft: 20,
     backgroundColor: "white",
   },
@@ -611,9 +577,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     marginBottom: 10,
   },
-  //   imageContainer: {
-  //     alignItems: "center",
-  //   },
+
   modalExtended: {
     height: "60%",
   },
@@ -646,9 +610,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   genderField: {
-    // marginHorizontal: 100,
     marginVertical: 10,
-    // left: -40,
   },
   inputInvalid: {
     color: "#8b0000",
