@@ -136,10 +136,11 @@ function DoctorScreen({ navigation }) {
 
   const handleNextDay = () => {
     const nextDateAux = new Date(date);
-
+    console.log(nextDateAux, "next");
     if (nextDateAux.getDay() === 5) {
       nextDateAux.setDate(date.getUTCDate() + 3);
     } else nextDateAux.setDate(date.getUTCDate() + 1);
+
     Object.keys(markedDates).forEach(
       (obj) => (markedDates[obj]["selected"] = false)
     );
@@ -162,6 +163,9 @@ function DoctorScreen({ navigation }) {
   };
 
   const onDateSelect = (date) => {
+    Object.keys(markedDates).forEach(
+      (obj) => (markedDates[obj]["selected"] = false)
+    );
     setSelectedDate(date);
     setDate(date);
   };
@@ -185,19 +189,6 @@ function DoctorScreen({ navigation }) {
         const tomorrowFormatted = `${tomorrow.getUTCFullYear()}-${String(
           tomorrow.getUTCMonth() + 1
         ).padStart(2, "0")}-${String(tomorrow.getUTCDate()).padStart(2, "0")}`;
-        if (
-          getFormattedDate(selectedDate) === tomorrowFormatted &&
-          appointments.length > 0
-        ) {
-          console.log("daaa");
-          for (const key in appointments) {
-            scheduleNotificationHandler(
-              appointments[key].did,
-              appointments[key].slot,
-              appointments[key].date
-            );
-          }
-        }
       } catch (error) {
         console.log(error);
       }
@@ -273,7 +264,10 @@ function DoctorScreen({ navigation }) {
         </TouchableOpacity>
       </View>
       <SafeAreaView style={styles.bolt}>
-        <Text style={styles.welcomeMessage}>Hello, Dr. {authCtx.name}</Text>
+        <Text style={styles.welcomeMessage}>
+          Hello, Dr.{" "}
+          {authCtx.name.charAt(0).toUpperCase() + authCtx.name.slice(1)}
+        </Text>
         <Text style={styles.appointments}>
           {appointments.length > 0
             ? appointments.length === 1

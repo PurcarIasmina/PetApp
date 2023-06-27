@@ -13,13 +13,18 @@ import { useContext, useEffect } from "react";
 function CustomDrawer(props) {
   const authCtx = useContext(AuthContext);
   const isDrawerOpen = useDrawerStatus() === "open";
-  const isDrawerClosed = useDrawerStatus() === "closed";
   useEffect(() => {
     props.setOpen(isDrawerOpen);
   }, [isDrawerOpen]);
   let name;
-  if (authCtx.isDoctor === false) name = `Hello, ${authCtx.name}`;
-  else name = `Hello, Doctor ${authCtx.name}`;
+  if (authCtx.isDoctor === false && authCtx.name)
+    name = `Hello, ${
+      authCtx.name.charAt(0).toUpperCase() + authCtx.name.slice(1)
+    }`;
+  else if (authCtx.name)
+    name = `Hello, Doctor ${
+      authCtx.name.charAt(0).toUpperCase() + authCtx.name.slice(1)
+    }`;
   return (
     <View style={styles.container}>
       <DrawerContentScrollView

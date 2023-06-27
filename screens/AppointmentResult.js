@@ -709,5 +709,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: -150,
     flexDirection: "column",
+    bottom: 10,
   },
 });
